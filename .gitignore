@@ -5,4 +5,5 @@
 /help/
 /i18n/
 /.idea/
+/__pycache__/
 debugmode
