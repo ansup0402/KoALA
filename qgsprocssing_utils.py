@@ -241,7 +241,7 @@ class qgsprocessUtils:
             result.commitChanges()
         return result
 
-            # 이함수는 좀 더 테스트 필요
+    # 이함수는 좀 더 테스트 필요
     def statisticsfromfield(self, input, numericfield, output_html='TEMPORARY_OUTPUT'):
         if output_html is None or output_html == '': output_html = 'TEMPORARY_OUTPUT'
         algname = 'qgis:basicstatisticsforfields'

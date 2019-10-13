@@ -334,6 +334,7 @@ class soc_locator_model:
         tempNodes = []
         totalcnt = self.__linklayer.featureCount()
         i = 0
+        if self.debugging: self.setProgressSubMsg("speed mode : {}".format(str(self.__linkSpeed is not None)))
         for feature in self.__linklayer.getFeatures():
             i += 1
             if self.feedback.isCanceled(): return None
@@ -351,12 +352,15 @@ class soc_locator_model:
                 weights.append(length)
             else:
                 speed = feature.attribute(self.__linkSpeed)
-                if speed == 0: self.setProgressSubMsg("링크레이어의 속도 필드에 0값이 있습니다.")
-                linktime = len/speed
+                if int(speed) == 0:
+                    if self.debugging: self.setProgressSubMsg("링크레이어의 속도 필드에 0값이 있습니다. 10으로 대체하여 계산합니다.")
+                    speed = 10
+                # self.setProgressSubMsg("speed ={}, len")
+                linktime = length/speed
                 weights.append(linktime)
 
         allnodes = list(set(tempNodes))
-
+        # if self.debugging: self.setProgressSubMsg("link list : {}".format(str(weights)))
 
         tmplink = tuple(zip(fnodes, tnodes, weights))
         self.nxGraph.add_nodes_from(allnodes)
@@ -433,6 +437,8 @@ class soc_locator_model:
 
         dict_distlist = self.get_allOfDistFromAlltarget(fromNodeID, svrNodeList)
 
+        if self.debugging: self.setProgressSubMsg("allofdistfromalltarget[{}] : {}".format(fromNodeID, dict_distlist is not None))
+
         if dict_distlist is not None:
             import operator
             sorteddict = sorted(dict_distlist.items(), key=operator.itemgetter(1))
@@ -462,9 +468,7 @@ class soc_locator_model:
                 new_dict = {idx: self.__outofcutoff if val > self.__cutoff else val for idx, val in pairNode.items() if (idx in alltargetNodeList)}
 
         except:
-            if self.debugging:
-                # self.__logger.info("[get_AllDistanceFromNode] 노드 찾기 오류(디버깅용메시지) : %s" % fromNodeID)
-                self.setProgressSubMsg("[get_AllDistanceFromNode] 노드 찾기 오류(디버깅용메시지) : %s" % fromNodeID)
+            if self.debugging: self.setProgressSubMsg("[get_AllDistanceFromNode] 노드 찾기 오류(디버깅용메시지) : %s" % fromNodeID)
             new_dict = None
 
         return new_dict
@@ -603,9 +607,7 @@ class soc_locator_model:
         noerrcnt = 0
 
         svrNodeilst = [feature.attribute(self.__nodeID) for feature in self.__currentSOClayer.getFeatures()]
-        if self.debugging:
-            # self.__logger.info("svrNodeilst : %s" % str(svrNodeilst))
-            self.setProgressSubMsg("svrNodeilst : %s" % str(svrNodeilst))
+        if self.debugging: self.setProgressSubMsg("svrNodeilst : %s" % str(svrNodeilst))
 
         listpopNode = []
         listpopCnt = []
@@ -614,6 +616,8 @@ class soc_locator_model:
 
         tmppoplayer = self.__populationLayer
         totalcnt = tmppoplayer.featureCount()
+
+        if self.debugging: self.setProgressSubMsg("tmppoplayer count : {}".format(totalcnt))
         for feature in tmppoplayer.getFeatures():
             i += 1
             if self.feedback.isCanceled(): return None
@@ -631,9 +635,7 @@ class soc_locator_model:
                 if dis is None:
                     # todo 이 주석 내용 확인 후 삭제 필요
                     # get_alltargetSumofDistance함수 내에서 outofcutoff처리를 다 했기때문에, 분석지역안에 1건이라도 생활SOC가 있는 경우는 None알 수 없음
-                    # self.__logger.info("[NODE-%s] 해당 인구데이터의 %sm 이내에는 현재 생활SOC가 없습니다." % (str(popNodeid), str(self.cutoff)))
-                    self.setProgressSubMsg(
-                        "[NODE-%s] 해당 인구데이터의 %sm 이내에는 현재 생활SOC가 없습니다." % (str(popNodeid), str(self.cutoff)))
+                    self.setProgressSubMsg("[NODE-%s] 해당 인구데이터의 %sm 이내에는 현재 생활SOC가 없습니다." % (str(popNodeid), str(self.cutoff)))
                 # if dis is None:
                 #     errcnt += 1
                 #     dis = 0
