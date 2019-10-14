@@ -5,5 +5,8 @@
 /help/
 /i18n/
 /.idea/
+/test/
 /__pycache__/
 debugmode
+test_hepler.py
+test_module.py
