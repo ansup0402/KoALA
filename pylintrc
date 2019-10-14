@@ -132,7 +132,7 @@ docstring-min-length=-1
 
 # List of note tags to take in consideration, separated by a comma.
 notes=FIXME,refac,TODO
-TODO [테스트입니다..]
+TODO [테스트입니다....]
 TODO [전체] QgsProcessingMultiStepFeedback 적용 : https://gis.stackexchange.com/questions/314844/getting-qgis-processing-script-field-calculator-error
 TODO [전체] debugging output 네이밍 보완
 TODO [전체] 퍼센트, 텍스트 정리할 것

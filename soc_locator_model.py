@@ -926,19 +926,20 @@ class soc_locator_model:
         # 아래 부분은 잘 기억이 안남... 왜 여러개 였지? (아마 노드아이디로 할 시절에 여러개가 반환되므로..)
         # eqscore = tmpdfPOP["ACC_SCORE"].loc[tmpdfPOP[finalKeyID] == str(finalkey)].head(1)
 
+
         finanallayer = self.qgsutils.addField(input=self.__livingareaLayer,
-                                     fid="AC_SCORE",
-                                     ftype=1,  # 0 — Integer, 1 — Float, 2 — String
-                                     flen=20,
-                                     fprecision=8)
-        finanallayer = self.qgsutils.addField(input=finanallayer,
                                               fid="AC_GRADE",
                                               ftype=0,  # 0 — Integer, 1 — Float, 2 — String
                                               flen=10,
                                               fprecision=8)
 
+        if self.debugging:
+            finanallayer = self.qgsutils.addField(input=finanallayer,
+                                         fid="AC_SCORE",
+                                         ftype=1,  # 0 — Integer, 1 — Float, 2 — String
+                                         flen=20,
+                                         fprecision=8)
 
-        i = 0
 
         if isNetwork:
             finalKeyID = self.__livinglyrID
@@ -981,7 +982,7 @@ class soc_locator_model:
         potencnt = finanallayer.featureCount()
         editstatus = finanallayer.startEditing()
         if self.debugging: self.setProgressSubMsg("editmode : %s" % str(editstatus))
-
+        i = 0
         for feature in finanallayer.getFeatures():
             i += 1
             if self.feedback.isCanceled(): return None
@@ -1026,19 +1027,18 @@ class soc_locator_model:
 
 
     def make_equityscore(self, isNetwork=True, output=None):
-        # 계산식 확정시 적용
-        self.setProgressSubMsg("****** 등급을 산정하기 위한 공식이 구현되지 않았음")
 
-        tmppotenlayer = self.qgsutils.addField(input=self.__potentiallayer,
-                                      fid="EQ_SCORE",
-                                      ftype=1,  # 0 — Integer, 1 — Float, 2 — String
-                                      flen=20,
-                                      fprecision=8)
-        finanallayer = self.qgsutils.addField(input=tmppotenlayer,
+        finanallayer = self.qgsutils.addField(input=self.__potentiallayer,
                                               fid="EQ_GRADE",
                                               ftype=0,  # 0 — Integer, 1 — Float, 2 — String
                                               flen=10,
                                               fprecision=8)
+        if self.debugging:
+            finanallayer = self.qgsutils.addField(input=finanallayer,
+                                                  fid="EQ_SCORE",
+                                                  ftype=1,  # 0 — Integer, 1 — Float, 2 — String
+                                                  flen=20,
+                                                  fprecision=8)
         if isNetwork:
             finalKeyID = self.__nodeID
         else:
@@ -1296,8 +1296,6 @@ class soc_locator_model:
 
 
     def make_efficiencyscore(self, output):
-        # 계산식 확정시 적용
-        self.setProgressSubMsg("****** 등급을 산정하기 위한 공식이 구현되지 않았음")
 
         dictScore = self.__dictFinalwithScore
         finalKeyID = self.__potentialID
@@ -1330,20 +1328,20 @@ class soc_locator_model:
         ########################################################################################
         dictefGrade = dict(zip(dfScore[finalKeyID].tolist(), dfScore['EF_GRADE'].tolist()))
 
-        tmppotenlayer = self.qgsutils.addField(input=self.__potentiallayer,
-                                               fid="EF_SCORE",
-                                               ftype=1,  # 0 — Integer, 1 — Float, 2 — String
-                                               flen=20,
-                                               fprecision=8)
-        finanallayer = self.qgsutils.addField(input=tmppotenlayer,
+        finanallayer = self.qgsutils.addField(input=self.__potentiallayer,
                                               fid="EF_GRADE",
                                               ftype=0,  # 0 — Integer, 1 — Float, 2 — String
                                               flen=10,
                                               fprecision=8)
 
+        if self.debugging:
+            finanallayer = self.qgsutils.addField(input=finanallayer,
+                                                  fid="EF_SCORE",
+                                                  ftype=1,  # 0 — Integer, 1 — Float, 2 — String
+                                                  flen=20,
+                                                  fprecision=8)
+
         i = 0
-
-
         finanallayer.startEditing()
         potencnt = finanallayer.featureCount()
         for feature in finanallayer.getFeatures():
