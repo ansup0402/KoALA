@@ -1,47 +1,32 @@
-# This file contains metadata for your plugin.
-
-# This file should be included when you package your plugin.# Mandatory items:
+# Mandatory items:
 
 [general]
 name=Life-Friendly SOC Locator
-qgisMinimumVersion=3.0
+qgisMinimumVersion=3.8
+qgisMaximumVersion=3.99
 description=Life-Friendly SOC Locator
-version=0.1
+version=0.5.0
 author=Ansup
 email=ansup0402@gmail.com
 
-about=Life-Friendly SOC Locator Life-Friendly SOC Locator Life-Friendly SOC Locator
+about=An accessibility analysis tool
 
-tracker=http://bugs
-repository=http://repo
-# End of mandatory metadata
+homepage=https://github.com/ansup0402/livingsoc_locator
+tracker=https://github.com/ansup0402/livingsoc_locator/issues
+repository=https://github.com/ansup0402/livingsoc_locator
 
 # Recommended items:
 
 hasProcessingProvider=yes
-# Uncomment the following line and add your changelog:
-# changelog=
+changelog=0.5.0: 
+	- First release of Life-friendly SOC Locator Plugin
 
-# Tags are comma separated with spaces allowed
-tags=python
+tags=python, network, locator, Korea, social
 
-homepage=http://homepage
-category=Analysis
 icon=icon.png
-# experimental flag
+category=Analysis
+
 experimental=True
-
-# deprecated flag (applies to the whole plugin, not just a single version)
-deprecated=False
-
-# Since QGIS 3.8, a comma separated list of plugins to be installed
-# (or upgraded) can be specified.
-# Check the documentation for more information.
-# plugin_dependencies=
-
-Category of the plugin: Raster, Vector, Database or Web
-# category=
-
-# If the plugin can run on QGIS Server.
 server=False
+deprecated=False
 
