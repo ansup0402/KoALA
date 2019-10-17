@@ -383,7 +383,7 @@ class soc_locator_model:
 
         if self.debugging: self.setProgressSubMsg("[start] shortestAllnodes")
 
-        if output_alllink is not None and os.path.exists(output_alllink):
+        if self.debugging and output_alllink is not None and os.path.exists(output_alllink):
             with open(output_alllink, 'rb') as handle:
                 allNodes = pickle.load(handle)
         else:
@@ -396,7 +396,7 @@ class soc_locator_model:
                 # bellman 는 cutoff 적용이 되지 않아 속도가 느림(차후 로직에서 한꺼번에 처리/해당 알고리즘 사용지 cutoff 로직 재확인 필요)
                 allNodes = dict(nx.all_pairs_bellman_ford_path_length(self.nxGraph, weight='weight'))
 
-            if output_alllink is not None:
+            if self.debugging and output_alllink is not None:
                 with open(output_alllink, 'wb') as handle:
                     pickle.dump(allNodes, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -594,10 +594,6 @@ class soc_locator_model:
         self.__dfPop = dfPopwidthDis
 
         return self.__dfPop
-
-
-
-
 
 
     def anal_AllCurSOC_network(self):
