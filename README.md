@@ -53,4 +53,4 @@ License
 
 Gallery
 ------------------------------
- - ??
+![screenshot](https://github.com/ansup0402/livingsoc_locator/resources/gallery01.png?width=800)
