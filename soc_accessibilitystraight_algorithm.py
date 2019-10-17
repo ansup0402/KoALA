@@ -1,10 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
-import pathlib
-cur_dir = pathlib.Path(__file__).parent
-debugging = os.path.exists(os.path.join(cur_dir, 'debugmode'))
-
 """
 /***************************************************************************
  LivingSOCLocator
@@ -48,6 +43,10 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingParameterString,
                        QgsProcessingParameterFeatureSink)
 
+import os
+import pathlib
+cur_dir = pathlib.Path(__file__).parent
+debugging = os.path.exists(os.path.join(cur_dir, 'debugmode'))
 
 class LivingSOCAccessibilitystraightAlgorithm(QgsProcessingAlgorithm):
     """
