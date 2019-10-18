@@ -1,5 +1,6 @@
-Life-Friendly SOC Locator
+<h1>SAOLA(Spatial accessibility and optimal location analysis tool)</h1>
 =============================
+This tool is built to support a rational decision-making process for optimal supply and management of neighborhood SOC in South Korea.
 - Equity-based potential location analysis(by euclidean Distance, by network Distance)
 - Efficiency-based potential location analysis(by euclidean Distance, by network Distance)
 - Accessibility Analysis of Detailed Living Areas(by euclidean Distance, by network Distance)
@@ -37,6 +38,7 @@ You must install **'pandas'** to use this plugin. Manual installation is as foll
     * Hit Enter and confirm installation with **'yes'** when prompted
     * Restart **QGIS3**
 
+
 Getting Started
 ------------------------------
 - ??
@@ -44,7 +46,8 @@ Getting Started
 
 Plugins Repository
 ------------------------------
-- https://github.com/ansup0402/livingsoc_locator
+- https://github.com/ansup0402/SAOLA
+
 
 License
 ------------------------------
@@ -53,4 +56,4 @@ License
 
 Gallery
 ------------------------------
-![screenshot](https://github.com/ansup0402/livingsoc_locator/blob/master/resources/gallery01.png?width=800)
+![screenshot](https://github.com/ansup0402/SAOLA/blob/master/resources/gallery01.png?width=800)

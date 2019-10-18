@@ -1,15 +1,15 @@
 # Mandatory items:
 
 [general]
-name=Life-Friendly SOC Locator
+name=SAOLA
 qgisMinimumVersion=3.8
 qgisMaximumVersion=3.99
-description=Life-Friendly SOC Locator
+description=This tool is built to support a rational decision-making process for optimal supply and management of neighborhood SOC in South Korea.
 version=0.5.0
 author=Ansup
 email=ansup0402@gmail.com
 
-about=An accessibility analysis tool
+about=Spatial accessibility and optimal location analysis tool (SAOLA)
 
 homepage=https://github.com/ansup0402/livingsoc_locator
 tracker=https://github.com/ansup0402/livingsoc_locator/issues
@@ -21,7 +21,7 @@ hasProcessingProvider=yes
 changelog=0.5.0: 
 	- First release of Life-friendly SOC Locator Plugin
 
-tags=python, network, locator, Korea, social
+tags=network, Korea, SOC, accessibility
 
 icon=icon.png
 category=Analysis
