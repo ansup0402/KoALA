@@ -56,5 +56,4 @@ License
 
 Gallery
 ------------------------------
-![screenshot](https://github.com/ansup0402/SAOLA/blob/master/resources/gallery01.png?width=800)
 ![screenshot](./resources/gallery01.png?width=800)
