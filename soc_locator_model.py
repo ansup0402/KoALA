@@ -335,6 +335,16 @@ class soc_locator_model:
         totalcnt = self.__linklayer.featureCount()
         i = 0
         if self.debugging: self.setProgressSubMsg("speed mode : {}".format(str(self.__linkSpeed is not None)))
+
+        # get minimumspeed beside zero
+        tmplayer = self.__linklayer
+        tmplayer = self.qgsutils.selectbyexpression(input=tmplayer, expression='%s > 0' % self.__linkSpeed)
+        tmplayer = self.qgsutils.saveselectedfeatrues(input=tmplayer)
+        idx = tmplayer.fields().indexFromName(self.__linkSpeed)
+        minimumSpeed = tmplayer.minimumValue(idx)
+
+        if self.debugging: self.setProgressSubMsg("minimumValue speed : {}".format(str(minimumSpeed)))
+
         for feature in self.__linklayer.getFeatures():
             i += 1
             if self.feedback.isCanceled(): return None
@@ -353,8 +363,8 @@ class soc_locator_model:
             else:
                 speed = feature.attribute(self.__linkSpeed)
                 if int(speed) == 0:
-                    if self.debugging: self.setProgressSubMsg("링크레이어의 속도 필드에 0값이 있습니다. 10으로 대체하여 계산합니다.")
-                    speed = 10
+                    if self.debugging: self.setProgressSubMsg("링크레이어의 속도 필드에 0값이 있습니다. 최저속도인 %s으로 대체하여 계산합니다."%str(minimumSpeed))
+                    speed = minimumSpeed
                 # self.setProgressSubMsg("speed ={}, len")
                 linktime = length/speed
                 weights.append(linktime)
@@ -654,8 +664,6 @@ class soc_locator_model:
 
         return self.__dfPop
 
-    # todo [000] 너무 느리니 단계를 2개로 분리하자.
-    # todo [000] 함수마다 임시파일명을 함수명_시리얼_일련번호로 통일시키지..
     def anal_AllPotenSOC_straight(self):
 
         # 1) 잠재적위치 레이어와 세생활권 인구레이어 distance matrix
@@ -693,7 +701,6 @@ class soc_locator_model:
                 toPopDists[popID] = distance
                 pot2popDists[popID] = toPopDists
 
-        # refac [999] 코드 리팩토링 필요
         try:
             tmppotenlayer = self.__potentiallayer
             potencnt = tmppotenlayer.featureCount()
@@ -1041,8 +1048,6 @@ class soc_locator_model:
             finalKeyID = self.__potentialID
 
 
-        # todo [등급] __dictFinalwithScore, __dtFinalwithsScore 값을 이용하여 등급으로 치환
-        # self.__dictFinalwithScore[potenVal]
         dfScore = self.__dtFinalwithsScore
         ###################### 등급 산정 부분 ######################
         scorefield = 'EQ_SCORE'
@@ -1297,7 +1302,6 @@ class soc_locator_model:
         finalKeyID = self.__potentialID
 
 
-        # todo [등급] __dictFinalwithScore, __dtFinalwithsScore 값 이용하여 등급 값 산정
         dfScore = self.__dtFinalwithsScore
         ###################### 등급 산정 부분 ######################
         step = 100 / self.__classify_count

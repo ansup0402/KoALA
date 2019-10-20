@@ -203,7 +203,7 @@ class LivingSOCEfficiencynetworkAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterField(
                 self.IN_LINK_SPEED,
-                self.tr('속도 필드'),
+                self.tr('최대 속도 필드 : 속도 값이 0인 경우 최소 값으로 대체 됩니다.'),
                 None,
                 self.IN_LINK,
                 QgsProcessingParameterField.Numeric,
@@ -276,23 +276,35 @@ class LivingSOCEfficiencynetworkAlgorithm(QgsProcessingAlgorithm):
 
         return keyword
 
+
     def check_userinput(self, parameters):
 
         isvailid = True
-        #
-        #
-        ## 금칙 필드 ID 지정
-        # 레이어 두개 합칠때 필드명 동일한 것 있는지 사전체 체크 할 것
-        # # 한글필드 체크,
-        # # 특수필드들 다른 레이어에 중복된것이 있는지 체크
-        # # 다른 필드에 NODE_ID 생성할떄 도일한 필드타입으로 int >< double 다름
-        # # 링크에 없는 NODE가 있음 -> 노드를 내부적으로 만들어 줄까?? 아님 링크로 만들까? 아님 체크할까???
-        # # NODE_ID 포함 모든ID는 String으로(직선거리 분석도 마찬가지임)
-        #
-        # if networkmode == 0:
-        #     pass
-        #
-        # return isvailid
+
+        # to check used field name in model
+        avoidedfield = {"NODE": ['ID'],
+                         "LINK": ['ID'],
+                         "POP": ['ACC_SCORE', 'NEW_DIS', 'A', 'EQ_SCORE'],
+                         "LIVING": ['ID'],
+                         "CURSOC" : ['ID']
+                         }
+        # 지정된 필드명이 다른 레이어에 존재하는 경우
+
+
+        # 한글 필드명 체크
+
+        # 레이어 조인시 중복될 여지가 있는 필드명 체크
+
+
+        # 필드 값 유효성 체크
+            # None 체크 : NODE ID, SPEED
+            # Node Key 중복 값 체크
+
+        # 링크에 없는 노드....(랜덤하게 10%만 체크)
+
+
+
+
         return isvailid
 
 

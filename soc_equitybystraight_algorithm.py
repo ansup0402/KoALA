@@ -233,9 +233,6 @@ class LivingSOCEquityStraightAlgorithm(QgsProcessingAlgorithm):
 
 
 
-    def testUnit(self):
-        pass
-
 
     def name(self):
         """
