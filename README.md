@@ -1,4 +1,4 @@
-<h1>SAOLA(Spatial accessibility and optimal location analysis tool)</h1>
+SAOLA(Spatial accessibility and optimal location analysis tool)
 =============================
 This tool is built to support a rational decision-making process for optimal supply and management of neighborhood SOC in South Korea.
 - Equity-based potential location analysis(by euclidean Distance, by network Distance)
