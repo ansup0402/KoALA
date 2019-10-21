@@ -1,15 +1,15 @@
 # Mandatory items:
 
 [general]
-name=SAOLA
+name=KoALA
 qgisMinimumVersion=3.8
 qgisMaximumVersion=3.99
-description=This tool is built to support a rational decision-making process for optimal supply and management of neighborhood SOC in South Korea.
+description=Korean Accessibility and Optimal Location Analysis Tool for Neighborhood SOC
 version=0.5.0
 author=Ansup
 email=ansup0402@gmail.com
 
-about=Spatial accessibility and optimal location analysis tool (SAOLA)
+about=This tool is built to support a rational decision-making process for optimal supply and management of neighborhood SOC in South Korea.
 
 homepage=https://github.com/ansup0402/livingsoc_locator
 tracker=https://github.com/ansup0402/livingsoc_locator/issues
@@ -19,7 +19,7 @@ repository=https://github.com/ansup0402/livingsoc_locator
 
 hasProcessingProvider=yes
 changelog=0.5.0: 
-	- First release of Life-friendly SOC Locator Plugin
+	- First release of KoALA
 
 tags=network, Korea, SOC, accessibility
 
