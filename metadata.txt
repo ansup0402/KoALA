@@ -26,7 +26,7 @@ changelog=0.5.0:
 
 tags=network, Korea, SOC, accessibility
 
-icon=./resources/icon2.png
+icon=./resources/icon.png
 category=Analysis
 
 experimental=True
