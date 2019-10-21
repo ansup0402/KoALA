@@ -10,10 +10,13 @@ author=Ansup
 email=ansup0402@gmail.com
 
 about=This tool is built to support a rational decision-making process for optimal supply and management of neighborhood SOC in South Korea.
+    - Equity-based potential location analysis(by euclidean Distance, by network Distance)
+    - Efficiency-based potential location analysis(by euclidean Distance, by network Distance)
+    - Accessibility Analysis of Detailed Living Areas(by euclidean Distance, by network Distance)
 
-homepage=https://github.com/ansup0402/livingsoc_locator
-tracker=https://github.com/ansup0402/livingsoc_locator/issues
-repository=https://github.com/ansup0402/livingsoc_locator
+homepage=https://github.com/ansup0402/KoALA
+tracker=https://github.com/ansup0402/KoALA/issues
+repository=https://github.com/ansup0402/KoALA
 
 # Recommended items:
 

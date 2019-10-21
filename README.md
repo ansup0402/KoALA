@@ -1,4 +1,4 @@
-SAOLA(Spatial accessibility and optimal location analysis tool)
+KoALA(Korean Accessibility and Optimal Location Analysis Tool for Neighborhood SOC)
 =============================
 This tool is built to support a rational decision-making process for optimal supply and management of neighborhood SOC in South Korea.
 - Equity-based potential location analysis(by euclidean Distance, by network Distance)
@@ -39,14 +39,9 @@ You must install **'pandas'** to use this plugin. Manual installation is as foll
     * Restart **QGIS3**
 
 
-Getting Started
-------------------------------
-- ??
-
-
 Plugins Repository
 ------------------------------
-- https://github.com/ansup0402/SAOLA
+- https://github.com/ansup0402/KoALA
 
 
 License
