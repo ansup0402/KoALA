@@ -133,6 +133,7 @@ docstring-min-length=-1
 # List of note tags to take in consideration, separated by a comma.
 notes=FIXME,refac,TODO
 TODO [출처] https://pixabay.com/vectors/koala-animal-mammal-australia-wild-48558/
+TODO [경로] TEMP경로를 Data/temp 경로로 변경
 TODO [전체] 로그정보를 모두 영어로 변경하자...
 TODO [ICON] https://www.pngguru.com/free-transparent-background-png-clipart-nuedd/download
 TODO [전체] debugging output 네이밍 보완
