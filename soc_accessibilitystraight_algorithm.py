@@ -47,6 +47,9 @@ import os
 import pathlib
 cur_dir = pathlib.Path(__file__).parent
 debugging = os.path.exists(os.path.join(cur_dir, 'debugmode'))
+if debugging:
+    file = open(os.path.join(cur_dir, 'debugmode'), "r")
+    cur_dir = file.readline()
 
 class LivingSOCAccessibilitystraightAlgorithm(QgsProcessingAlgorithm):
 
@@ -209,8 +212,9 @@ class LivingSOCAccessibilitystraightAlgorithm(QgsProcessingAlgorithm):
 
         global debugging
         if debugging: feedback.pushInfo("****** [START DEBUG] ******")
-
-        launcher = soc_locator_launcher(feedback=feedback, context=context, parameters=params, debugging=debugging)
+        global cur_dir
+        launcher = soc_locator_launcher(feedback=feedback, context=context, parameters=params, debugging=debugging,
+                                        workpath=cur_dir)
 
         out_vector = launcher.execute_accessibility_in_straight()
 

@@ -1,45 +1,24 @@
-
 import os
-import pathlib
-
-cur_dir = pathlib.Path(__file__).parent
-
-#
-from qgis.core import (
-                    QgsVectorLayer,
-#                     QgsFeatureRequest,
-#                     QgsVectorFileWriter,
-#                     QgsProcessingMultiStepFeedback,
-#                     QgsProcessingFeatureSourceDefinition
-                    )
-
 import networkx as nx
 import pandas as pd
 import numpy as np
-
-# from pandas import DataFrame
-
-
-# from processing.core.Processing import Processing
-# Processing.initialize()
-# import processing
+from qgis.core import QgsVectorLayer
 
 
 class soc_locator_model:
 
-    def __init__(self, feedback, context, debugmode=False):
+    def __init__(self, feedback, context, debugmode=False, workpath=None):
         try:
             from .qgsprocssing_utils import qgsprocessUtils as qgsutils
         except ImportError:
             from qgsprocssing_utils import qgsprocessUtils as qgsutils
 
+        self.workpath = workpath
         self.qgsutils = qgsutils(feedback=feedback, context=context, debugmode=debugmode)
 
         self.debugging = debugmode
         self.feedback = feedback
         self.context = context
-
-
 
         self.allshortestnodes = {}
         self.nxGraph = None
@@ -70,18 +49,6 @@ class soc_locator_model:
         self.__poplyrID = ''
 
         self.__classify_count = 10
-
-        # if debugmode:
-        #     if not os.path.exists(os.path.join(cur_dir, 'temp')):
-        #         os.makedirs(os.path.join(cur_dir, 'temp'))
-        #
-        #     import logging
-        #     self.__logger = logging.getLogger("my")
-        #     self.__logger.setLevel(logging.INFO)
-        #
-        #     logpath = os.path.join(cur_dir, 'temp/debugging.log')
-        #     file_handler = logging.FileHandler(logpath)
-        #     self.__logger.addHandler(file_handler)
 
 
     @property
@@ -260,7 +227,7 @@ class soc_locator_model:
 
 
 
-    # qgis의 내부 함수를 통해 데이터를 변형하는 부분
+    # processing funtions
     def writeAsVectorLayer(self, layername):
         return self.qgsutils.writeAsVectorLayer(layername=layername)
 
@@ -273,13 +240,11 @@ class soc_locator_model:
     def clipwithQgis(self, input, onlyselected, overlay, output='TEMPORARY_OUTPUT'):
         return self.qgsutils.clipwithQgis(input=input, onlyselected=onlyselected, overlay=overlay, output=output)
 
-
     def dissolvewithQgis(self, input, onlyselected, field=None, output='TEMPORARY_OUTPUT'):
         return self.qgsutils.dissolvewithQgis(input=input, onlyselected=onlyselected, field=field, output=output)
 
     def nearesthubpoints(self, input, onlyselected, sf_hub, hubfield, output='TEMPORARY_OUTPUT'):
         return self.qgsutils.nearesthubpoints(input=input, onlyselected=onlyselected, sf_hub=sf_hub, hubfield=hubfield, output=output)
-
 
     def countpointsinpolygon(self, polylayer, pointslayer, field, weight=None, classfield=None, output='TEMPORARY_OUTPUT'):
         return self.qgsutils.countpointsinpolygon(polygons=polylayer,
@@ -288,7 +253,6 @@ class soc_locator_model:
                                                   weight=weight,
                                                   classfield=classfield,
                                                   output=output)
-
 
     def intersection(self, input, inputfields, inputonlyseleceted, overlay, overayprefix, overlayer_fields=None, output='TEMPORARY_OUTPUT'):
         return self.qgsutils.intersection(input=input,
@@ -310,7 +274,6 @@ class soc_locator_model:
                                              overlay=overlayer, overonlyselected=overonlyselected,
                                              output=output)
 
-
     def addIDField(self, input, idfid, output='TEMPORARY_OUTPUT'):
         return self.qgsutils.fieldCalculate(input=input,
                                             fid=idfid,
@@ -323,20 +286,16 @@ class soc_locator_model:
 
     def createNodeEdgeInGraph(self):
 
-        # Node layer를 이용한 node 추가 방법
-        # allnodes = [feature.attribute(self.__nodeID) for feature in self.__nodelayer.getFeatures()]
-
         fnodes = []
         tnodes = []
         weights = []
-        lengths = []
 
         tempNodes = []
         totalcnt = self.__linklayer.featureCount()
         i = 0
         if self.debugging: self.setProgressSubMsg("speed mode : {}".format(str(self.__linkSpeed is not None)))
 
-        # get minimumspeed beside zero
+        # to get minimum speed beside zero
         tmplayer = self.__linklayer
         tmplayer = self.qgsutils.selectbyexpression(input=tmplayer, expression='%s > 0' % self.__linkSpeed)
         tmplayer = self.qgsutils.saveselectedfeatrues(input=tmplayer)
@@ -398,12 +357,10 @@ class soc_locator_model:
                 allNodes = pickle.load(handle)
         else:
             if algorithm.lower() == 'johnson':
-                # johnson 는 cutoff 적용이 되지 않아 속도가 느림(차후 로직에서 한꺼번에 처리/해당 알고리즘 사용지 cutoff 로직 재확인 필요)
                 allNodes = dict(nx.johnson(self.nxGraph, weight='weight'))
             elif algorithm.lower() == 'dijkstra':
                 allNodes = dict(nx.all_pairs_dijkstra_path_length(self.nxGraph, weight='weight', cutoff=cutoff))
             elif algorithm.lower() == 'bellman':
-                # bellman 는 cutoff 적용이 되지 않아 속도가 느림(차후 로직에서 한꺼번에 처리/해당 알고리즘 사용지 cutoff 로직 재확인 필요)
                 allNodes = dict(nx.all_pairs_bellman_ford_path_length(self.nxGraph, weight='weight'))
 
             if self.debugging and output_alllink is not None:
@@ -411,10 +368,6 @@ class soc_locator_model:
                     pickle.dump(allNodes, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
         if self.debugging: self.setProgressSubMsg("[END] shortestAllnodes")
-
-        # 로그 파일을 쓰는 경우 일부 데이터만 쓸것(속도, 메모리 부분에서 상당히 분리함)
-        # if self.debugging:
-        #     self.__logger.info("allLink : %s" % str(allNodes))
 
         self.allshortestnodes = allNodes
         self.feedback.setProgress(100)
@@ -440,14 +393,15 @@ class soc_locator_model:
         if len(dict_distlist) > 0: dis = sum(dict_distlist.values())
         return dis
 
-    # 효율성과 접근성에서 사용 중
     def get_nearesttargetDistnace(self, fromNodeID, svrNodeList):
 
         dis = None
 
         dict_distlist = self.get_allOfDistFromAlltarget(fromNodeID, svrNodeList)
 
-        if self.debugging: self.setProgressSubMsg("allofdistfromalltarget[{}] : {}".format(fromNodeID, dict_distlist is not None))
+        # if self.debugging:
+        #     if dict_distlist is None
+        #         self.setProgressSubMsg("    >> get_nearesttargetDistnace [NODE-%s] 해당 노드 %sm 이내에는 현재 생활SOC가 없습니다." % (str(fromNodeID), str(self.cutoff)))
 
         if dict_distlist is not None:
             import operator
@@ -503,7 +457,7 @@ class soc_locator_model:
         if (self.__cutoff is not None) and (self.__cutoff > 0): matrixtype = 0
 
         tmpoutput = ''
-        if (self.debugging): tmpoutput = os.path.join(cur_dir, 'temp/popdistmatrix1_%s.shp' % targetlayer.sourceName())
+        if (self.debugging): tmpoutput = os.path.join(self.workpath, 'popdistmatrix1_%s.shp' % targetlayer.sourceName())
 
         matrix_distance = self.qgsutils.distancematrix(input=singlepop,
                                                       inputonlyselected=False,
@@ -530,13 +484,13 @@ class soc_locator_model:
     def anal_AllCurSOC_straight(self):
 
         tmpoutput = ''
-        if (self.debugging): tmpoutput = os.path.join(cur_dir, 'temp/AllCurSOC1.shp')
+        if (self.debugging): tmpoutput = os.path.join(self.workpath, 'AllCurSOC1.shp')
         matrixDisLayer = self.getPopdistmatrixDataLayer(targetlayer=self.__currentSOClayer,
                                                         targetlayerID=self.__currentSOCID,
                                                         output=tmpoutput)
 
         tmpoutput = ''
-        if (self.debugging): tmpoutput = os.path.join(cur_dir, 'temp/AllCurSOC2')
+        if (self.debugging): tmpoutput = os.path.join(self.workpath, 'AllCurSOC2')
         statstable = self.qgsutils.statisticsbycategories(input=matrixDisLayer,
                                                  onlyselected=False,
                                                  categoriesfields=['InputID'],
@@ -544,7 +498,7 @@ class soc_locator_model:
                                                  output=tmpoutput)
 
         tmpoutput = ''
-        if (self.debugging): tmpoutput = os.path.join(cur_dir, 'temp/AllCurSOC3.shp')
+        if (self.debugging): tmpoutput = os.path.join(self.workpath, 'AllCurSOC3.shp')
         joinedpop = self.qgsutils.joinattributetable(input1=self.__popSinglepartlayer,
                                             input1onlyselected=False,
                                             field1=self.popIDField,
@@ -584,7 +538,6 @@ class soc_locator_model:
             if str(accval) is None or str(accval) == 'NULL':
                 accval = 0
 
-            # self.setProgressSubMsg("accval : %s[%s]" % (accval, type(accval)))
             listPoptoSocDis.append(accval)
 
         rawData = {self.__poplyrID: listPopID,
@@ -593,13 +546,11 @@ class soc_locator_model:
 
         dfPopwidthDis = pd.DataFrame(rawData)
 
-        # 왜 못찾지?
         dfPopwidthDis['ACC_SCORE'].fillna(0, inplace=True)
         # dfPopwidthDis.loc[dfPopwidthDis['ACC_SCORE'] == 'NULL', 'ACC_SCORE'] = 0
 
         if self.debugging:
-            tempexcel = os.path.join(cur_dir, 'temp/matrix4_AllCurSOC.csv')
-            dfPopwidthDis.to_csv(tempexcel)
+            dfPopwidthDis.to_csv(os.path.join(self.workpath, 'matrix4_AllCurSOC.csv'))
 
         self.__dfPop = dfPopwidthDis
 
@@ -609,8 +560,6 @@ class soc_locator_model:
     def anal_AllCurSOC_network(self):
         dists = []
         i = 0
-        errcnt = 0
-        noerrcnt = 0
 
         svrNodeilst = [feature.attribute(self.__nodeID) for feature in self.__currentSOClayer.getFeatures()]
         if self.debugging: self.setProgressSubMsg("svrNodeilst : %s" % str(svrNodeilst))
@@ -632,21 +581,14 @@ class soc_locator_model:
             popNodeid = str(feature[self.__nodeID])
             poppnt = feature[self.__popcntField]
 
-            # get_AllDistanceFromNode 함수 적게 타도록 처리
             try:
                 dis = calculatedNode[popNodeid]
             except:
                 dis = self.get_alltargetSumofDistance(fromNodeID=popNodeid,
                                                       svrNodeList=svrNodeilst)
                 if dis is None:
-                    # todo 이 주석 내용 확인 후 삭제 필요
-                    # get_alltargetSumofDistance함수 내에서 outofcutoff처리를 다 했기때문에, 분석지역안에 1건이라도 생활SOC가 있는 경우는 None알 수 없음
-                    self.setProgressSubMsg("[NODE-%s] 해당 인구데이터의 %sm 이내에는 현재 생활SOC가 없습니다." % (str(popNodeid), str(self.cutoff)))
-                # if dis is None:
-                #     errcnt += 1
-                #     dis = 0
-                # else:
-                #     noerrcnt += 1
+                    if self.debugging:
+                        self.setProgressSubMsg("[NODE-%s] 해당 인구데이터의 %sm 이내에는 현재 생활SOC가 없습니다." % (str(popNodeid), str(self.cutoff)))
 
                 calculatedNode[popNodeid] = dis
 
@@ -660,7 +602,7 @@ class soc_locator_model:
 
         self.__dfPop = pd.DataFrame(rawData)
 
-        if self.debugging: self.__dfPop.to_csv(os.path.join(cur_dir, 'temp/analyze_fromAllCurSOC.csv'))
+        if self.debugging: self.__dfPop.to_csv(os.path.join(self.workpath, 'analyze_fromAllCurSOC.csv'))
 
         return self.__dfPop
 
@@ -668,7 +610,7 @@ class soc_locator_model:
 
         # 1) 잠재적위치 레이어와 세생활권 인구레이어 distance matrix
         tmpoutput = ''
-        if (self.debugging): tmpoutput = os.path.join(cur_dir, 'temp/AllPotenSOC1.shp')
+        if (self.debugging): tmpoutput = os.path.join(self.workpath, 'AllPotenSOC1.shp')
         matrixDisLayer = self.getPopdistmatrixDataLayer(targetlayer=self.__potentiallayer,
                                                         targetlayerID=self.__potentialID,
                                                         output=tmpoutput)
@@ -725,7 +667,7 @@ class soc_locator_model:
                 tmpPopCopy['NEW_DIS'] = 0
                 try:
                     popDistances = pot2popDists[potenID]
-                    # tmpPopCopy중에 해당되는 것만 값을 변경해주자..
+
                     for key, value in popDistances.items():
                         tmpPopCopy.loc[tmpPopCopy[self.__poplyrID] == key, "NEW_DIS"] = value
 
@@ -818,10 +760,10 @@ class soc_locator_model:
             except:
                 dis = self.get_nearesttargetDistnace(fromNodeID=popNodeid,
                                                      svrNodeList=svrNodeilst)
-                if dis is None: dis = 0
-
-                # if dis is None:
-                #     self.setProgressSubMsg("[anal_NeartestCurSOC_network] 오류 : 세생활권의 %s노드 거리를 찾을 수 없음" % str(popNodeid))
+                if dis is None:
+                    if self.debugging:
+                        self.setProgressSubMsg("[NODE-%s] 해당 세생권데이터의 %sm 이내에는 현재 생활SOC가 없습니다." % (str(popNodeid), str(self.cutoff)))
+                    dis = 0
 
                 calculatedNode[popNodeid] = dis
 
@@ -844,7 +786,7 @@ class soc_locator_model:
             self.setProgressSubMsg("count of success node : %s" % str(noerrcnt))
             # self.__logger.info("count of unsearchable node : %s" % str(errcnt))
             # self.__logger.info("count of success node : %s" % str(noerrcnt))
-            tempexcel = os.path.join(cur_dir, 'temp/anal_NeartestCurSOC_network.csv')
+            tempexcel = os.path.join(self.workpath, 'anal_NeartestCurSOC_network.csv')
             self.__dfPop.to_csv(tempexcel)
         # except MemoryError as error:
         #     self.setProgressSubMsg(type(error))
@@ -908,7 +850,7 @@ class soc_locator_model:
         self.__dictFinalwithScore = dictResultwithsScore
 
         if self.debugging:
-            tempexcel = os.path.join(cur_dir, 'temp/anal_AllPotenSOC_network.csv')
+            tempexcel = os.path.join(self.workpath, 'anal_AllPotenSOC_network.csv')
             self.__dtFinalwithsScore.to_csv(tempexcel)
 
         return self.__dtFinalwithsScore
@@ -923,12 +865,6 @@ class soc_locator_model:
                                                                                                          self.__popcntField: {'POP_SUM': 'sum'}
                                                                                                          }).reset_index()
         dfgroupy['ACC_SCORE'] = dfgroupy['ACC_SCORE_SUM'] / dfgroupy['POP_SUM']
-
-
-        # todo 이부분은 생각중...
-        # 아래 부분은 잘 기억이 안남... 왜 여러개 였지? (아마 노드아이디로 할 시절에 여러개가 반환되므로..)
-        # eqscore = tmpdfPOP["ACC_SCORE"].loc[tmpdfPOP[finalKeyID] == str(finalkey)].head(1)
-
 
         finanallayer = self.qgsutils.addField(input=self.__livingareaLayer,
                                               fid="AC_GRADE",
@@ -960,8 +896,8 @@ class soc_locator_model:
         classRange = [cls * step for cls in reversed(range(0, self.__classify_count + 1))]
         clsfy = np.nanpercentile(tmpdfPOP[scorefield], classRange, interpolation='linear')
         # 접근성 분석은 +지표, 이부분 지표 성격에 따라 다름(+지표 or 0지표)
-        clsfy[len(clsfy) - 1] = tmpdfPOP[scorefield].max(skipna=True) + 1
-        clsfy[0] = tmpdfPOP[scorefield].min(skipna=True) - 1
+        clsfy[len(clsfy) - 1] = tmpdfPOP[scorefield].min(skipna=True) - 1
+        clsfy[0] = tmpdfPOP[scorefield].max(skipna=True) + 1
 
         if self.debugging: self.setProgressSubMsg("classify count : {}".format(len(clsfy)))
 
@@ -978,7 +914,7 @@ class soc_locator_model:
         ########################################################################################
 
         if self.debugging:
-            tempexcel = os.path.join(cur_dir, 'temp/final_Accessbillityscore.csv')
+            tempexcel = os.path.join(self.workpath, 'final_Accessbillityscore.csv')
             tmpdfPOP.to_csv(tempexcel)
 
 
@@ -1109,8 +1045,75 @@ class soc_locator_model:
         return resultlayer
 
 
-    # 효율성에서만 쓰는 함수임
-    def anal_nearestSOC_network(self, socNodeList, outdistfidnm, outissvredfidnm):
+    # # 효율성에서만 쓰는 함수임
+    # def anal_nearestSOC_network(self, socNodeList, outdistfidnm, outissvredfidnm):
+    #
+    #     tmppoplayer = self.__populationLayer
+    #     totalcnt = tmppoplayer.featureCount()
+    #
+    #     listpopID = []
+    #     listpopNode = []
+    #     listpopCnt = []
+    #     listpopAccscore = []
+    #     listissvrSOC = []
+    #     calculatedNode = {}
+    #
+    #     i = 0
+    #     errcnt = 0
+    #     noerrcnt = 0
+    #     for feature in tmppoplayer.getFeatures():
+    #         i += 1
+    #         if self.feedback.isCanceled(): return None
+    #         self.feedback.setProgress(int(i / totalcnt * 100))
+    #
+    #         popID = feature[self.__poplyrID]
+    #         popNodeid = feature[self.__nodeID]
+    #         poppnt = feature[self.__popcntField]
+    #
+    #         # dis는 서비스영역내 생활SOC 존재 여부. 있으면 0, 없으면 1
+    #         try:
+    #             dis = calculatedNode[popNodeid]
+    #         except:
+    #             dis = self.get_nearesttargetDistnace(fromNodeID=popNodeid,
+    #                                                  svrNodeList=socNodeList)
+    #             if dis is None:
+    #                 dis = self.__outofcutoff
+    #                 if self.debugging:
+    #                     self.setProgressSubMsg("    >> get_nearesttargetDistnace [NODE-%s] 세생활권 %sm 이내에는 현재 생활SOC가 없습니다." % (str(popNodeid), str(self.cutoff)))
+    #
+    #             calculatedNode[popNodeid] = dis
+    #
+    #         if dis > self.__cutoff:
+    #             issvr = 0
+    #         else:
+    #             issvr = 1
+    #
+    #         listpopID.append(popID)
+    #         listpopNode.append(popNodeid)
+    #         listpopCnt.append(poppnt)
+    #         listissvrSOC.append(issvr)
+    #         listpopAccscore.append(dis)
+    #
+    #
+    #     rawData = {
+    #         self.__poplyrID: listpopID,
+    #         self.__nodeID: listpopNode,
+    #         self.__popcntField: listpopCnt,
+    #         outdistfidnm: listpopAccscore,
+    #         outissvredfidnm: listissvrSOC}
+    #
+    #     self.dfResult = pd.DataFrame(rawData)
+    #
+    #
+    #
+    #     return self.dfResult
+
+
+
+
+    def anal_efficiencyCurSOC_network(self):
+
+        cursvrlist = [feature.attribute(self.__nodeID) for feature in self.__currentSOClayer.getFeatures()]
 
         tmppoplayer = self.__populationLayer
         totalcnt = tmppoplayer.featureCount()
@@ -1123,8 +1126,6 @@ class soc_locator_model:
         calculatedNode = {}
 
         i = 0
-        errcnt = 0
-        noerrcnt = 0
         for feature in tmppoplayer.getFeatures():
             i += 1
             if self.feedback.isCanceled(): return None
@@ -1139,11 +1140,14 @@ class soc_locator_model:
                 dis = calculatedNode[popNodeid]
             except:
                 dis = self.get_nearesttargetDistnace(fromNodeID=popNodeid,
-                                                     svrNodeList=socNodeList)
-                if dis is None: dis = self.__outofcutoff
+                                                     svrNodeList=cursvrlist)
+                if dis is None:
+                    dis = self.__outofcutoff
+                    if self.debugging:
+                        self.setProgressSubMsg("    >> get_nearesttargetDistnace [NODE-%s] 세생활권 %sm 이내에는 현재 생활SOC가 없습니다."
+                                               % (str(popNodeid), str(self.cutoff))
+                                               )
 
-                # if dis is None:
-                #     self.setProgressSubMsg("[anal_NeartestCurSOC_network] 오류 : 세생활권의 %s노드 거리를 찾을 수 없음" % str(popNodeid))
                 calculatedNode[popNodeid] = dis
 
             if dis > self.__cutoff:
@@ -1157,29 +1161,19 @@ class soc_locator_model:
             listissvrSOC.append(issvr)
             listpopAccscore.append(dis)
 
-
         rawData = {
             self.__poplyrID: listpopID,
             self.__nodeID: listpopNode,
             self.__popcntField: listpopCnt,
-            outdistfidnm: listpopAccscore,
-            outissvredfidnm: listissvrSOC}
+            'CUR_DIST': listpopAccscore,
+            'CUR_ISSVRED': listissvrSOC}
 
-        self.dfResult = pd.DataFrame(rawData)
+        dfCur =pd.DataFrame(rawData)
 
+        # self.anal_nearestSOC_network(socNodeList=cursvrlist,
+        #                               outdistfidnm='CUR_DIST',
+        #                               outissvredfidnm='CUR_ISSVRED')
 
-
-        return self.dfResult
-
-
-
-
-    def anal_efficiencyCurSOC_network(self):
-
-        cursvrlist = [feature.attribute(self.__nodeID) for feature in self.__currentSOClayer.getFeatures()]
-        dfCur = self.anal_nearestSOC_network(socNodeList=cursvrlist,
-                                      outdistfidnm='CUR_DIST',
-                                      outissvredfidnm='CUR_ISSVRED')
 
         # 기존SOC시설로 커버되는 인구데이터는 모두 제거(CUR_ISSVRED == 0)
         # dfNotSvrPop = dfCur.loc[dfCur['CUR_ISSVRED'] == 1]
@@ -1188,7 +1182,7 @@ class soc_locator_model:
         # self.__dfPop = pd.merge(dfCur, dfNew[[self.__nodeID, "NEW_DIST", "NEW_ISSVRED"]], on=self.__nodeID)
 
         if self.debugging:
-            tempexcel = os.path.join(cur_dir, 'temp/anal_NeartestCurSOC_network.csv')
+            tempexcel = os.path.join(self.workpath, 'anal_NeartestCurSOC_network.csv')
             self.__dfPop.to_csv(tempexcel)
 
         return self.__dfPop
@@ -1233,7 +1227,7 @@ class soc_locator_model:
         self.__dtFinalwithsScore = pd.DataFrame(rawData)
 
         if self.debugging:
-            tempexcel = os.path.join(cur_dir, 'temp/efscore.csv')
+            tempexcel = os.path.join(self.workpath, 'efscore.csv')
             self.__dtFinalwithsScore.to_csv(tempexcel)
 
         return self.__dtFinalwithsScore
@@ -1289,7 +1283,7 @@ class soc_locator_model:
         self.__dictFinalwithScore = svrdPOPDict
         self.__dtFinalwithsScore = pd.DataFrame(rawData)
 
-        if self.debugging: self.__dtFinalwithsScore.to_csv(os.path.join(cur_dir, 'temp/efscore.csv'))
+        if self.debugging: self.__dtFinalwithsScore.to_csv(os.path.join(self.workpath, 'efscore.csv'))
 
         return self.__dtFinalwithsScore
 
@@ -1300,7 +1294,6 @@ class soc_locator_model:
 
         dictScore = self.__dictFinalwithScore
         finalKeyID = self.__potentialID
-
 
         dfScore = self.__dtFinalwithsScore
         ###################### 등급 산정 부분 ######################

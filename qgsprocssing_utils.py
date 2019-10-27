@@ -1,10 +1,4 @@
-
 import os
-import pathlib
-
-cur_dir = pathlib.Path(__file__).parent
-
-
 from qgis.core import (
                     QgsVectorLayer,
                     QgsVectorFileWriter,
