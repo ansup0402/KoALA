@@ -44,6 +44,7 @@ class qgsprocessUtils:
 
     def createGridfromLayer(self, sourcelayer, gridsize, output='TEMPORARY_OUTPUT'):
         if output is None or output == '': output = 'TEMPORARY_OUTPUT'
+        # qgis 3.10부터는 native:creategrid로 변경됨
         algname = "qgis:creategrid"
 
         layer = sourcelayer
@@ -351,6 +352,10 @@ class qgsprocessUtils:
                                                 fileEncoding=fileEncoding,
                                                 destCRS=destCRS,
                                                 driverName='ESRI Shapefile')
+        #  select & export로 변경...
+
+
+
 
     def differencelayer(self, input, onlyselected, overlay, overonlyselected, output='TEMPORARY_OUTPUT'):
         if output is None or output == '': output = 'TEMPORARY_OUTPUT'

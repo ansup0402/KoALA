@@ -957,13 +957,19 @@ class soc_locator_model:
             resultlayer = finanallayer
         else:
             if self.debugging: self.setProgressSubMsg("output is not none")
-            resultlayer = self.qgsutils.vectorlayer2ShapeFile(vectorlayer=finanallayer,
-                                                              output=output,
-                                                              destCRS=finanallayer.sourceCrs())
+            # resultlayer = self.qgsutils.vectorlayer2ShapeFile(vectorlayer=finanallayer,
+            #                                                   output=output,
+            #                                                   destCRS=finanallayer.sourceCrs())
+            resultlayer = self.vectoclayer2output(input=finanallayer, output=output)
+
 
         return resultlayer
 
 
+    def vectoclayer2output(self, input, output):
+        expression = "1 = 1"
+        tmplayer = self.qgsutils.selectbyexpression(input=input, expression=expression)
+        return self.qgsutils.saveselectedfeatrues(input=tmplayer, output=output)
 
     def make_equityscore(self, isNetwork=True, output=None):
 
@@ -1039,9 +1045,10 @@ class soc_locator_model:
         if output is None:
             resultlayer = finanallayer
         else:
-            resultlayer = self.qgsutils.vectorlayer2ShapeFile(vectorlayer=finanallayer,
-                                                              output=output,
-                                                              destCRS=finanallayer.sourceCrs())
+            resultlayer = self.vectoclayer2output(input=finanallayer, output=output)
+            # resultlayer = self.qgsutils.vectorlayer2ShapeFile(vectorlayer=finanallayer,
+            #                                                   output=output,
+            #                                                   destCRS=finanallayer.sourceCrs())
         return resultlayer
 
 
@@ -1313,6 +1320,9 @@ class soc_locator_model:
                         (prevalue > dfScore['EF_SCORE']) & (dfScore['EF_SCORE'] >= gradeval), 'EF_GRADE'] = grade
             prevalue = gradeval
             grade += 1
+
+        nullvalgrade = dfScore['EF_GRADE'].max(skipna=True)
+        if self.debugging: self.setProgressSubMsg("nullvalgrade : %s" % str(nullvalgrade))
         ########################################################################################
         if self.debugging: dfScore.to_csv(os.path.join(self.workpath, 'efgrade.csv'))
 
@@ -1334,13 +1344,15 @@ class soc_locator_model:
         i = 0
         finanallayer.startEditing()
         potencnt = finanallayer.featureCount()
+
         for feature in finanallayer.getFeatures():
             i += 1
             if self.feedback.isCanceled(): return None
             self.feedback.setProgress(int(i / potencnt * 100))
 
-            finalkey = feature[finalKeyID]
 
+            efgrade = 0
+            finalkey = feature[finalKeyID]
             try:
                 efscore = float(dictScore[finalkey])
                 efgrade = float(dictefGrade[finalkey])
@@ -1351,7 +1363,10 @@ class soc_locator_model:
                 # 잠재적의 서비스 영역 안에 인구Feature가 하나도 검색되지 않은 경우
                 # 최소 값 부여(dictefGrade)
                 efscore = 0.00000001
-                efgrade = grade
+                efscore = 0.99999999
+                # todo [오류] nullvalgrade 값 반여 안됨
+                efgrade = nullvalgrade
+                self.setProgressSubMsg("null efgrade : %s" % str(efgrade))
 
 
             if self.debugging: feature["EF_SCORE"] = efscore
@@ -1364,9 +1379,11 @@ class soc_locator_model:
         if output is None:
             resultlayer = finanallayer
         else:
-            resultlayer = self.qgsutils.vectorlayer2ShapeFile(vectorlayer=finanallayer,
-                                                              output=output,
-                                                              destCRS=finanallayer.sourceCrs())
+            resultlayer = self.vectoclayer2output(input=finanallayer, output=output)
+            #
+            # resultlayer = self.qgsutils.vectorlayer2ShapeFile(vectorlayer=finanallayer,
+            #                                                   output=output,
+            #                                                   destCRS=finanallayer.sourceCrs())
         return resultlayer
 
     def removeRelCurSOCInPoplayer(self):

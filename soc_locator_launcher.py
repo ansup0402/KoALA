@@ -684,7 +684,7 @@ class soc_locator_launcher:
         if self.feedback.isCanceled(): return None
         if self.debugging: self.setProgressMsg('잠재적 위치의 최단거리를 분석합니다.....')
         relpotenID = overprefix + model.potentialID
-        if self.debugging: relpotenID = relpotenID[0: 10]  # shape file의 필드명 최대길이는 10자리 / 메모리에 있으때는 상관없음
+        if self.debugging: relpotenID = relpotenID[0: 10]  # shape file의 필드명 최대길이는 10자리 / 메모리에 있을때는 상관없음
         potengpd = model.anal_efficiencyPotenSOC_straight(relpotenID=relpotenID)
 
 
@@ -940,6 +940,7 @@ class soc_locator_launcher:
         out_path = ''
         if self.debugging: out_path = os.path.join(self.workpath, 'popaddedpotenid.shp')
         overprefix = 'POTL_'
+        # todo [오류] potenSvrArea의 feaeture가 여러개 겹칠 경우 맨 위의 feature 하나만 찾아서 처리함(수작업으로 처리? - distanceMatrix로 변경)
         popWithNodeaddedpoten = model.intersection(input=model.populationLayer,
                                                    inputfields=[model.popIDField, model.popcntField, model.nodeIDfield],
                                                    inputonlyseleceted=False,
