@@ -135,7 +135,7 @@ class LivingSOCEfficiencystraightAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterVectorDestination(
                 self.OUTPUT,
-                self.tr('형평성 분석 결과(직선거리)')
+                self.tr('효율성 분석 결과(직선거리)')
             )
         )
 

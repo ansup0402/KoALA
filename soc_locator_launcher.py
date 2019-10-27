@@ -195,7 +195,7 @@ class soc_locator_launcher:
 
         # 1-4 분석 지역 데이터 추출 : 기존 생활 SOC 시설
         if self.feedback.isCanceled(): return None
-        if self.debugging:self.setProgressMsg('존의 생활SOC 레이어를 초기화 합니다.....')
+        if self.debugging: self.setProgressMsg('기존의 생활SOC 레이어를 초기화 합니다.....')
         clipedCurSOC = model.clipwithQgis(input=self.parameters['IN_CURSOC'].sourceName(),
                                           onlyselected=self.parameters['IN_CURSOC_ONLYSELECTED'],
                                           overlay=boundary)
@@ -663,6 +663,7 @@ class soc_locator_launcher:
         out_path = ''
         if self.debugging: out_path = os.path.join(self.workpath, 'popaddedpotenid.shp')
         overprefix = 'POTL_'
+        # todo [오류] potenSvrArea의 feaeture가 여러개 겹칠 경우 맨 위의 feature 하나만 찾아서 처리함(수작업으로 처리? - distanceMatrix로 변경)
         popaddedpoten = model.intersection(input=model.populationLayer,
                                                    inputfields=[model.popcntField],
                                                    inputonlyseleceted=False,

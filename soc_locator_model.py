@@ -1192,13 +1192,8 @@ class soc_locator_model:
     def anal_efficiencyPotenSOC_straight(self, relpotenID):
 
         potenID = None
-        # popID = None
         popCnt = None
-        # popNodeKey = None
-        # potenNodeKey = None
-
         svrdPOPDict = {}
-        # popenIDList = []
 
 
         i = 0
@@ -1319,6 +1314,8 @@ class soc_locator_model:
             prevalue = gradeval
             grade += 1
         ########################################################################################
+        if self.debugging: dfScore.to_csv(os.path.join(self.workpath, 'efgrade.csv'))
+
         dictefGrade = dict(zip(dfScore[finalKeyID].tolist(), dfScore['EF_GRADE'].tolist()))
 
         finanallayer = self.qgsutils.addField(input=self.__potentiallayer,
@@ -1345,17 +1342,20 @@ class soc_locator_model:
             finalkey = feature[finalKeyID]
 
             try:
-                efscore = dictScore[finalkey]
-                efgrade = dictefGrade[finalkey]
+                efscore = float(dictScore[finalkey])
+                efgrade = float(dictefGrade[finalkey])
                 # todo [CHECK] 같은 노드를 가지고 있는 경우는 0 (해당 노드 확인 필요)
                 if efscore == 0:
                     efscore = 0.00000001
             except:
+                # 잠재적의 서비스 영역 안에 인구Feature가 하나도 검색되지 않은 경우
+                # 최소 값 부여(dictefGrade)
                 efscore = 0.00000001
+                efgrade = grade
 
 
-            if self.debugging: feature["EF_SCORE"] = float(efscore)
-            feature["EF_GRADE"] = float(efgrade)
+            if self.debugging: feature["EF_SCORE"] = efscore
+            feature["EF_GRADE"] = efgrade
 
             finanallayer.updateFeature(feature)
 
