@@ -1316,8 +1316,7 @@ class soc_locator_model:
                 if prevalue != gradeval:
                     # 접근성 분석은 +지표, 이부분 지표 성격에 따라 다름(+지표 or 0지표)
                     # print('{} > {} >= {}'.format(prevalue, i, gradeval))
-                    dfScore.loc[
-                        (prevalue > dfScore['EF_SCORE']) & (dfScore['EF_SCORE'] >= gradeval), 'EF_GRADE'] = grade
+                    dfScore.loc[(prevalue > dfScore['EF_SCORE']) & (dfScore['EF_SCORE'] >= gradeval), 'EF_GRADE'] = grade
             prevalue = gradeval
             grade += 1
 
@@ -1358,8 +1357,7 @@ class soc_locator_model:
                 if efscore == 0:
                     efscore = 0.00000001
             except:
-                # 잠재적의 서비스 영역 안에 인구Feature가 하나도 검색되지 않은 경우
-                # 최소 값 부여(dictefGrade)
+                # 잠재적의 서비스 영역 안에 인구 Feature가 하나도 검색되지 않은 경우
                 efscore = 0.00000001
                 efgrade = nullvalgrade
 
