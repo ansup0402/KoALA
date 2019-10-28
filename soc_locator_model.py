@@ -1292,7 +1292,7 @@ class soc_locator_model:
 
 
 
-    def make_efficiencyscore(self, output):
+    def œmake_efficiencyscore(self, output):
 
         dictScore = self.__dictFinalwithScore
         finalKeyID = self.__potentialID

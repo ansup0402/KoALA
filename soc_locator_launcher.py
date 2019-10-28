@@ -685,6 +685,7 @@ class soc_locator_launcher:
         if self.debugging: self.setProgressMsg('잠재적 위치의 최단거리를 분석합니다.....')
         relpotenID = overprefix + model.potentialID
         if self.debugging: relpotenID = relpotenID[0: 10]  # shape file의 필드명 최대길이는 10자리 / 메모리에 있을때는 상관없음
+        # 각 잠재적 위치의 서비스 영역내 포함되는 인구수
         potengpd = model.anal_efficiencyPotenSOC_straight(relpotenID=relpotenID)
 
 
@@ -965,6 +966,7 @@ class soc_locator_launcher:
 
         relpotenNodeID = overprefix + model.nodeIDfield
         if self.debugging: relpotenNodeID = relpotenNodeID[0:10] # shape file의 필드명 최대길이는 10자리 / 메모리에 있을때는 상관없음
+        # 각 잠재적 위치의 서비스 영역내 포함되는 인구수
         potengpd = model.anal_efficiencyPotenSOC_network(relpotenID=relpotenID,
                                                          relpotenNodeID=relpotenNodeID)
 
