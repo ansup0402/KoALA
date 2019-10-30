@@ -254,6 +254,10 @@ class soc_locator_model:
                                                   classfield=classfield,
                                                   output=output)
 
+    def joinattributesbylocation(self, input, join, joinfiels=[], prefix='', output='TEMPORARY_OUTPUT'):
+        return self.qgsutils.joinattributesbylocation(input=input, join=join, joinfiels=joinfiels, prefix=prefix, output=output)
+
+
     def intersection(self, input, inputfields, inputonlyseleceted, overlay, overayprefix, overlayer_fields=None, output='TEMPORARY_OUTPUT'):
         return self.qgsutils.intersection(input=input,
                                           inputfields=inputfields,
@@ -1219,7 +1223,12 @@ class soc_locator_model:
             except:
                 addedpopCnt = 0
 
-            svrdPOPDict[potenID] = addedpopCnt + popCnt
+            # 잠재적 위치 서비스 영역안에 인구데이터가 하나도 없는 경우
+            if str(popCnt) is None or str(popCnt) == 'NULL':
+                popCnt = 0
+
+            svrdPOPDict[potenID] = addedpopCnt + int(popCnt)
+
 
         rawData = {self.__potentialID: list(svrdPOPDict.keys()),
                    'EF_SCORE': list(svrdPOPDict.values())
@@ -1292,7 +1301,7 @@ class soc_locator_model:
 
 
 
-    def œmake_efficiencyscore(self, output):
+    def make_efficiencyscore(self, output):
 
         dictScore = self.__dictFinalwithScore
         finalKeyID = self.__potentialID

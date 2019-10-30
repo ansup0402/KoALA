@@ -280,6 +280,31 @@ class qgsprocessUtils:
                       OUTPUT=output)
         return self.run_algprocessing(algname=algname, params=params)['OUTPUT']
 
+    def joinattributesbylocation(self, input, join, inputonlyselected=False, joinonlyselected=False, joinfiels=[], method=0, predicate=[0], prefix='', discardnomatching=False, output='TEMPORARY_OUTPUT'):
+
+        if output is None or output == '': output = 'TEMPORARY_OUTPUT'
+        algname = 'qgis:joinattributesbylocation'
+
+        inputsource = input
+        joinsource = join
+
+        if inputonlyselected: inputsource = QgsProcessingFeatureSourceDefinition(input, True)
+        if joinonlyselected: joinsource = QgsProcessingFeatureSourceDefinition(join, True)
+
+        params = dict(INPUT=inputsource,
+                      JOIN=joinsource,
+                      JOIN_FIELDS=joinfiels,
+                      METHOD=method,     # 0 — (one-to-many), 1 — (one - to - one)
+                      PREDICATE=predicate, # 0 — intersects, 1 — contains, 2 — equals, 3 — touches, 4 — overlaps, 5 — within, 6 — crosses
+                      prefix=prefix,
+                      DISCARD_NONMATCHING=discardnomatching,
+                      OUTPUT=output)
+
+        # {'DISCARD_NONMATCHING': False, 'INPUT': '/Users/song-ansup/Desktop/KoALA_data/logfile/popenSvrArea.shp',
+        #  'JOIN': '/Users/song-ansup/Desktop/KoALA_data/logfile/popremovedCurSOC.shp', 'JOIN_FIELDS': ['pop_all'],
+        #  'METHOD': 0, 'OUTPUT': 'TEMPORARY_OUTPUT', 'PREDICATE': [0], 'PREFIX': ''}
+        return self.run_algprocessing(algname=algname, params=params)['OUTPUT']
+
     def joinattributetable(self, input1, input1onlyselected, input2, input2onlyselected, field1, field2,
                            prefix='M_', output='TEMPORARY_OUTPUT'):
 
