@@ -1224,8 +1224,7 @@ class soc_locator_model:
                 addedpopCnt = 0
 
             # 잠재적 위치 서비스 영역안에 인구데이터가 하나도 없는 경우
-            if str(popCnt) is None or str(popCnt) == 'NULL':
-                popCnt = 0
+            if str(popCnt) is None or str(popCnt) == 'NULL': popCnt = 0
 
             svrdPOPDict[potenID] = addedpopCnt + int(popCnt)
 
@@ -1246,32 +1245,30 @@ class soc_locator_model:
 
 
 
-    def anal_efficiencyPotenSOC_network(self, relpotenID, relpotenNodeID):
+    def anal_efficiencyPotenSOC_network(self, relpopNodeID, relpopcntfid):
 
         potenID = None
-        popID = None
         popCnt = None
         popNodeKey = None
         potenNodeKey = None
 
         svrdPOPDict = {}
-        # popenIDList = []
-
 
         i = 0
         tmpPOPlyr = self.__populationLayer
         popFeacnt = tmpPOPlyr.featureCount()
         self.setProgressSubMsg("tmpPOPlyr : {}개".format(popFeacnt))
+
         for feature in tmpPOPlyr.getFeatures():
             i += 1
             if self.feedback.isCanceled(): return None
             self.feedback.setProgress(int(i / popFeacnt * 100))
 
-            popCnt = feature[self.__popcntField]
-            popNodeKey = feature[self.__nodeID]
-            potenID = feature[relpotenID]
-            potenNodeKey = feature[relpotenNodeID]
+            potenID = feature[self.__potentialID]
+            potenNodeKey = feature[self.__nodeID]
 
+            popCnt = feature[relpopcntfid]
+            popNodeKey = feature[relpopNodeID]
 
             dist = self.get_Distance(potenNodeKey, popNodeKey)
 
@@ -1279,13 +1276,15 @@ class soc_locator_model:
             if dist is None: dist = self.__outofcutoff
             if dist > self.__cutoff: popCnt = 0
 
-
             try:
                 addedpopCnt = svrdPOPDict[potenID]
             except:
                 addedpopCnt = 0
 
-            svrdPOPDict[potenID] = addedpopCnt + popCnt
+            # 잠재적 위치 서비스 영역안에 인구데이터가 하나도 없는 경우
+            if str(popCnt) is None or str(popCnt) == 'NULL': popCnt = 0
+
+            svrdPOPDict[potenID] = addedpopCnt + int(popCnt)
 
         rawData = {self.__potentialID: list(svrdPOPDict.keys()),
                    'EF_SCORE': list(svrdPOPDict.values())

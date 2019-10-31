@@ -932,22 +932,13 @@ class soc_locator_launcher:
         if self.feedback.isCanceled(): return None
         out_path = ''
         if self.debugging: out_path = os.path.join(self.workpath, 'popaddedpotenid.shp')
-        overprefix = 'POTL_'
-        # todo [오류] potenSvrArea의 feaeture가 여러개 겹칠 경우 맨 위의 feature 하나만 찾아서 처리함(수작업으로 처리? - distanceMatrix로 변경)
-        # popaddedpoten = model.joinattributesbylocation(input=potenSvrArea,
-        #                                                join=model.populationLayer,
-        #                                                joinfiels=[model.popIDField, model.popcntField, model.nodeIDfield],
-        #                                                output=out_path
-        #                                                )
-
-        popWithNodeaddedpoten = model.intersection(input=model.populationLayer,
-                                                   inputfields=[model.popIDField, model.popcntField, model.nodeIDfield],
-                                                   inputonlyseleceted=False,
-                                                   overlay=potenSvrArea,
-                                                   overayprefix=overprefix,
-                                                   overlayer_fields=[model.potentialID, model.nodeIDfield],
-                                                   output=out_path
-                                                   )
+        overprefix = 'JN_'
+        popWithNodeaddedpoten = model.joinattributesbylocation(input=potenSvrArea,
+                                                               join=model.populationLayer,
+                                                               prefix=overprefix,
+                                                               joinfiels=[model.popcntField, model.nodeIDfield],
+                                                               output=out_path
+                                                               )
 
         # 해당 인구레이어는 잠재적레이어와 outter join 된 결과임
         if isinstance(popWithNodeaddedpoten, str):
@@ -955,18 +946,19 @@ class soc_locator_launcher:
         else:
             model.populationLayer = popWithNodeaddedpoten
 
-
         # 5-5 효율성 분석 : 잠재적 위치 분석 실행
         if self.feedback.isCanceled(): return None
         if self.debugging: self.setProgressMsg('잠재적 위치의 최단거리를 분석합니다.....')
-        relpotenID = overprefix + model.potentialID
-        if self.debugging: relpotenID = relpotenID[0: 10]      # shape file의 필드명 최대길이는 10자리 / 메모리에 있을때는 상관없음
 
-        relpotenNodeID = overprefix + model.nodeIDfield
-        if self.debugging: relpotenNodeID = relpotenNodeID[0:10] # shape file의 필드명 최대길이는 10자리 / 메모리에 있을때는 상관없음
+        # shape file의 필드명 최대길이는 10자리 / 메모리에 있을때는 상관없음
+        relpopNodeID = overprefix + model.nodeIDfield
+        if self.debugging: relpopNodeID = relpopNodeID[0:10]
+        popcntfield = overprefix + model.popcntField
+        if self.debugging: popcntfield = popcntfield[0: 10]
+
         # 각 잠재적 위치의 서비스 영역내 포함되는 인구수
-        potengpd = model.anal_efficiencyPotenSOC_network(relpotenID=relpotenID,
-                                                         relpotenNodeID=relpotenNodeID)
+        potengpd = model.anal_efficiencyPotenSOC_network(relpopNodeID=relpopNodeID,
+                                                         relpopcntfid=popcntfield)
 
         # 5-6 효율성 분석 결과 평가
         if self.feedback.isCanceled(): return None
@@ -974,11 +966,6 @@ class soc_locator_launcher:
         finallayer = model.make_efficiencyscore(output=self.parameters["OUTPUT"])
 
         return finallayer
-
-
-
-
-
 
 
     def execute_equity_in_network(self):

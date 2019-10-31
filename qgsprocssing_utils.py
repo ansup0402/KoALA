@@ -296,7 +296,7 @@ class qgsprocessUtils:
                       JOIN_FIELDS=joinfiels,
                       METHOD=method,     # 0 — (one-to-many), 1 — (one - to - one)
                       PREDICATE=predicate, # 0 — intersects, 1 — contains, 2 — equals, 3 — touches, 4 — overlaps, 5 — within, 6 — crosses
-                      prefix=prefix,
+                      PREFIX=prefix,
                       DISCARD_NONMATCHING=discardnomatching,
                       OUTPUT=output)
 
