@@ -288,6 +288,7 @@ class soc_locator_model:
                                             newfield=True,
                                             output=output)
 
+
     def createNodeEdgeInGraph(self):
 
         fnodes = []

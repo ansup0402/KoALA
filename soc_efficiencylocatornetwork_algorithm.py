@@ -279,12 +279,13 @@ class LivingSOCEfficiencynetworkAlgorithm(QgsProcessingAlgorithm):
 
         return keyword
 
-
+    # todo [MAIN] check_valication
     def check_userinput(self, parameters):
 
         isvailid = True
 
         # to check used field name in model
+
         avoidedfield = {"NODE": ['ID'],
                          "LINK": ['ID'],
                          "POP": ['ACC_SCORE', 'NEW_DIS', 'A', 'EQ_SCORE'],
@@ -292,6 +293,11 @@ class LivingSOCEfficiencynetworkAlgorithm(QgsProcessingAlgorithm):
                          "CURSOC" : ['ID']
                          }
         # 지정된 필드명이 다른 레이어에 존재하는 경우
+
+        # qgis:refactorfields
+        # {'FIELDS_MAPPING': [{'expression': '"NEAR_FID"', 'length': 10, 'name': 'NEAR_FID', 'precision': 0, 'type': 4},
+        #                     {'expression': '"pop_all"', 'length': 18, 'name': 'pop_all', 'precision': 11, 'type': 6}],
+        #  'INPUT': '/Users/song-ansup/Desktop/KoALA_data/logfile/cliped_pop.shp', 'OUTPUT': 'TEMPORARY_OUTPUT'}
 
 
         # 한글 필드명 체크

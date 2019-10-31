@@ -169,6 +169,7 @@ class LivingSOCEfficiencystraightAlgorithm(QgsProcessingAlgorithm):
 
         return keyword
 
+    # todo check_valication
     def check_userinput(self, parameters):
 
         isvailid = True
