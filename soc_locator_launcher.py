@@ -1046,6 +1046,7 @@ class soc_locator_launcher:
                                           onlyselected=self.parameters['IN_LIVINGAREA_ONLYSELECTED'],
                                           overlay=boundary,
                                           output=out_path)
+
         # todo 불필요한 필드 값 제거(IN_LIVINGAREA)
         out_path = ''
         if self.debugging: out_path = os.path.join(self.workpath, 'cliped_living2.shp')
@@ -1232,7 +1233,7 @@ class soc_locator_launcher:
         #
         #
         ################# [5 단계] 형평성 분석(네트워크) #################
-        self.setProgressMsg('[5 단계] 형평성 분석(베트워크)......')
+        self.setProgressMsg('[5 단계] 형평성 분석(네트워크)......')
         # 5-1 형평성 분석 : 기존 생활 SOC 시설
         if self.feedback.isCanceled(): return None
         if self.debugging: self.setProgressMsg('기존 SOC 시설의 최단거리를 분석합니다.....')

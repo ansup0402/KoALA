@@ -291,7 +291,8 @@ class soc_locator_model:
     def deleteFields(self, input, requredfields=[], output=None):
 
         # copy
-        inputsrc = QgsVectorLayer(input.source(), input.name(), input.providerType())
+        # inputsrc = QgsVectorLayer(input.source(), input.name(), input.providerType())
+        inputsrc = input
 
         fields = inputsrc.dataProvider().fields()
 
@@ -301,7 +302,8 @@ class soc_locator_model:
         toDelete = []
         for idx in range(fields.count()):
             name = fields.field(idx).name()
-
+            # 최소 필드하나만은 남김
+            # if not (len(notDelete) == 0 and idx == 0):
             if not name.upper() in notDelete:
                 toDelete.append(idx)
 
@@ -311,6 +313,7 @@ class soc_locator_model:
             if bsuccess:
                 inputsrc.updateFields()
                 inputsrc.commitChanges()
+
             else:
                 inputsrc.rollback()
 
@@ -610,6 +613,7 @@ class soc_locator_model:
         totalcnt = tmppoplayer.featureCount()
 
         if self.debugging: self.setProgressSubMsg("tmppoplayer count : {}".format(totalcnt))
+
         for feature in tmppoplayer.getFeatures():
             i += 1
             if self.feedback.isCanceled(): return None
@@ -833,7 +837,6 @@ class soc_locator_model:
 
     def anal_AllPotenSOC_network(self):
 
-
         tmppotenlayer = self.__potentiallayer
 
         potencnt = tmppotenlayer.featureCount()
@@ -866,7 +869,6 @@ class soc_locator_model:
                     dists.append(newdis)
                     calculatedNode[nodeid] = dists
 
-            # todo [오류] 실행모드 일 때 오류 발생 dists 값이 없나?
             self.__dfPop['NEW_DIS'] = pd.DataFrame({'NEW_DIS': dists})
 
             dfsumOfacc = self.__dfPop['ACC_SCORE'] + self.__dfPop['NEW_DIS']
@@ -990,6 +992,10 @@ class soc_locator_model:
         editstatus = finanallayer.commitChanges()
         if self.debugging: self.setProgressSubMsg("commit : %s" % str(editstatus))
 
+        if not self.debugging:
+            reqfiels = [finalKeyID, 'AC_GRADE']
+            finanallayer = self.deleteFields(input=finanallayer, requredfields=reqfiels)
+
         if output is None:
             if self.debugging: self.setProgressSubMsg("output is none")
             resultlayer = finanallayer
@@ -1084,7 +1090,7 @@ class soc_locator_model:
         # 불필요한 필드 제거
         if not self.debugging:
             reqfiels = [self.__potentialID, 'EQ_GRADE']
-            finanallayer = self.deleteFields(input=finanallayer, requredfields=[])
+            finanallayer = self.deleteFields(input=finanallayer, requredfields=reqfiels)
 
         if output is None:
             resultlayer = finanallayer
@@ -1415,6 +1421,10 @@ class soc_locator_model:
             finanallayer.updateFeature(feature)
 
         finanallayer.commitChanges()
+
+        if not self.debugging:
+            reqfiels = [finalKeyID, 'EF_GRADE']
+            finanallayer = self.deleteFields(input=finanallayer, requredfields=reqfiels)
 
         if output is None:
             resultlayer = finanallayer
