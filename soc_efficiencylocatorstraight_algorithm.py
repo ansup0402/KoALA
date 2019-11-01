@@ -169,9 +169,8 @@ class LivingSOCEfficiencystraightAlgorithm(QgsProcessingAlgorithm):
 
         return keyword
 
-    # todo check_valication
     def check_userinput(self, parameters):
-
+        # 사용자가 자주 실수하는 부분 파악하여 해당 함수 완성 할 것(노드, 링크 관계, PK필드 누락 등)
         isvailid = True
         return isvailid
 

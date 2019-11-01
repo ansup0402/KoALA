@@ -181,24 +181,10 @@ class LivingSOCAccessibilitystraightAlgorithm(QgsProcessingAlgorithm):
 
         return keyword
 
-    # todo check_valication
     def check_userinput(self, parameters):
-
-        # isvailid = False
-        #
-        #
-        #
-        # # 한글필드 체크,
-        # # 특수필드들 다른 레이어에 중복된것이 있는지 체크
-        # # 다른 필드에 NODE_ID 생성할떄 도일한 필드타입으로 int >< double 다름
-        # # 링크에 없는 NODE가 있음 -> 노드를 내부적으로 만들어 줄까?? 아님 링크로 만들까? 아님 체크할까???
-        # # NODE_ID는 String으로
-        # 금칙 필드 ID 지정
-        # if networkmode == 0:
-        #     pass
-        #
-        # return isvailid
-        pass
+        # 사용자가 자주 실수하는 부분 파악하여 해당 함수 완성 할 것(노드, 링크 관계, PK필드 누락 등)
+        isvailid = True
+        return isvailid
 
     def processAlgorithm(self, parameters, context, feedback):
 

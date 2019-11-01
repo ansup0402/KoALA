@@ -30,7 +30,6 @@ class qgsprocessUtils:
         if output is None or output == '': output = 'TEMPORARY_OUTPUT'
         algname = 'native:multiringconstantbuffer'
 
-        # self.feedback.pushInfo(str(type(input)))
         inputsource = input
         if onlyselected:
             inputsource = QgsProcessingFeatureSourceDefinition(input, True)
@@ -100,8 +99,6 @@ class qgsprocessUtils:
         algname = 'qgis:addfieldtoattributestable'
 
         inputsource = input
-        # if onlyselected:
-        #     inputsource = QgsProcessingFeatureSourceDefinition(input, True)
 
         params = dict(INPUT=inputsource,
                       FIELD_NAME=fid,
@@ -120,8 +117,6 @@ class qgsprocessUtils:
         algname = 'qgis:fieldcalculator'
 
         inputsource = input
-        # if onlyselected:
-        #     inputsource = QgsProcessingFeatureSourceDefinition(input, True)
 
         params = dict(INPUT=inputsource,
                       FIELD_NAME=fid,
@@ -201,12 +196,6 @@ class qgsprocessUtils:
                       OUTPUT=output)
 
         return self.run_algprocessing(algname=algname, params=params)['OUTPUT']
-
-
-        # {'ALL_PARTS': False,
-        #  'INPUT': '/Users/ansup0402/Library/Application Support/QGIS/QGIS3/profiles/default/python/plugins/soc_locator/data/pop_102082.shp',
-        #  'OUTPUT': 'TEMPORARY_OUTPUT'}
-
 
 
     def nearesthubpoints(self, input, onlyselected, sf_hub, hubfield, output='TEMPORARY_OUTPUT'):
@@ -300,9 +289,6 @@ class qgsprocessUtils:
                       DISCARD_NONMATCHING=discardnomatching,
                       OUTPUT=output)
 
-        # {'DISCARD_NONMATCHING': False, 'INPUT': '/Users/song-ansup/Desktop/KoALA_data/logfile/popenSvrArea.shp',
-        #  'JOIN': '/Users/song-ansup/Desktop/KoALA_data/logfile/popremovedCurSOC.shp', 'JOIN_FIELDS': ['pop_all'],
-        #  'METHOD': 0, 'OUTPUT': 'TEMPORARY_OUTPUT', 'PREDICATE': [0], 'PREFIX': ''}
         return self.run_algprocessing(algname=algname, params=params)['OUTPUT']
 
     def joinattributetable(self, input1, input1onlyselected, input2, input2onlyselected, field1, field2,
@@ -398,6 +384,20 @@ class qgsprocessUtils:
 
         return self.run_algprocessing(algname=algname, params=params)['OUTPUT']
 
+    # 테스트 되지 않음 함수임
+    def refactorfields(self, input , onlyselected, refieldmapping, output='TEMPORARY_OUTPUT'):
+      # qgis:refactorfields
+      # {'FIELDS_MAPPING': [{'expression': '"NEAR_FID"', 'length': 10, 'name': 'NEAR_FID', 'precision': 0, 'type': 4},
+      #                     {'expression': '"pop_all"', 'length': 18, 'name': 'pop_all', 'precision': 11, 'type': 6}],
+      #  'INPUT': '/Users/song-ansup/Desktop/KoALA_data/logfile/cliped_pop.shp', 'OUTPUT': 'TEMPORARY_OUTPUT'}
+        if output is None or output == '': output = 'TEMPORARY_OUTPUT'
+        algname = "qgis:refactorfields"
+        if onlyselected: inputsource = QgsProcessingFeatureSourceDefinition(input, True)
+
+        params = dict(INPUT=inputsource,
+                      FIELDS_MAPPING=refieldmapping,
+                      OUTPUT=output)
+        return self.run_algprocessing(algname=algname, params=params)['OUTPUT']
 
 
     def writeAsVectorLayer(self, layername):

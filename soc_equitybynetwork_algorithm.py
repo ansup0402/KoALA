@@ -292,33 +292,9 @@ class LivingSOCEquityNetworkAlgorithm(QgsProcessingAlgorithm):
 
         return keyword
 
-    # todo check_valication
     def check_userinput(self, parameters):
-
+        # 사용자가 자주 실수하는 부분 파악하여 해당 함수 완성 할 것(노드, 링크 관계, PK필드 누락 등)
         isvailid = True
-
-        # to check used field name in model
-        avoidedfield = {"NODE": ['ID'],
-                         "LINK": ['ID'],
-                         "POP": ['ACC_SCORE', 'NEW_DIS', 'A', 'EQ_SCORE'],
-                         "LIVING": ['ID'],
-                         "CURSOC" : ['ID']
-                         }
-        # 지정된 필드명이 다른 레이어에 존재하는 경우
-
-
-        # 한글 필드명 체크
-
-        # 레이어 조인시 중복될 여지가 있는 필드명 체크
-
-
-        # 필드 값 유효성 체크
-            # None 체크 : NODE ID, SPEED
-            # Node Key 중복 값 체크
-
-        # 링크에 없는 노드....(랜덤하게 10%만 체크)
-
-
         return isvailid
 
 

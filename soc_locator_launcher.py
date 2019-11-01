@@ -1005,6 +1005,7 @@ class soc_locator_launcher:
                                         onlyselected=self.parameters['IN_NODE_ONLYSELECTED'],
                                         overlay=boundary,
                                         output=out_path)
+
         if isinstance(clipednode, str):
             model.nodelayer = model.writeAsVectorLayer(clipednode)
         else:
@@ -1045,6 +1046,15 @@ class soc_locator_launcher:
                                           onlyselected=self.parameters['IN_LIVINGAREA_ONLYSELECTED'],
                                           overlay=boundary,
                                           output=out_path)
+        # todo 불필요한 필드 값 제거(IN_LIVINGAREA)
+        out_path = ''
+        if self.debugging: out_path = os.path.join(self.workpath, 'cliped_living2.shp')
+        if isinstance(clipedliving, str):
+            tmplyr = model.writeAsVectorLayer(clipedliving)
+        else:
+            tmplyr = clipedliving
+        clipedliving = model.deleteFields(input=tmplyr, requredfields=[], output=out_path)
+
 
         # 1-5 분석 지역 데이터 추출 : 인구데이터
         if self.feedback.isCanceled(): return None
@@ -1055,6 +1065,17 @@ class soc_locator_launcher:
                                        overlay=boundary,
                                        output=out_path)
 
+
+        # todo 불필요한 필드 값 제거(IN_POP)
+        out_path = ''
+        if self.debugging: out_path = os.path.join(self.workpath, 'cliped_pop2.shp')
+        if isinstance(clipedpop, str):
+            tmplyr = model.writeAsVectorLayer(clipedpop)
+        else:
+            tmplyr = clipedpop
+        clipedpop = model.deleteFields(input=tmplyr, requredfields=[self.parameters['IN_POP_CNTFID']], output=out_path)
+        #
+
         # 1-6 분석 지역 데이터 추출 : 기존 생활 SOC 시설
         if self.feedback.isCanceled(): return None
         out_path = ''
@@ -1063,6 +1084,19 @@ class soc_locator_launcher:
                                           onlyselected=self.parameters['IN_CURSOC_ONLYSELECTED'],
                                           overlay=boundary,
                                           output=out_path)
+
+        # todo 불필요한 필드 값 제거(IN_CURSOC)
+        out_path = ''
+        if self.debugging: out_path = os.path.join(self.workpath, 'cliped_curSOC2.shp')
+        if isinstance(clipedCurSOC, str):
+            tmplyr = model.writeAsVectorLayer(clipedCurSOC)
+        else:
+            tmplyr = clipedCurSOC
+        clipedCurSOC = model.deleteFields(input=tmplyr, requredfields=[], output=out_path)
+        #
+        #
+        #
+        #
 
         # 5. 기존시설 노드 찾기
         if self.feedback.isCanceled(): return None
@@ -1142,6 +1176,9 @@ class soc_locator_launcher:
                                         onlyselected=False,
                                         overlay=model.boundary,
                                         output=out_path)
+
+
+
 
         if isinstance(clipedgrid, str):
             grid = model.writeAsVectorLayer(clipedgrid)

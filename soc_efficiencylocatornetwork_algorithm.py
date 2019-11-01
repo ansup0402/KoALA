@@ -279,41 +279,9 @@ class LivingSOCEfficiencynetworkAlgorithm(QgsProcessingAlgorithm):
 
         return keyword
 
-    # todo [MAIN] check_valication
     def check_userinput(self, parameters):
-
+        # 사용자가 자주 실수하는 부분 파악하여 해당 함수 완성 할 것
         isvailid = True
-
-        # to check used field name in model
-
-        avoidedfield = {"NODE": ['ID'],
-                         "LINK": ['ID'],
-                         "POP": ['ACC_SCORE', 'NEW_DIS', 'A', 'EQ_SCORE'],
-                         "LIVING": ['ID'],
-                         "CURSOC" : ['ID']
-                         }
-        # 지정된 필드명이 다른 레이어에 존재하는 경우
-
-        # qgis:refactorfields
-        # {'FIELDS_MAPPING': [{'expression': '"NEAR_FID"', 'length': 10, 'name': 'NEAR_FID', 'precision': 0, 'type': 4},
-        #                     {'expression': '"pop_all"', 'length': 18, 'name': 'pop_all', 'precision': 11, 'type': 6}],
-        #  'INPUT': '/Users/song-ansup/Desktop/KoALA_data/logfile/cliped_pop.shp', 'OUTPUT': 'TEMPORARY_OUTPUT'}
-
-
-        # 한글 필드명 체크
-
-        # 레이어 조인시 중복될 여지가 있는 필드명 체크
-
-
-        # 필드 값 유효성 체크
-            # None 체크 : NODE ID, SPEED
-            # Node Key 중복 값 체크
-
-        # 링크에 없는 노드....(랜덤하게 10%만 체크)
-
-
-
-
         return isvailid
 
 

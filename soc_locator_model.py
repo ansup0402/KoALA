@@ -288,6 +288,38 @@ class soc_locator_model:
                                             newfield=True,
                                             output=output)
 
+    def deleteFields(self, input, requredfields=[], output=None):
+
+        # copy
+        inputsrc = QgsVectorLayer(input.source(), input.name(), input.providerType())
+
+        fields = inputsrc.dataProvider().fields()
+
+        notDelete = list(map(lambda x:x.upper(),requredfields))
+        if self.debugging: self.setProgressSubMsg(str(notDelete))
+
+        toDelete = []
+        for idx in range(fields.count()):
+            name = fields.field(idx).name()
+
+            if not name.upper() in notDelete:
+                toDelete.append(idx)
+
+        if len(toDelete) > 0:
+            editstatus = inputsrc.startEditing()
+            bsuccess = inputsrc.dataProvider().deleteAttributes(toDelete)
+            if bsuccess:
+                inputsrc.updateFields()
+                inputsrc.commitChanges()
+            else:
+                inputsrc.rollback()
+
+        if bsuccess:
+            return self.vectoclayer2output(input=inputsrc, output=output)
+        else:
+            self.setProgressSubMsg(">> 필드 삭제 실패")
+            return None
+
 
     def createNodeEdgeInGraph(self):
 
@@ -834,6 +866,7 @@ class soc_locator_model:
                     dists.append(newdis)
                     calculatedNode[nodeid] = dists
 
+            # todo [오류] 실행모드 일 때 오류 발생 dists 값이 없나?
             self.__dfPop['NEW_DIS'] = pd.DataFrame({'NEW_DIS': dists})
 
             dfsumOfacc = self.__dfPop['ACC_SCORE'] + self.__dfPop['NEW_DIS']
@@ -1046,6 +1079,12 @@ class soc_locator_model:
             finanallayer.updateFeature(feature)
 
         finanallayer.commitChanges()
+
+
+        # 불필요한 필드 제거
+        if not self.debugging:
+            reqfiels = [self.__potentialID, 'EQ_GRADE']
+            finanallayer = self.deleteFields(input=finanallayer, requredfields=[])
 
         if output is None:
             resultlayer = finanallayer
