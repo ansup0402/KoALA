@@ -1446,7 +1446,7 @@ class soc_locator_model:
                 if efscore == 0:
                     efscore = 0.00000001
             except:
-                # 잠재적의 서비스 영역 안에 인구 Feature가 하나도 검색되지 않은 경우 
+                # 잠재적의 서비스 영역 안에 인구 Feature가 하나도 검색되지 않은 경우
                 efscore = 0.00000001
                 efgrade = nullvalgrade
 
