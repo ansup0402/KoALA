@@ -51,4 +51,4 @@ License
 
 Gallery
 ------------------------------
-![screenshot](./resources/gallery01.png?width=800)
+![screenshot](img/gallery01.png?width=800)
