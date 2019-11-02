@@ -4,6 +4,10 @@ import pandas as pd
 import numpy as np
 from qgis.core import QgsVectorLayer
 
+from processing.core.Processing import Processing
+Processing.initialize()
+import processing
+
 
 class soc_locator_model:
 
@@ -288,8 +292,36 @@ class soc_locator_model:
                                             newfield=True,
                                             output=output)
 
-    def deleteFields(self, input, requredfields=[], output=None):
+    def deleteFields(self, input, onlyselected=False, requredfields=[], output=None):
+        inputsrc  = None
+        if isinstance(input, str):
+            inputsrc = self.writeAsVectorLayer(input)
+        else:
+            inputsrc  = input
 
+        notDelete = list(map(lambda x: x.upper(), requredfields))
+
+        fields = inputsrc.dataProvider().fields()
+        remappings = []
+
+        for idx in range(fields.count()):
+            name = fields.field(idx).name()
+            length = fields.field(idx).length()
+            precision = fields.field(idx).precision()
+            ftype = fields.field(idx).type()
+            remap = {}
+            if name.upper() in notDelete:
+                remap['expression'] = name
+                remap['name'] = name
+                remap['type'] = ftype
+                remap['length'] = length
+                remap['precision'] = precision
+                remappings.append(remap)
+
+        return self.qgsutils.refactorfields(input=input, onlyselected=onlyselected, refieldmapping=remappings, output=output)
+
+    # 해당 함수는 input과 output에 따라 오류 테스트가 더 필요함(그래서 현재 deleteFields를 사용함)
+    def deleteFields2(self, input, requredfields=[], output=None):
         # copy
         # inputsrc = QgsVectorLayer(input.source(), input.name(), input.providerType())
         inputsrc = input
@@ -302,11 +334,10 @@ class soc_locator_model:
         toDelete = []
         for idx in range(fields.count()):
             name = fields.field(idx).name()
-            # 최소 필드하나만은 남김
-            # if not (len(notDelete) == 0 and idx == 0):
             if not name.upper() in notDelete:
                 toDelete.append(idx)
 
+        completedlayer = None
         if len(toDelete) > 0:
             editstatus = inputsrc.startEditing()
             bsuccess = inputsrc.dataProvider().deleteAttributes(toDelete)
@@ -314,15 +345,14 @@ class soc_locator_model:
                 inputsrc.updateFields()
                 inputsrc.commitChanges()
 
+                completedlayer = self.vectoclayer2output(input=inputsrc, output=output)
             else:
+                self.setProgressSubMsg(">> 필드 삭제 실패")
                 inputsrc.rollback()
-
-        if bsuccess:
-            return self.vectoclayer2output(input=inputsrc, output=output)
         else:
-            self.setProgressSubMsg(">> 필드 삭제 실패")
-            return None
+            completedlayer = inputsrc
 
+        return completedlayer
 
     def createNodeEdgeInGraph(self):
 
@@ -524,7 +554,10 @@ class soc_locator_model:
     def anal_AllCurSOC_straight(self):
 
         tmpoutput = ''
-        if (self.debugging): tmpoutput = os.path.join(self.workpath, 'AllCurSOC1.shp')
+        if self.debugging:
+            tmpoutput = os.path.join(self.workpath, 'AllCurSOC1.shp')
+            self.setProgressSubMsg("__currentSOClayer : %s" % str(self.__currentSOClayer.featureCount()))
+
         matrixDisLayer = self.getPopdistmatrixDataLayer(targetlayer=self.__currentSOClayer,
                                                         targetlayerID=self.__currentSOCID,
                                                         output=tmpoutput)
@@ -994,7 +1027,9 @@ class soc_locator_model:
 
         if not self.debugging:
             reqfiels = [finalKeyID, 'AC_GRADE']
+            self.setProgressSubMsg("start finanallayer type is %s" % str(type(finanallayer)))
             finanallayer = self.deleteFields(input=finanallayer, requredfields=reqfiels)
+            self.setProgressSubMsg("end finanallayer type is %s" % str(type(finanallayer)))
 
         if output is None:
             if self.debugging: self.setProgressSubMsg("output is none")

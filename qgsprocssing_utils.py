@@ -314,11 +314,11 @@ class qgsprocessUtils:
 
         return self.run_algprocessing(algname=algname, params=params)['OUTPUT']
 
-    def selectbyexpression(self, input, expression):
+    def selectbyexpression(self, input, expression, method=0):
         algname = "qgis:selectbyexpression"
         params = dict(INPUT=input,
                       EXPRESSION=expression,
-                      METHOD=0)
+                      METHOD=method)
         return self.run_algprocessing(algname=algname, params=params)['OUTPUT']
 
     def saveselectedfeatrues(self, input, output='TEMPORARY_OUTPUT'):
@@ -384,7 +384,6 @@ class qgsprocessUtils:
 
         return self.run_algprocessing(algname=algname, params=params)['OUTPUT']
 
-    # 테스트 되지 않음 함수임
     def refactorfields(self, input , onlyselected, refieldmapping, output='TEMPORARY_OUTPUT'):
       # qgis:refactorfields
       # {'FIELDS_MAPPING': [{'expression': '"NEAR_FID"', 'length': 10, 'name': 'NEAR_FID', 'precision': 0, 'type': 4},
@@ -392,6 +391,8 @@ class qgsprocessUtils:
       #  'INPUT': '/Users/song-ansup/Desktop/KoALA_data/logfile/cliped_pop.shp', 'OUTPUT': 'TEMPORARY_OUTPUT'}
         if output is None or output == '': output = 'TEMPORARY_OUTPUT'
         algname = "qgis:refactorfields"
+
+        inputsource = input
         if onlyselected: inputsource = QgsProcessingFeatureSourceDefinition(input, True)
 
         params = dict(INPUT=inputsource,
