@@ -7,6 +7,6 @@
 /.idea/
 /test/
 /__pycache__/
-debugmode
+debugmode*
 test_hepler.py
 test_module.py
