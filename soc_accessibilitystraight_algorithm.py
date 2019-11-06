@@ -76,7 +76,7 @@ class LivingSOCAccessibilitystraightAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.IN_CURSOC,
-                self.tr('❖ 기존 생활SOC 시설(POINT)'),
+                '❖ ' + self.tr('Located Neighborhood Facility'),
                 [QgsProcessing.TypeVectorPoint],
                 optional=debugging)
         )
@@ -85,7 +85,7 @@ class LivingSOCAccessibilitystraightAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.IN_LIVINGAREA,
-                self.tr('❖ 세생활권(Polygon)'),
+                '❖ ' + self.tr('Sub-Neighborhood Unit'),
                 [QgsProcessing.TypeVectorPolygon],
                 optional=debugging)
         )
@@ -94,7 +94,7 @@ class LivingSOCAccessibilitystraightAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.IN_POP,
-                self.tr('❖ 거주 인구(POINT)'),
+                '❖ ' + self.tr('Resident Population'),
                 [QgsProcessing.TypeVectorPoint],
                 optional=debugging)
         )
@@ -103,7 +103,7 @@ class LivingSOCAccessibilitystraightAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterField(
                 self.IN_POP_CNTFID,
-                self.tr('인구수 필드'),
+                self.tr('Population Field'),
                 None,
                 self.IN_POP,
                 QgsProcessingParameterField.Numeric,
@@ -114,7 +114,7 @@ class LivingSOCAccessibilitystraightAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.IN_SITE,
-                self.tr('❖ 분석 대상지 선택(Polygon)'),
+                '❖ ' + self.tr('Analysis Site'),
                 [QgsProcessing.TypeVectorPolygon],
                 optional=debugging)
         )
@@ -123,7 +123,7 @@ class LivingSOCAccessibilitystraightAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterNumber(
                 self.IN_LIMIT_DIST,
-                self.tr('5. 유효 서비스 범위(m) : \'0\'을 입력할 경우 유효 서비스 범위를 대상지역 전체로 간주'),
+                '❖ ' + self.tr('Facility Effective Service Coverage : If you input 0, it is regarded as the whole area'),
                 QgsProcessingParameterNumber.Integer,
                 1000, False, 0, 1000000)        #디폴트, 옵션, 미니멈, 맥시멈
         )
@@ -132,7 +132,7 @@ class LivingSOCAccessibilitystraightAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterNumber(
                 self.IN_CALSSIFYNUM,
-                self.tr('❖ 분석 결과 등급 구간 수 : 설정 가능 구간(2 ~ 100개 구간)'),
+                '❖ ' + self.tr('Analysis result grade number of sections: configurable range (2 ~ 100)'),
                 QgsProcessingParameterNumber.Integer,
                 10, False, 2, 100)  # 디폴트, 옵션, 미니멈, 맥시멈
         )
@@ -141,7 +141,7 @@ class LivingSOCAccessibilitystraightAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterVectorDestination(
                 self.OUTPUT,
-                self.tr('접근성 분석 결과(직선거리)')
+                self.tr('Accessibility Analysis Results(Euclidean)')
             )
         )
 
@@ -217,7 +217,7 @@ class LivingSOCAccessibilitystraightAlgorithm(QgsProcessingAlgorithm):
         formatting characters.
         """
         # return 'Accessibility Analysis Model'
-        return '접근성 분석(직선거리)'
+        return 'Accessibility Analysis(Euclidean)'
 
     def displayName(self):
         """
@@ -243,7 +243,7 @@ class LivingSOCAccessibilitystraightAlgorithm(QgsProcessingAlgorithm):
         """
         # return 'Life-Friendly SOC Locator'
         # return 'Priority Supply Area Analysis'
-        return '생활SOC 접근성 분석'
+        return 'Neighborhood Facility Accessibility Analysis'
     def tr(self, string):
         return QCoreApplication.translate('koala', string)
 

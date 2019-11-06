@@ -103,7 +103,7 @@ class LivingSOCLocatorProvider(QgsProcessingProvider):
         This string should be short (e.g. "Lastools") and localised.
         """
         # return self.tr('Life-Friendly SOC Analysis Model')
-        return self.tr('Neighborhood facility Analysis Toolkit(KoALA)')
+        return self.tr('Neighborhood Facility Analysis Toolkit(KoALA)')
 
     def tr(self, string):
         return QCoreApplication.translate('koala', string)

@@ -85,7 +85,7 @@ class LivingSOCEquityNetworkAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.IN_CURSOC,
-                "❖ " + self.tr('located neighborhood facility'),
+                "❖ " + self.tr('Located Neighborhood Facility'),
                 [QgsProcessing.TypeVectorPoint],
                 optional=debugging)
         )
@@ -95,16 +95,16 @@ class LivingSOCEquityNetworkAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.IN_LIVINGAREA,
-                self.tr('❖ 세생활권(Polygon)'),
+                "❖ " + self.tr('Sub-Neighborhood Unit'),
                 [QgsProcessing.TypeVectorPolygon],
                 optional=debugging)
         )
 
-        # 세생활권 인구 레이어
+        # 거주 인구 레이어
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.IN_POP,
-                self.tr('❖ 거주인구(POINT)'),
+                "❖ " + self.tr('Resident Population'),
                 [QgsProcessing.TypeVectorPoint],
                 optional=debugging)
         )
@@ -113,7 +113,7 @@ class LivingSOCEquityNetworkAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterField(
                 self.IN_POP_CNTFID,
-                self.tr('인구수 필드'),
+                self.tr('Population Field'),
                 None,
                 self.IN_POP,
                 QgsProcessingParameterField.Numeric,
@@ -124,7 +124,7 @@ class LivingSOCEquityNetworkAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.IN_SITE,
-                self.tr('❖ 분석 대상지 선택(Polygon)'),
+                "❖ " + self.tr('Analysis Site'),
                 [QgsProcessing.TypeVectorPolygon],
                 optional=debugging)
         )
@@ -132,7 +132,7 @@ class LivingSOCEquityNetworkAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterNumber(
                 self.IN_GRID_SIZE,
-                self.tr('❖ 최소 분석 크기(Cell size : m)'),
+                "❖ " + self.tr('Analysis Unit(Cell size : m)'),
                 QgsProcessingParameterNumber.Integer,
                 1000, False, 100, 10000)        #디폴트, 옵션, 미니멈, 맥시멈
         )
@@ -141,7 +141,7 @@ class LivingSOCEquityNetworkAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterNumber(
                 self.IN_LIMIT_DIST,
-                self.tr('❖ 유효 서비스 범위(m) : \'0\'을 입력할 경우 유효 서비스 범위를 대상지역 전체로 간주'),
+                "❖ " + self.tr('Facility Effective Service Coverage : If you input 0, it is regarded as the whole area'),
                 QgsProcessingParameterNumber.Integer,
                 1000, False, 0, 1000000)        #디폴트, 옵션, 미니멈, 맥시멈
         )
@@ -151,7 +151,7 @@ class LivingSOCEquityNetworkAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.IN_NODE,
-                self.tr('❖ 노드 레이어(POINT)'),
+                "❖ " + self.tr('Node Layer'),
                 [QgsProcessing.TypeVectorPoint],
                 optional=debugging)
         )
@@ -159,7 +159,7 @@ class LivingSOCEquityNetworkAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterField(
                 self.IN_NODE_ID,
-                self.tr('노드ID 필드'),
+                self.tr('Node ID FIELD'),
                 None,
                 self.IN_NODE,
                 QgsProcessingParameterField.Any,
@@ -170,7 +170,7 @@ class LivingSOCEquityNetworkAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.IN_LINK,
-                self.tr('❖ 링크 레이어(LINE)'),
+                "❖ " + self.tr('Link Layer'),
                 [QgsProcessing.TypeVectorLine],
                 optional=debugging)
         )
@@ -178,8 +178,8 @@ class LivingSOCEquityNetworkAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterEnum(
                 self.IN_LINK_TYPE,
-                self.tr('링크 레이어 유형'),
-                options=[self.tr('단방향'), self.tr('양방향')],
+                self.tr('Network direction'),
+                options=[self.tr('One-way'), self.tr('Bidirectional')],
                 defaultValue=1,
                 optional=debugging)
         )
@@ -188,7 +188,7 @@ class LivingSOCEquityNetworkAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterField(
                 self.IN_LINK_FNODE,
-                self.tr('기점 노드 필드'),
+                self.tr('Origin field'),
                 None,
                 self.IN_LINK,
                 QgsProcessingParameterField.Any,
@@ -198,7 +198,7 @@ class LivingSOCEquityNetworkAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterField(
                 self.IN_LINK_TNODE,
-                self.tr('종점 노드 필드'),
+                self.tr('Destination'),
                 None,
                 self.IN_LINK,
                 QgsProcessingParameterField.Any,
@@ -208,7 +208,7 @@ class LivingSOCEquityNetworkAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterField(
                 self.IN_LINK_LENGTH,
-                self.tr('링크 길이 필드'),
+                self.tr('Link Length Field'),
                 None,
                 self.IN_LINK,
                 QgsProcessingParameterField.Numeric,
@@ -218,7 +218,7 @@ class LivingSOCEquityNetworkAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterField(
                 self.IN_LINK_SPEED,
-                self.tr('최대 속도 필드 : 속도 값이 0인 경우 최소 값으로 대체 됩니다.'),
+                self.tr('Speed Field : If the speed value is zero, it is replaced by the minimum value'),
                 None,
                 self.IN_LINK,
                 QgsProcessingParameterField.Numeric,
@@ -230,7 +230,7 @@ class LivingSOCEquityNetworkAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterNumber(
                 self.IN_CALSSIFYNUM,
-                self.tr('❖ 분석 결과 등급 구간 수 : 설정 가능 구간(2 ~ 100개 구간)'),
+                "❖ " + self.tr('Analysis result grade number of sections: configurable range (2 ~ 100)'),
                 QgsProcessingParameterNumber.Integer,
                 10, False, 2, 100)  # 디폴트, 옵션, 미니멈, 맥시멈
         )
@@ -239,7 +239,7 @@ class LivingSOCEquityNetworkAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterVectorDestination(
                 self.OUTPUT,
-                self.tr('형평성 분석 결과(네트워크)')
+                self.tr('Equity Analysis Results(Network)')
             )
         )
 
@@ -358,7 +358,7 @@ class LivingSOCEquityNetworkAlgorithm(QgsProcessingAlgorithm):
         """
         # return 'Life-Friendly SOC Locator'
         # return 'Priority Supply Area Analysis'
-        return 'Neighborhood facility Priority Location Analysis'
+        return 'Neighborhood Facility Priority Location Analysis'
     def tr(self, string):
         return QCoreApplication.translate('koala', string)
 
