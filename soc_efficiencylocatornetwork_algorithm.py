@@ -50,6 +50,7 @@ from qgis.core import (QgsProcessing,
 
 import os
 import pathlib
+
 cur_dir = pathlib.Path(__file__).parent
 debugging = os.path.exists(os.path.join(cur_dir, 'debugmode'))
 if debugging:
@@ -370,11 +371,9 @@ class LivingSOCEfficiencynetworkAlgorithm(QgsProcessingAlgorithm):
         contain lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        # return 'Life-Friendly SOC Locator'
-        # return 'Priority Supply Area Analysis'
-        return '생활SOC 우선검토지역 분석'
+        return 'Neighborhood facility Priority Location Analysis'
     def tr(self, string):
-        return QCoreApplication.translate('Processing', string)
+        return QCoreApplication.translate('koala', string)
 
     def createInstance(self):
         return LivingSOCEfficiencynetworkAlgorithm()

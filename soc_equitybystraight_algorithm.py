@@ -157,7 +157,7 @@ class LivingSOCEquityStraightAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterVectorDestination(
                 self.OUTPUT,
-                self.tr('형평성 분석 결과(직선거리)')
+                self.tr('Equity Based Location Analysis(Euclidean)')
             )
         )
 
@@ -258,9 +258,9 @@ class LivingSOCEquityStraightAlgorithm(QgsProcessingAlgorithm):
         """
         # return 'Life-Friendly SOC Locator'
         # return 'Priority Supply Area Analysis'
-        return '생활SOC 우선검토지역 분석'
+        return 'Neighborhood facility Priority Location Analysis'
     def tr(self, string):
-        return QCoreApplication.translate('Processing', string)
+        return QCoreApplication.translate('koala', string)
 
     def createInstance(self):
         return LivingSOCEquityStraightAlgorithm()

@@ -30,6 +30,7 @@ __copyright__ = '(C) 2019 by Ansup'
 
 __revision__ = '$Format:%H$'
 
+from qgis.PyQt.QtCore import QSettings, QCoreApplication, QTranslator, qVersion
 from qgis.core import QgsProcessingProvider
 from .soc_equitybynetwork_algorithm import LivingSOCEquityNetworkAlgorithm
 from .soc_equitybystraight_algorithm import LivingSOCEquityStraightAlgorithm
@@ -40,6 +41,8 @@ from .soc_accessibilitystraight_algorithm import LivingSOCAccessibilitystraightA
 from .soc_efficiencylocatornetwork_algorithm import LivingSOCEfficiencynetworkAlgorithm
 from .soc_efficiencylocatorstraight_algorithm import LivingSOCEfficiencystraightAlgorithm
 
+import os
+
 class LivingSOCLocatorProvider(QgsProcessingProvider):
 
     def __init__(self):
@@ -47,6 +50,20 @@ class LivingSOCLocatorProvider(QgsProcessingProvider):
         Default constructor.
         """
         QgsProcessingProvider.__init__(self)
+
+        locale = QSettings().value('locale/userLocale')[0:2]
+        locale_path = os.path.join(
+            os.path.dirname(__file__),
+            'i18n',
+            'koala_{}.qm'.format(locale))
+
+        self.translator = None
+        if os.path.exists(locale_path):
+            self.translator = QTranslator()
+            self.translator.load(locale_path)
+
+        if qVersion() > '4.3.3':
+            QCoreApplication.installTranslator(self.translator)
 
     def unload(self):
         """
@@ -86,7 +103,10 @@ class LivingSOCLocatorProvider(QgsProcessingProvider):
         This string should be short (e.g. "Lastools") and localised.
         """
         # return self.tr('Life-Friendly SOC Analysis Model')
-        return self.tr('생활SOC 분석 툴킷')
+        return self.tr('Neighborhood facility Analysis Toolkit(KoALA)')
+
+    def tr(self, string):
+        return QCoreApplication.translate('koala', string)
 
     def icon(self):
         """

@@ -85,7 +85,7 @@ class LivingSOCEquityNetworkAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.IN_CURSOC,
-                self.tr('❖ 기존 생활SOC 시설(POINT)'),
+                "❖ " + self.tr('located neighborhood facility'),
                 [QgsProcessing.TypeVectorPoint],
                 optional=debugging)
         )
@@ -141,7 +141,7 @@ class LivingSOCEquityNetworkAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterNumber(
                 self.IN_LIMIT_DIST,
-                self.tr('6. 유효 서비스 범위(m) : \'0\'을 입력할 경우 유효 서비스 범위를 대상지역 전체로 간주'),
+                self.tr('❖ 유효 서비스 범위(m) : \'0\'을 입력할 경우 유효 서비스 범위를 대상지역 전체로 간주'),
                 QgsProcessingParameterNumber.Integer,
                 1000, False, 0, 1000000)        #디폴트, 옵션, 미니멈, 맥시멈
         )
@@ -332,7 +332,7 @@ class LivingSOCEquityNetworkAlgorithm(QgsProcessingAlgorithm):
         formatting characters.
         """
         # return 'Equity Location Model'
-        return '형평성 기준 분석(네트워크거리)'
+        return 'Equity Based Location Analysis(Network)'
 
     def displayName(self):
         """
@@ -358,9 +358,9 @@ class LivingSOCEquityNetworkAlgorithm(QgsProcessingAlgorithm):
         """
         # return 'Life-Friendly SOC Locator'
         # return 'Priority Supply Area Analysis'
-        return '생활SOC 우선검토지역 분석'
+        return 'Neighborhood facility Priority Location Analysis'
     def tr(self, string):
-        return QCoreApplication.translate('Processing', string)
+        return QCoreApplication.translate('koala', string)
 
     def createInstance(self):
         return LivingSOCEquityNetworkAlgorithm()

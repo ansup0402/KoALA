@@ -356,7 +356,7 @@ class LivingSOCAccessibilitynetworkAlgorithm(QgsProcessingAlgorithm):
         # return 'Priority Supply Area Analysis'
         return '생활SOC 접근성 분석'
     def tr(self, string):
-        return QCoreApplication.translate('Processing', string)
+        return QCoreApplication.translate('koala', string)
 
     def createInstance(self):
         return LivingSOCAccessibilitynetworkAlgorithm()

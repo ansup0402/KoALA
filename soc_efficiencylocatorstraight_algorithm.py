@@ -260,10 +260,10 @@ class LivingSOCEfficiencystraightAlgorithm(QgsProcessingAlgorithm):
         """
         # return 'Life-Friendly SOC Locator'
         # return 'Priority Supply Area Analysis'
-        return '생활SOC 우선검토지역 분석'
+        return 'Neighborhood facility Priority Location Analysis'
 
     def tr(self, string):
-        return QCoreApplication.translate('Processing', string)
+        return QCoreApplication.translate('koala', string)
 
     def createInstance(self):
         return LivingSOCEfficiencystraightAlgorithm()
