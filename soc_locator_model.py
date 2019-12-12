@@ -945,12 +945,12 @@ class soc_locator_model:
                                               flen=10,
                                               fprecision=8)
 
-        if self.debugging:
-            finanallayer = self.qgsutils.addField(input=finanallayer,
-                                         fid="AC_SCORE",
-                                         ftype=1,  # 0 — Integer, 1 — Float, 2 — String
-                                         flen=20,
-                                         fprecision=8)
+        # if self.debugging:
+        finanallayer = self.qgsutils.addField(input=finanallayer,
+                                     fid="AC_SCORE",
+                                     ftype=1,  # 0 — Integer, 1 — Float, 2 — String
+                                     flen=20,
+                                     fprecision=8)
 
 
         if isNetwork:
@@ -1017,7 +1017,8 @@ class soc_locator_model:
 
             # if self.debugging: self.setProgressSubMsg(str(eqscore))
 
-            if self.debugging: feature["AC_SCORE"] = eqscore
+            # if self.debugging:
+            feature["AC_SCORE"] = eqscore
             feature["AC_GRADE"] = eqgrade
 
             finanallayer.updateFeature(feature)
@@ -1057,12 +1058,12 @@ class soc_locator_model:
                                               ftype=0,  # 0 — Integer, 1 — Float, 2 — String
                                               flen=10,
                                               fprecision=8)
-        if self.debugging:
-            finanallayer = self.qgsutils.addField(input=finanallayer,
-                                                  fid="EQ_SCORE",
-                                                  ftype=1,  # 0 — Integer, 1 — Float, 2 — String
-                                                  flen=20,
-                                                  fprecision=8)
+        # if self.debugging:
+        finanallayer = self.qgsutils.addField(input=finanallayer,
+                                              fid="EQ_SCORE",
+                                              ftype=1,  # 0 — Integer, 1 — Float, 2 — String
+                                              flen=20,
+                                              fprecision=8)
         if isNetwork:
             finalKeyID = self.__nodeID
         else:
@@ -1124,7 +1125,8 @@ class soc_locator_model:
 
         # 불필요한 필드 제거
         if not self.debugging:
-            reqfiels = [self.__potentialID, 'EQ_GRADE']
+            # reqfiels = [self.__potentialID, 'EQ_GRADE']
+            reqfiels = [self.__potentialID]
             finanallayer = self.deleteFields(input=finanallayer, requredfields=reqfiels)
 
         if output is None:
@@ -1422,12 +1424,12 @@ class soc_locator_model:
                                               flen=10,
                                               fprecision=8)
 
-        if self.debugging:
-            finanallayer = self.qgsutils.addField(input=finanallayer,
-                                                  fid="EF_SCORE",
-                                                  ftype=1,  # 0 — Integer, 1 — Float, 2 — String
-                                                  flen=20,
-                                                  fprecision=8)
+        # if self.debugging:
+        finanallayer = self.qgsutils.addField(input=finanallayer,
+                                              fid="EF_SCORE",
+                                              ftype=1,  # 0 — Integer, 1 — Float, 2 — String
+                                              flen=20,
+                                              fprecision=8)
 
         i = 0
         finanallayer.startEditing()
@@ -1450,7 +1452,8 @@ class soc_locator_model:
                 efscore = 0.00000001
                 efgrade = nullvalgrade
 
-            if self.debugging: feature["EF_SCORE"] = efscore
+            # if self.debugging:
+            feature["EF_SCORE"] = efscore
             feature["EF_GRADE"] = int(efgrade)
 
             finanallayer.updateFeature(feature)
