@@ -644,6 +644,7 @@ class soc_locator_model:
 
         tmppoplayer = self.__populationLayer
         totalcnt = tmppoplayer.featureCount()
+        notfounddatacnt = 0
 
         if self.debugging: self.setProgressSubMsg("tmppoplayer count : {}".format(totalcnt))
 
@@ -663,6 +664,7 @@ class soc_locator_model:
                 if dis is None:
                     if self.debugging:
                         self.setProgressSubMsg("[NODE-%s] 해당 인구데이터의 %sm 이내에는 현재 생활SOC가 없습니다." % (str(popNodeid), str(self.cutoff)))
+                        notfounddatacnt += 1
 
                 calculatedNode[popNodeid] = dis
 
@@ -676,7 +678,11 @@ class soc_locator_model:
 
         self.__dfPop = pd.DataFrame(rawData)
 
-        if self.debugging: self.__dfPop.to_csv(os.path.join(self.workpath, 'analyze_fromAllCurSOC.csv'))
+        if self.debugging:
+            self.setProgressSubMsg("총 %s의 인구 데이터 중에 %s개의 인구데이터는 %sm 이내의 인근 생활 SOC를 찾지 못했습니다."
+                                   % (str(totalcnt), str(notfounddatacnt), str(self.cutoff))
+                                   )
+            self.__dfPop.to_csv(os.path.join(self.workpath, 'analyze_fromAllCurSOC.csv'))
 
         return self.__dfPop
 
@@ -817,8 +823,8 @@ class soc_locator_model:
         calculatedNode = {}
 
         i = 0
-        errcnt = 0
-        noerrcnt = 0
+        # errcnt = 0
+        # noerrcnt = 0
         for feature in tmppoplayer.getFeatures():
             i += 1
             if self.feedback.isCanceled(): return None
@@ -856,8 +862,8 @@ class soc_locator_model:
         self.__dfPop = pd.DataFrame(rawData)
 
         if self.debugging:
-            self.setProgressSubMsg("count of unsearchable node : %s" % str(errcnt))
-            self.setProgressSubMsg("count of success node : %s" % str(noerrcnt))
+            # self.setProgressSubMsg("count of unsearchable node : %s" % str(errcnt))
+            # self.setProgressSubMsg("count of success node : %s" % str(noerrcnt))
             # self.__logger.info("count of unsearchable node : %s" % str(errcnt))
             # self.__logger.info("count of success node : %s" % str(noerrcnt))
             tempexcel = os.path.join(self.workpath, 'anal_NeartestCurSOC_network.csv')
