@@ -969,27 +969,48 @@ class soc_locator_model:
 
 
         ###################### 등급 산정 부분 ######################
+        # 점수가 높을 수록 좋은 등급(낮은 숫자)
         scorefield = 'ACC_SCORE'
         step = 100 / self.__classify_count
-        # 접근성 분석은 +지표, 이부분 지표 성격에 따라 다름(+지표 or 0지표)
         classRange = [cls * step for cls in reversed(range(0, self.__classify_count + 1))]
         clsfy = np.nanpercentile(tmpdfPOP[scorefield], classRange, interpolation='linear')
-        # 접근성 분석은 +지표, 이부분 지표 성격에 따라 다름(+지표 or 0지표)
-        clsfy[len(clsfy) - 1] = tmpdfPOP[scorefield].min(skipna=True) - 1
-        clsfy[0] = tmpdfPOP[scorefield].max(skipna=True) + 1
 
-        if self.debugging: self.setProgressSubMsg("classify count : {}".format(len(clsfy)))
+        # + vs - 지표에 따라 아래 내용이 약간 달라짐
+        clsfy[0] = tmpdfPOP[scorefield].min(skipna=True) - 1
+        clsfy[len(clsfy) - 1] = tmpdfPOP[scorefield].max(skipna=True) + 1
 
-        grade = 0
+        # print(clsfy)
+
+        grade = self.__classify_count + 1
+        gradeval = None
         prevalue = None
+
         for gradeval in clsfy:
             if prevalue is not None:
                 if prevalue != gradeval:
                     # 접근성 분석은 +지표, 이부분 지표 성격에 따라 다름(+지표 or 0지표)
                     # print('{} > {} >= {}'.format(prevalue, i, gradeval))
-                    tmpdfPOP.loc[(prevalue > tmpdfPOP[scorefield]) & (tmpdfPOP[scorefield] >= gradeval), 'AC_GRADE'] = grade
+                    tmpdfPOP.loc[(prevalue < tmpdfPOP[scorefield]) & (tmpdfPOP[scorefield] <= gradeval), 'AC_GRADE'] = grade
+                    # print('{} 등급 : {} < AC_GRADE <= {}'.format(grade, prevalue, gradeval))
             prevalue = gradeval
-            grade += 1
+            grade -= 1
+
+        #
+        # clsfy[len(clsfy) - 1] = tmpdfPOP[scorefield].min(skipna=True) - 1
+        # clsfy[0] = tmpdfPOP[scorefield].max(skipna=True) + 1
+        #
+        # if self.debugging: self.setProgressSubMsg("classify count : {}".format(len(clsfy)))
+        #
+        # grade = 0
+        # prevalue = None
+        # for gradeval in clsfy:
+        #     if prevalue is not None:
+        #         if prevalue != gradeval:
+        #             # 접근성 분석은 +지표, 이부분 지표 성격에 따라 다름(+지표 or 0지표)
+        #             # print('{} > {} >= {}'.format(prevalue, i, gradeval))
+        #             tmpdfPOP.loc[(prevalue > tmpdfPOP[scorefield]) & (tmpdfPOP[scorefield] >= gradeval), 'AC_GRADE'] = grade
+        #     prevalue = gradeval
+        #     grade += 1
         ########################################################################################
 
         if self.debugging:
@@ -1078,30 +1099,37 @@ class soc_locator_model:
 
         dfScore = self.__dtFinalwithsScore
         ###################### 등급 산정 부분 ######################
+
+
         scorefield = 'EQ_SCORE'
         step = 100 / self.__classify_count
         # 접근성 분석은 +지표, 이부분 지표 성격에 따라 다름(+지표 or 0지표)
         classRange = [cls * step for cls in range(0, self.__classify_count + 1)]
         # ex) 100, 90, 80, 70, ... 10, 0
         clsfy = np.nanpercentile(dfScore[scorefield], classRange, interpolation='linear')
-        # 접근성 분석은 +지표, 이부분 지표 성격에 따라 다름(+지표 or 0지표)
+        # 값이 낮을 수록 좋은(낮은 숫자) 등급
         clsfy[0] = dfScore[scorefield].min(skipna=True) - 1
         clsfy[len(clsfy) - 1] = dfScore[scorefield].max(skipna=True) + 1
+
+        grade = 0
+        gradeval = None
+        prevalue = None
 
 
         if self.debugging: self.setProgressSubMsg("classify count : {}".format(len(clsfy)))
         if self.debugging: self.setProgressSubMsg("classify : {}".format(clsfy))
 
-        grade = 0
-        prevalue = None
+
         for gradeval in clsfy:
             if prevalue is not None:
                 if prevalue != gradeval:
                     # 접근성 분석은 +지표, 이부분 지표 성격에 따라 다름(+지표 or 0지표)
-                    # print('{} < {} <= {}'.format(prevalue, i, gradeval))
+                    # print('{} 등급 : {} < GRADE <= {}'.format(grade, prevalue, gradeval))
                     dfScore.loc[(prevalue < dfScore[scorefield]) & (dfScore[scorefield] <= gradeval), 'EQ_GRADE'] = grade
             prevalue = gradeval
             grade += 1
+
+
         ########################################################################################
         dictGrade = dict(zip(dfScore[finalKeyID].tolist(), dfScore['EQ_GRADE'].tolist()))
 
@@ -1393,33 +1421,39 @@ class soc_locator_model:
 
         dictScore = self.__dictFinalwithScore
         finalKeyID = self.__potentialID
-
         dfScore = self.__dtFinalwithsScore
+
         ###################### 등급 산정 부분 ######################
+        scorefield = 'EF_SCORE'
         step = 100 / self.__classify_count
-        # 접근성 분석은 +지표, 이부분 지표 성격에 따라 다름(+지표 or 0지표)
         classRange = [cls * step for cls in reversed(range(0, self.__classify_count + 1))]
-        clsfy = np.nanpercentile(dfScore['EF_SCORE'], classRange, interpolation='linear')
+        clsfy = np.nanpercentile(dfScore[scorefield], classRange, interpolation='linear')
+
+
         # 접근성 분석은 +지표, 이부분 지표 성격에 따라 다름(+지표 or 0지표)
-        clsfy[0] = dfScore['EF_SCORE'].max(skipna=True) + 1
-        clsfy[len(clsfy) - 1] = dfScore['EF_SCORE'].min(skipna=True) - 1
+        clsfy[0] = dfScore[scorefield].min(skipna=True) - 1
+        clsfy[len(clsfy) - 1] = dfScore[scorefield].max(skipna=True) + 1
 
         if self.debugging: self.setProgressSubMsg("classify count : {}".format(len(clsfy)))
 
-        grade = 0
+        grade = self.__classify_count + 1
+        gradeval = None
         prevalue = None
+
         for gradeval in clsfy:
             if prevalue is not None:
                 if prevalue != gradeval:
                     # 접근성 분석은 +지표, 이부분 지표 성격에 따라 다름(+지표 or 0지표)
                     # print('{} > {} >= {}'.format(prevalue, i, gradeval))
-                    dfScore.loc[(prevalue > dfScore['EF_SCORE']) & (dfScore['EF_SCORE'] >= gradeval), 'EF_GRADE'] = grade
+                    dfScore.loc[(prevalue < dfScore[scorefield]) & (dfScore[scorefield] <= gradeval), 'EF_GRADE'] = grade
+                    # print('{} 등급 : {} < AC_GRADE <= {}'.format(grade, prevalue, gradeval))
             prevalue = gradeval
-            grade += 1
+            grade -= 1
+
+        ########################################################################################
 
         nullvalgrade = dfScore['EF_GRADE'].max(skipna=True)
         if self.debugging: self.setProgressSubMsg("nullvalgrade : %s" % str(nullvalgrade))
-        ########################################################################################
         if self.debugging: dfScore.to_csv(os.path.join(self.workpath, 'efgrade.csv'))
 
         dictefGrade = dict(zip(dfScore[finalKeyID].tolist(), dfScore['EF_GRADE'].tolist()))
