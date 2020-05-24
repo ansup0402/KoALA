@@ -211,8 +211,10 @@ class LivingSOCEquityStraightAlgorithm(QgsProcessingAlgorithm):
             from soc_locator_launcher import soc_locator_launcher
 
         global debugging
-        if debugging: feedback.pushInfo("****** [START DEBUG] ******")
         global cur_dir
+        if debugging:
+            feedback.pushInfo("****** [START DEBUG] ******")
+            feedback.pushInfo(cur_dir)
         launcher = soc_locator_launcher(feedback=feedback, context=context, parameters=params, debugging=debugging,
                                         workpath=cur_dir)
 
