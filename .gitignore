@@ -10,3 +10,4 @@ debugmode*
 test_hepler.py
 test_module.py
 pylintrc
+soc_test.py
