@@ -197,16 +197,6 @@ class qgsprocessUtils:
 
         return self.run_algprocessing(algname=algname, params=params)['OUTPUT']
 
-    def createspatialindex(self, input, output='TEMPORARY_OUTPUT'):
-        if output is None or output == '': output = 'TEMPORARY_OUTPUT'
-        # algname = 'native:createspatialindex'
-        algname = 'qgis:createspatialindex'
-
-        inputsource = input
-        params = dict(INPUT=inputsource,
-                      OUTPUT=output)
-
-        return self.run_algprocessing(algname=algname, params=params)['OUTPUT']
 
 
 
@@ -236,18 +226,6 @@ class qgsprocessUtils:
             result.renameAttribute(idx, hubfield)
             result.commitChanges()
         return result
-
-    # 이함수는 좀 더 테스트 필요
-    def statisticsfromfield(self, input, numericfield, output_html='TEMPORARY_OUTPUT'):
-        if output_html is None or output_html == '': output_html = 'TEMPORARY_OUTPUT'
-        algname = 'qgis:basicstatisticsforfields'
-
-        inputsource = input
-        params = dict(INPUT_LAYER=inputsource,
-                      FIELD_NAME=numericfield,
-                      OUTPUT_HTML_FILE=output_html)
-
-        return self.run_algprocessing(algname=algname, params=params)
 
     def distancematrix(self, input, inputonlyselected, inputfield, target, targetonlyseleted, targetfield,
                        matrixtype=2, output='TEMPORARY_OUTPUT'):
@@ -427,3 +405,30 @@ class qgsprocessUtils:
             self.feedback.pushInfo("%s is not valid" % layername)
             return None
 
+
+
+
+
+    # 이함수는 좀 더 테스트 필요
+    def statisticsfromfield(self, input, numericfield, output_html='TEMPORARY_OUTPUT'):
+        if output_html is None or output_html == '': output_html = 'TEMPORARY_OUTPUT'
+        algname = 'qgis:basicstatisticsforfields'
+
+        inputsource = input
+        params = dict(INPUT_LAYER=inputsource,
+                      FIELD_NAME=numericfield,
+                      OUTPUT_HTML_FILE=output_html)
+
+        return self.run_algprocessing(algname=algname, params=params)
+
+    # 테스트 되지 않은 함수... 확인 필요
+    def createspatialindex(self, input, output='TEMPORARY_OUTPUT'):
+        if output is None or output == '': output = 'TEMPORARY_OUTPUT'
+        # algname = 'native:createspatialindex'
+        algname = 'qgis:createspatialindex'
+
+        inputsource = input
+        params = dict(INPUT=inputsource,
+                      OUTPUT=output)
+
+        return self.run_algprocessing(algname=algname, params=params)['OUTPUT']
