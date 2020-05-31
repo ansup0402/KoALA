@@ -250,6 +250,9 @@ class soc_locator_model:
     def nearesthubpoints(self, input, onlyselected, sf_hub, hubfield, output='TEMPORARY_OUTPUT'):
         return self.qgsutils.nearesthubpoints(input=input, onlyselected=onlyselected, sf_hub=sf_hub, hubfield=hubfield, output=output)
 
+    def createspatialindex(self, input, output='TEMPORARY_OUTPUT'):
+        return self.qgsutils.createspatialindex(input=input, output=output)
+
     def countpointsinpolygon(self, polylayer, pointslayer, field, weight=None, classfield=None, output='TEMPORARY_OUTPUT'):
         return self.qgsutils.countpointsinpolygon(polygons=polylayer,
                                                   points=pointslayer,
@@ -662,9 +665,13 @@ class soc_locator_model:
                 dis = self.get_alltargetSumofDistance(fromNodeID=popNodeid,
                                                       svrNodeList=svrNodeilst)
                 if dis is None:
+                    # newdis를 찾지 못할 경우 최대값을 할당함(형평성은 모든 시설까지의 거리를 기반으로 하므로 len(svrNodeilst)를 곱해줌)
+                    dis = self.__outofcutoff * len(svrNodeilst)
+
                     if self.debugging:
                         self.setProgressSubMsg("[NODE-%s] 해당 인구데이터의 %sm 이내에는 현재 생활SOC가 없습니다." % (str(popNodeid), str(self.cutoff)))
-                        notfounddatacnt += 1
+                    notfounddatacnt += 1
+
 
                 calculatedNode[popNodeid] = dis
 
@@ -1054,10 +1061,10 @@ class soc_locator_model:
         if self.debugging: self.setProgressSubMsg("commit : %s" % str(editstatus))
 
         if not self.debugging:
-            reqfiels = [finalKeyID, 'AC_GRADE']
-            self.setProgressSubMsg("start finanallayer type is %s" % str(type(finanallayer)))
+            reqfiels = [finalKeyID, 'AC_GRADE', 'AC_SCORE']
+            # self.setProgressSubMsg("start finanallayer type is %s" % str(type(finanallayer)))
             finanallayer = self.deleteFields(input=finanallayer, requredfields=reqfiels)
-            self.setProgressSubMsg("end finanallayer type is %s" % str(type(finanallayer)))
+            # self.setProgressSubMsg("end finanallayer type is %s" % str(type(finanallayer)))
 
         if output is None:
             if self.debugging: self.setProgressSubMsg("output is none")
@@ -1091,6 +1098,8 @@ class soc_locator_model:
                                               ftype=1,  # 0 — Integer, 1 — Float, 2 — String
                                               flen=20,
                                               fprecision=8)
+
+
         if isNetwork:
             finalKeyID = self.__nodeID
         else:
@@ -1144,13 +1153,14 @@ class soc_locator_model:
 
             potenVal = feature[finalKeyID]
             eqscore = self.__dictFinalwithScore[potenVal]
-            if self.debugging: feature["EQ_SCORE"] = float(eqscore)
+            feature["EQ_SCORE"] = float(eqscore)
 
             try:
                 eqgrade = dictGrade[potenVal]
                 feature["EQ_GRADE"] = int(eqgrade)
             except:
                 self.setProgressSubMsg('NODEKEY : {}, EQGRADE : {}'.format(potenVal, eqgrade))
+
 
             finanallayer.updateFeature(feature)
 
@@ -1159,8 +1169,7 @@ class soc_locator_model:
 
         # 불필요한 필드 제거
         if not self.debugging:
-            # reqfiels = [self.__potentialID, 'EQ_GRADE']
-            reqfiels = [self.__potentialID]
+            reqfiels = [self.__potentialID, 'EQ_SCORE', 'EQ_GRADE']
             finanallayer = self.deleteFields(input=finanallayer, requredfields=reqfiels)
 
         if output is None:
@@ -1501,7 +1510,7 @@ class soc_locator_model:
         finanallayer.commitChanges()
 
         if not self.debugging:
-            reqfiels = [finalKeyID, 'EF_GRADE']
+            reqfiels = [finalKeyID, 'EF_GRADE', 'EF_SCORE']
             finanallayer = self.deleteFields(input=finanallayer, requredfields=reqfiels)
 
         if output is None:

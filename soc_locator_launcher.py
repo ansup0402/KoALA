@@ -181,9 +181,16 @@ class soc_locator_launcher:
         self.setProgressMsg('[1 단계] 분석을 위한 데이터를 초기화 합니다......')
         # 1-1 분석 영역 데이터 생성
         if self.feedback.isCanceled(): return None
+        out_path = ''
+        if self.debugging: out_path = os.path.join(self.workpath, 'boundary.shp')
         boundary = model.dissolvewithQgis(input=self.parameters['IN_SITE'].sourceName(),
-                                          onlyselected=self.parameters['IN_SITE_ONLYSELECTED'])
+                                          onlyselected=self.parameters['IN_SITE_ONLYSELECTED'],
+                                          output=out_path)
 
+        if isinstance(boundary, str):
+            model.boundary = model.writeAsVectorLayer(boundary)
+        else:
+            model.boundary = boundary
 
         # 1-2 분석 지역 데이터 추출 : 세생활권
         if self.feedback.isCanceled(): return None
@@ -310,7 +317,7 @@ class soc_locator_launcher:
         if self.debugging:self.setProgressMsg('잠재적 후보지 그리드 데이터를 생성합니다.....')
         out_path = ''
         if self.debugging: out_path = os.path.join(self.workpath, 'grid.shp')
-        gridlayer = model.createGridfromLayer(sourcelayer=boundary,
+        gridlayer = model.createGridfromLayer(sourcelayer=model.boundary,
                                               gridsize=self.parameters['IN_GRID_SIZE'],
                                               output=out_path)
 
@@ -693,6 +700,8 @@ class soc_locator_launcher:
         gridlayer = model.createGridfromLayer(sourcelayer=model.boundary,
                                               gridsize=self.parameters['IN_GRID_SIZE'],
                                               output=out_path)
+
+
 
         # 3-2 분석 지역 데이터 추출 : 잠재적 위치
         if self.feedback.isCanceled(): return None
@@ -1119,8 +1128,8 @@ class soc_locator_launcher:
         if self.feedback.isCanceled(): return None
         if self.debugging: self.setProgressMsg('링크 데이터를 초기화 합니다.....')
         boundary2000 = model.bufferwithQgis(input=boundary,
-                                           onlyselected=False,
-                                           distance=2000)
+                                            onlyselected=False,
+                                            distance=2000)
 
         out_path = ''
         if self.debugging: out_path = os.path.join(self.workpath, 'cliped_link.shp')
@@ -1145,18 +1154,24 @@ class soc_locator_launcher:
         out_path = ''
         if self.debugging: out_path = os.path.join(self.workpath, 'cliped_living.shp')
         clipedliving = model.clipwithQgis(input=self.parameters['IN_LIVINGAREA'].sourceName(),
-                                          onlyselected=self.parameters['IN_LIVINGAREA_ONLYSELECTED'],
-                                          overlay=boundary,
-                                          output=out_path)
+                                             onlyselected=self.parameters['IN_LIVINGAREA_ONLYSELECTED'],
+                                             overlay=boundary,
+                                             output=out_path)
+
 
         # 불필요한 필드 값 제거(IN_LIVINGAREA)
         out_path = ''
-        if self.debugging: out_path = os.path.join(self.workpath, 'cliped_living2.shp')
+        if self.debugging:
+            out_path = os.path.join(self.workpath, 'cliped_living2.shp')
         # if isinstance(clipedliving, str):
         #     tmplyr = model.writeAsVectorLayer(clipedliving)
         # else:
         #     tmplyr = clipedliving
         clipedliving = model.deleteFields(input=clipedliving, requredfields=[], output=out_path)
+
+
+
+
 
 
         # 1-5 분석 지역 데이터 추출 : 인구데이터
@@ -1228,25 +1243,39 @@ class soc_locator_launcher:
         self.setProgressMsg('[2 단계] 세생활권 인구정보와 생활SOC 분석......')
         # 2-1 세생활권내 인구 분석
         if self.debugging: self.setProgressMsg('세생활권내에 인구 분석......')
-        if self.feedback.isCanceled(): return None
         if self.debugging: out_path = os.path.join(self.workpath, 'cliped_livingwithpop.shp')
+        if self.feedback.isCanceled(): return None
+
+        # # clipedliving
+        # # clipedpop
+        #
+        # self.setProgressMsg('1111.............')
+        # clipedpop222 = model.createspatialindex(input=clipedpop)
+        # self.setProgressMsg('2222.............')
+
+
         clipelivingwithpop = model.countpointsinpolygon(polylayer=clipedliving,
                                                         pointslayer=clipedpop,
                                                         field=self.parameters['IN_POP_CNTFID'],
                                                         weight=self.parameters['IN_POP_CNTFID'],
                                                         classfield=None,
                                                         output=out_path)
+
+        # self.setProgressMsg('3333.............')
+
         # 2-2 거주인구 지점의 최근린 노드  검색
         if self.debugging: self.setProgressMsg('세생활권(인구) 인근 노드 찾기......')
         if self.feedback.isCanceled(): return None
         out_path = ''
         if self.debugging: out_path = os.path.join(self.workpath, 'popwithNode.shp')
         popWithNode = model.nearesthubpoints(input=clipelivingwithpop,
-                                            onlyselected=False,
-                                            sf_hub=model.nodelayer,
-                                            hubfield=self.parameters['IN_NODE_ID'],
-                                            output=out_path
-                                            )
+                                             onlyselected=False,
+                                             sf_hub=model.nodelayer,
+                                             hubfield=self.parameters['IN_NODE_ID'],
+                                             output=out_path
+                                             )
+
+
 
         if isinstance(popWithNode, str):
             model.populationLayer = model.writeAsVectorLayer(popWithNode)
@@ -1267,8 +1296,8 @@ class soc_locator_launcher:
         out_path = ''
         if self.debugging: out_path = os.path.join(self.workpath, 'grid.shp')
         gridlayer = model.createGridfromLayer(sourcelayer=model.boundary,
-                                             gridsize=self.parameters['IN_GRID_SIZE'],
-                                             output=out_path)
+                                              gridsize=self.parameters['IN_GRID_SIZE'],
+                                              output=out_path)
 
         # 3-2 분석 지역 데이터 추출 : 잠재적 위치
         if self.feedback.isCanceled(): return None
@@ -1294,11 +1323,11 @@ class soc_locator_launcher:
         out_path = ''
         if self.debugging: out_path = os.path.join(self.workpath, 'gridwithNode.shp')
         gridwithNode = model.nearesthubpoints(input=grid,
-                                                  onlyselected=False,
-                                                  sf_hub=model.nodelayer,
-                                                  hubfield=self.parameters['IN_NODE_ID'],
-                                                  output=out_path
-                                                  )
+                                              onlyselected=False,
+                                              sf_hub=model.nodelayer,
+                                              hubfield=self.parameters['IN_NODE_ID'],
+                                              output=out_path
+                                              )
         if isinstance(gridwithNode, str):
             model.potentiallayer = model.writeAsVectorLayer(gridwithNode)
         else:

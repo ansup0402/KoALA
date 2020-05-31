@@ -197,6 +197,18 @@ class qgsprocessUtils:
 
         return self.run_algprocessing(algname=algname, params=params)['OUTPUT']
 
+    def createspatialindex(self, input, output='TEMPORARY_OUTPUT'):
+        if output is None or output == '': output = 'TEMPORARY_OUTPUT'
+        # algname = 'native:createspatialindex'
+        algname = 'qgis:createspatialindex'
+
+        inputsource = input
+        params = dict(INPUT=inputsource,
+                      OUTPUT=output)
+
+        return self.run_algprocessing(algname=algname, params=params)['OUTPUT']
+
+
 
     def nearesthubpoints(self, input, onlyselected, sf_hub, hubfield, output='TEMPORARY_OUTPUT'):
         if output is None or output == '': output = 'TEMPORARY_OUTPUT'
