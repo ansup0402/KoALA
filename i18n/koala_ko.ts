@@ -135,6 +135,12 @@
         <source>Accessibility Analysis Results(Network)</source>
         <translation>접근성 분석 결과(네트워크)</translation>
     </message>
+    <message>
+        <source>Population Exclusion Ratio(%)</source>
+        <translation>기 서비스 지역 인구 배제 비율(%)</translation>
+    </message>
+
+
 </context>
 </TS>
 

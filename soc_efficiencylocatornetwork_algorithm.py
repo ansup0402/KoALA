@@ -75,6 +75,7 @@ class LivingSOCEfficiencynetworkAlgorithm(QgsProcessingAlgorithm):
     IN_LINK_SPEED = 'IN_LINK_SPEED'
     IN_GRID_SIZE = 'IN_GRID_SIZE'
     IN_LIMIT_DIST = 'IN_LIMIT_DIST'
+    IN_POP_EXCLUSION = 'IN_POP_EXCLUSION'
     IN_CALSSIFYNUM = 'IN_CALSSIFYNUM'
     OUTPUT = 'OUTPUT'
 
@@ -87,6 +88,8 @@ class LivingSOCEfficiencynetworkAlgorithm(QgsProcessingAlgorithm):
                 [QgsProcessing.TypeVectorPoint],
                 optional=debugging)
         )
+
+
 
         # 인구 레이어
         self.addParameter(
@@ -214,6 +217,15 @@ class LivingSOCEfficiencynetworkAlgorithm(QgsProcessingAlgorithm):
                 optional=True)
         )
 
+        # 기존 SOC 서비스 중인 인구 제외 비율
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.IN_POP_EXCLUSION,
+                '❖ ' + self.tr('Population Exclusion Ratio(%)'),
+                QgsProcessingParameterNumber.Integer,
+                100, False, 0, 100)  # 디폴트, 옵션, 미니멈, 맥시멈
+        )
+
         # 등급
         self.addParameter(
             QgsProcessingParameterNumber(
@@ -275,6 +287,8 @@ class LivingSOCEfficiencynetworkAlgorithm(QgsProcessingAlgorithm):
         keyword['IN_GRID_SIZE'] = self.parameterAsInt(parameters, self.IN_GRID_SIZE, context)
 
         keyword['IN_LIMIT_DIST'] = self.parameterAsInt(parameters, self.IN_LIMIT_DIST, context)
+
+        keyword['IN_POP_EXCLUSION'] = self.parameterAsInt(parameters, self.IN_POP_EXCLUSION, context)
         keyword['IN_CALSSIFYNUM'] = self.parameterAsInt(parameters, self.IN_CALSSIFYNUM, context)
         keyword['OUTPUT'] = self.parameterAsOutputLayer(parameters, self.OUTPUT, context)
 
