@@ -22,7 +22,7 @@ repository=https://github.com/ansup0402/KoALA
 
 hasProcessingProvider=yes
 changelog=0.5.3:
-	- Bug fixed
+	- addition of population exclusion ratio
 
 
 tags=network, Korea, SOC, accessibility
