@@ -64,8 +64,8 @@
         <translation>최소 분석 크기(Cell size : m)</translation>
     </message>
     <message>
-        <source>Facility Effective Service Coverage : If you input 0, it is regarded as the whole area</source>
-        <translation>유효 서비스 범위(m) : 0 을 입력할 경우 유효 서비스 범위를 대상지역 전체로 간주</translation>
+        <source>Facility Effective Service Coverage</source>
+        <translation>유효 서비스 범위(m)</translation>
     </message>
     <message>
         <source>Node Layer</source>

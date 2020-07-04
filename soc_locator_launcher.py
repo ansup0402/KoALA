@@ -736,6 +736,17 @@ class soc_locator_launcher:
                                             onlyselected=False,
                                             distance=model.cutoff)
 
+
+
+        # selectbylocation : with bufferedSOC
+
+
+        popexlusrate = self.parameters['IN_POP_EXCLUSION']
+        poprate = (100 - popexlusrate) / 100
+        # calculation field selected feature : pop * poprate
+        #todo calcualtion field 구현
+
+
         # 5-2 효율성 분석 : 기존 생활 SOC 시설(기 서비스 지역 제거)
         if self.feedback.isCanceled(): return None
         if self.debugging: self.setProgressMsg('기존서비스되는 인구 삭제.......')

@@ -142,7 +142,8 @@ class LivingSOCAccessibilitynetworkAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterNumber(
                 self.IN_LIMIT_DIST,
-                "❖ " + self.tr('Facility Effective Service Coverage : If you input 0, it is regarded as the whole area'),
+                # "❖ " + self.tr('Facility Effective Service Coverage : If you input 0, it is regarded as the whole area'),
+                "❖ " + self.tr('Facility Effective Service Coverage'),
                 QgsProcessingParameterNumber.Integer,
                 1000, False, 0, 1000000)  # 디폴트, 옵션, 미니멈, 맥시멈
         )
