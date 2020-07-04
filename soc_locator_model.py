@@ -285,6 +285,13 @@ class soc_locator_model:
                                              overlay=overlayer, overonlyselected=overonlyselected,
                                              output=output)
 
+    def selectbylocation(self, input, intersect, method=0, predicate=0, output='TEMPORARY_OUTPUT'):
+        return self.qgsutils.selectbylocation(input=input,
+                                              intersect=intersect,
+                                              predicate=predicate,
+                                              method=method,
+                                              output=output)
+
     def addIDField(self, input, idfid, output='TEMPORARY_OUTPUT'):
         return self.qgsutils.fieldCalculate(input=input,
                                             fid=idfid,
@@ -409,6 +416,216 @@ class soc_locator_model:
         self.nxGraph.add_weighted_edges_from(tmplink)
 
         return self.nxGraph
+
+
+
+    def selpopinsvrareaEuclidean(self, input, applyArea):
+        return self.selectbylocation(input=input, intersect=applyArea)
+
+    def selpopinsvrareaNetwork(self, input):
+
+        return None
+
+
+
+    def calpopexclusratio(self, poplyr, popratiofield, popfield, exlusrate, output=None):
+
+        editstatus = poplyr.startEditing()
+        if self.debugging: self.setProgressSubMsg("editmode : %s" % str(editstatus))
+
+        selection = poplyr.selectedFeatures()
+
+        totalcnt  = len(selection)
+        i = 0
+        for feature in selection:
+            i += 1
+            if self.feedback.isCanceled(): return None
+            self.feedback.setProgress(int(i / totalcnt * 100))
+
+            # 선택객체 : pop_ratio = ratio 변경
+            feature[popratiofield] = exlusrate
+            poplyr.updateFeature(feature)
+
+        editstatus = poplyr.commitChanges()
+        if self.debugging: self.setProgressSubMsg("commit : %s" % str(editstatus))
+
+        # poprate = (100 - popexlusrate) / 100
+        # popfield = popfield * pop_ratio 변경
+        if self.debugging:
+            tmp = self.qgsutils.fieldCalculate(input=poplyr,
+                                                  fid="ORG_POP",
+                                                  ftype=1,
+                                                  flen=10,
+                                                  fprecision=4,
+                                                  formula='\"{}\"'.format(popfield),
+                                                  newfield=True)
+
+        applyedpoplyr = self.qgsutils.fieldCalculate(input=tmp,
+                                            fid=popfield,
+                                            ftype=0,
+                                            flen=10,
+                                            fprecision=4,
+                                            formula='(100 - \"{}\") / 100 * \"{}\"'.format(popratiofield, popfield),
+                                            newfield=False)
+
+        if output is None:
+            if self.debugging: self.setProgressSubMsg("output is none")
+            resultlayer = applyedpoplyr
+        else:
+            if self.debugging: self.setProgressSubMsg("output is not none")
+            resultlayer = self.vectoclayer2output(input=applyedpoplyr, output=output)
+
+        return resultlayer
+
+    def applypopratioinselectedNetwork(self, input, popfield, exlusrate, output=None):
+
+        dfpopremovedSOC = self.__dfPop
+        # pop_ratio 필드 추가, pop_ratio 값을 전부 1로 변경
+        popratiofield = 'exlusrate'
+        tmppoplayer = self.qgsutils.fieldCalculate(input=self.__populationLayer,
+                                              fid=popratiofield,
+                                              ftype=1,
+                                              flen=10,
+                                              fprecision=4,
+                                              formula='0',
+                                              newfield=True)
+
+
+        tmppoplayer.removeSelection()
+
+        totalcnt = tmppoplayer.featureCount()
+        i = 0
+        for feature in tmppoplayer.getFeatures():
+            i += 1
+            if self.feedback.isCanceled(): return None
+            self.feedback.setProgress(int(i / totalcnt * 100))
+
+            popID = feature[self.__poplyrID]
+
+            isSvredCurSOC = dfpopremovedSOC['CUR_ISSVRED'].loc[dfpopremovedSOC[self.__poplyrID] == popID].values[0]
+
+            if str(isSvredCurSOC) == '1':
+                expression = "\"%s\"=%s" % (self.__poplyrID, str(popID))
+                # if self.debugging: self.setProgressSubMsg("expression : %s" % expression)
+                tmppoplayer.selectByExpression(expression, QgsVectorLayer.AddToSelection)
+
+        if self.debugging: self.setProgressSubMsg("선택된 객체 : %s " % str(len(list(tmppoplayer.getSelectedFeatures()))))
+
+
+        return self.calpopexclusratio(poplyr=tmppoplayer, popratiofield=popratiofield, popfield=popfield,
+                                      exlusrate=exlusrate, output=output)
+
+
+        #
+        #
+        #
+        #
+        #
+        #
+        # # pop_ratio 필드 추가, pop_ratio 값을 전부 1로 변경
+        # popratiofield = 'exlusrate'
+        # poplyr = self.qgsutils.fieldCalculate(input=input,
+        #                                       fid=popratiofield,
+        #                                       ftype=1,
+        #                                       flen=10,
+        #                                       fprecision=4,
+        #                                       formula='0',
+        #                                       newfield=True)
+        #
+        # dfpopremovedSOC = self.__dfPop
+        #
+        # totalcnt = poplyr.featureCount()
+        # i = 0
+        # for feature in poplyr.getFeatures():
+        #     i += 1
+        #     if self.feedback.isCanceled(): return None
+        #     self.feedback.setProgress(int(i / totalcnt * 100))
+        #
+        #     popID = feature[self.__poplyrID]
+        #
+        #     isSvredCurSOC = dfpopremovedSOC['CUR_ISSVRED'].loc[dfpopremovedSOC[self.__poplyrID] == popID].values[0]
+        #
+        #     if str(isSvredCurSOC) == '1':
+        #         expression = "\"%s\"=%s" % (self.__poplyrID, str(popID))
+        #         # if self.debugging: self.setProgressSubMsg("expression : %s" % expression)
+        #         poplyr.selectByExpression(expression, QgsVectorLayer.AddToSelection)
+        #
+        # if self.debugging: self.setProgressSubMsg("선택된 객체 : %s " % str(len(list(poplyr.getSelectedFeatures()))))
+
+
+
+        # return self.calpopexclusratio(poplyr=poplyr, popratiofield=popratiofield, popfield=popfield,
+        #                               exlusrate=exlusrate, output=output)
+
+
+
+    def applypopratioinselectedEuclidean(self, input, popfield, exlusrate, applyArea, output=None):
+
+        # pop_ratio 필드 추가, pop_ratio 값을 전부 1로 변경
+        popratiofield = 'exlusrate'
+        poplyr = self.qgsutils.fieldCalculate(input=input,
+                                            fid=popratiofield,
+                                            ftype=1,
+                                            flen=10,
+                                            fprecision=4,
+                                            formula='0',
+                                            newfield=True)
+
+        # # selbyloc : applyArea
+        self.selectbylocation(input=poplyr, intersect=applyArea)
+        # self, poplyr, popratiofield, popfield, exlusrate, output = None
+        return self.calpopexclusratio(poplyr=poplyr, popratiofield=popratiofield, popfield=popfield, exlusrate=exlusrate, output=output)
+        # self.selpopinsvrareaEuclidean(input=poplyr, intersect=applyArea)
+
+        #
+        # editstatus = poplyr.startEditing()
+        # if self.debugging: self.setProgressSubMsg("editmode : %s" % str(editstatus))
+        #
+        # selection = poplyr.selectedFeatures()
+        #
+        # totalcnt  = len(selection)
+        # i = 0
+        # for feature in selection:
+        #     i += 1
+        #     if self.feedback.isCanceled(): return None
+        #     self.feedback.setProgress(int(i / totalcnt * 100))
+        #
+        #     # 선택객체 : pop_ratio = ratio 변경
+        #     feature[popratiofield] = exlusrate
+        #     poplyr.updateFeature(feature)
+        #
+        # editstatus = poplyr.commitChanges()
+        # if self.debugging: self.setProgressSubMsg("commit : %s" % str(editstatus))
+        #
+        # # poprate = (100 - popexlusrate) / 100
+        # # popfield = popfield * pop_ratio 변경
+        # if self.debugging:
+        #     tmp = self.qgsutils.fieldCalculate(input=poplyr,
+        #                                           fid="ORG_POP",
+        #                                           ftype=1,
+        #                                           flen=10,
+        #                                           fprecision=4,
+        #                                           formula='\"{}\"'.format(popfield),
+        #                                           newfield=True)
+        #
+        # applyedpoplyr = self.qgsutils.fieldCalculate(input=tmp,
+        #                                     fid=popfield,
+        #                                     ftype=0,
+        #                                     flen=10,
+        #                                     fprecision=4,
+        #                                     formula='(100 - \"{}\") / 100 * \"{}\"'.format(popratiofield, popfield),
+        #                                     newfield=False)
+        #
+        # if output is None:
+        #     if self.debugging: self.setProgressSubMsg("output is none")
+        #     resultlayer = applyedpoplyr
+        # else:
+        #     if self.debugging: self.setProgressSubMsg("output is not none")
+        #     resultlayer = self.vectoclayer2output(input=applyedpoplyr, output=output)
+        #
+        # return resultlayer
+
+
 
 
 
@@ -1355,6 +1572,8 @@ class soc_locator_model:
             svrdPOPDict[potenID] = addedpopCnt + int(popCnt)
 
 
+
+
         rawData = {self.__potentialID: list(svrdPOPDict.keys()),
                    'EF_SCORE': list(svrdPOPDict.values())
                    }
@@ -1443,7 +1662,9 @@ class soc_locator_model:
         clsfy[0] = dfScore[scorefield].min(skipna=True) - 1
         clsfy[len(clsfy) - 1] = dfScore[scorefield].max(skipna=True) + 1
 
-        if self.debugging: self.setProgressSubMsg("classify count : {}".format(len(clsfy)))
+        if self.debugging:
+            self.setProgressSubMsg("classify count : {}".format(len(clsfy)))
+            self.setProgressSubMsg("classify : {}".format(clsfy))
 
         grade = self.__classify_count + 1
         gradeval = None

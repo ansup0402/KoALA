@@ -304,6 +304,19 @@ class qgsprocessUtils:
 
         return self.run_algprocessing(algname=algname, params=params)['OUTPUT']
 
+    # predicate : 0—intersect, 1—contain, 2—disjoint, 3—equal, 4—touch, 5—overlap, 6—are within, 7—cross
+    # method : 0—creating new selection, 1—adding to current selection, 2—selecting within current selection
+    #          3 — removing from current selection
+    def selectbylocation(self, input, intersect, predicate, method, output='TEMPORARY_OUTPUT'):
+        algname = "qgis:selectbylocation"
+        params = dict(INPUT=input,
+                      INTERSECT=intersect,
+                      PREDICATE=predicate,
+                      METHOD=method,
+                      OUTPUT=output)
+
+        return self.run_algprocessing(algname=algname, params=params)['OUTPUT']
+
     def selectbyexpression(self, input, expression, method=0):
         algname = "qgis:selectbyexpression"
         params = dict(INPUT=input,

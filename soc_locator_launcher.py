@@ -725,44 +725,48 @@ class soc_locator_launcher:
         #
         #
         #
-        ################# [3 단계] 효율성 분석(네트워크) #################
-        self.setProgressMsg('[3 단계] 효율성 분석(네트워크)......')
+        ################# [3 단계] 효율성 분석(직선거리) #################
+        self.setProgressMsg('[3 단계] 효율성 분석(직선거리)......')
         # 5-1 효율성 분석 : 기존 생활 SOC 시설
         if self.feedback.isCanceled(): return None
         if self.debugging: self.setProgressMsg('생활SOC 버퍼......')
         out_path = ''
         if self.debugging: out_path = os.path.join(self.workpath, 'bufferedCurSOC.shp')
         bufferedSOC = model.bufferwithQgis(input=model.currentSOC,
-                                            onlyselected=False,
-                                            distance=model.cutoff)
+                                           onlyselected=False,
+                                           distance=model.cutoff,
+                                           output=out_path)
 
-
-
-        # selectbylocation : with bufferedSOC
-
-
+        # # 5-2 효율성 분석 : 기존 생활 SOC 시설(기 서비스 지역 배제 비율 적)
+        model.popcntField = self.parameters['IN_POP_CNTFID']
         popexlusrate = self.parameters['IN_POP_EXCLUSION']
-        poprate = (100 - popexlusrate) / 100
-        # calculation field selected feature : pop * poprate
-        #todo calcualtion field 구현
 
-
-        # 5-2 효율성 분석 : 기존 생활 SOC 시설(기 서비스 지역 제거)
         if self.feedback.isCanceled(): return None
-        if self.debugging: self.setProgressMsg('기존서비스되는 인구 삭제.......')
+        if self.debugging: self.setProgressMsg('기 서비스 지역 인구 배제 처리 중......({}% 배제)'.format(popexlusrate))
         out_path = ''
-        if self.debugging: out_path = os.path.join(self.workpath, 'popremovedCurSOC.shp')
-        poplyr = model.differencelayer(input=clipedpop,
-                                       onlyselected=False,
-                                       overlayer=bufferedSOC,
-                                       overonlyselected=False,
-                                       output=out_path)
+        if self.debugging: out_path = os.path.join(self.workpath, 'selbyloc.shp')
+        poplyr = model.applypopratioinselectedEuclidean(input=clipedpop,
+                                                      popfield=self.parameters['IN_POP_CNTFID'],
+                                                      exlusrate=popexlusrate,
+                                                      applyArea=bufferedSOC,
+                                                      output=out_path)
+
+        # # 5-2 효율성 분석 : 기존 생활 SOC 시설(기 서비스 지역 제거)
+        # if self.feedback.isCanceled(): return None
+        # if self.debugging: self.setProgressMsg('기존서비스되는 인구 삭제.......')
+        # out_path = ''
+        # if self.debugging: out_path = os.path.join(self.workpath, 'popremovedCurSOC.shp')
+        # poplyr = model.differencelayer(input=clipedpop,용
+        #                                onlyselected=False,
+        #                                overlayer=bufferedSOC,
+        #                                overonlyselected=False,
+        #                                output=out_path)
 
         if isinstance(poplyr, str):
             model.populationLayer = model.writeAsVectorLayer(poplyr)
         else:
             model.populationLayer = poplyr
-        model.popcntField = self.parameters['IN_POP_CNTFID']
+
 
         # 5-3 효율성 분석 : 잠재적 위치(서비스 영역 설정)
         out_path = ''
@@ -1028,10 +1032,26 @@ class soc_locator_launcher:
         if self.debugging: self.setProgressMsg('기존 SOC 시설을 분석합니다.....')
         dfPop = model.anal_efficiencyCurSOC_network()
 
-        # 5-2 효율성 분석 : 기존 생활 SOC 시설(기 서비스 지역 제거)
+        # # 5-2 효율성 분석 : 기존 생활 SOC 시설(기 서비스 지역 배제 비율 적)
+        model.popcntField = self.parameters['IN_POP_CNTFID']
+        popexlusrate = self.parameters['IN_POP_EXCLUSION']
+
         if self.feedback.isCanceled(): return None
-        if self.debugging: self.setProgressMsg('이미 서비스 되고 있는 인구데이터를 제거합니다.....')
-        poplayerwithCurSOC = model.removeRelCurSOCInPoplayer()
+        if self.debugging: self.setProgressMsg('기 서비스 지역 인구 배제 처리 중......({}% 배제)'.format(popexlusrate))
+        out_path = ''
+        if self.debugging: out_path = os.path.join(self.workpath, 'selbyloc.shp')
+        poplayerwithCurSOC = model.applypopratioinselectedNetwork(input=clipedpop,
+                                                        popfield=self.parameters['IN_POP_CNTFID'],
+                                                        exlusrate=popexlusrate,
+                                                        output=out_path)
+
+
+        # # 5-2 효율성 분석 : 기존 생활 SOC 시설(기 서비스 지역 제거)
+        # if self.feedback.isCanceled(): return None
+        # if self.debugging: self.setProgressMsg('이미 서비스 되고 있는 인구데이터를 제거합니다.....')
+        # poplayerwithCurSOC = model.removeRelCurSOCInPoplayer()
+
+
         if isinstance(poplayerwithCurSOC, str):
             model.populationLayer = model.writeAsVectorLayer(poplayerwithCurSOC)
         else:
@@ -1040,6 +1060,14 @@ class soc_locator_launcher:
         if self.debugging:
             out_path = os.path.join(self.workpath, 'popwithNoderemovedCurSOC.shp')
             poplyr = model.vectorlayer2ShapeFile(model.populationLayer, output=out_path)
+
+
+
+
+
+
+
+
 
         # 5-3 효율성 분석 : 잠재적 위치(서비스 영역 설정)
         if self.feedback.isCanceled(): return None
