@@ -1196,7 +1196,8 @@ class soc_locator_model:
         # 점수가 높을 수록 좋은 등급(낮은 숫자)
         scorefield = 'ACC_SCORE'
         step = 100 / self.__classify_count
-        classRange = [cls * step for cls in reversed(range(0, self.__classify_count + 1))]
+        # classRange = [cls * step for cls in reversed(range(0, self.__classify_count + 1))]
+        classRange = [cls * step for cls in (range(0, self.__classify_count + 1))]
         clsfy = np.nanpercentile(tmpdfPOP[scorefield], classRange, interpolation='linear')
 
         # + vs - 지표에 따라 아래 내용이 약간 달라짐
@@ -1215,6 +1216,8 @@ class soc_locator_model:
                     # 접근성 분석은 +지표, 이부분 지표 성격에 따라 다름(+지표 or 0지표)
                     # print('{} > {} >= {}'.format(prevalue, i, gradeval))
                     tmpdfPOP.loc[(prevalue < tmpdfPOP[scorefield]) & (tmpdfPOP[scorefield] <= gradeval), 'AC_GRADE'] = grade
+                    if self.debugging:
+                        self.setProgressSubMsg("{}등급 : {} < score <= {}".format(grade, prevalue, gradeval))
                     # print('{} 등급 : {} < AC_GRADE <= {}'.format(grade, prevalue, gradeval))
             prevalue = gradeval
             grade -= 1
@@ -1654,7 +1657,8 @@ class soc_locator_model:
         ###################### 등급 산정 부분 ######################
         scorefield = 'EF_SCORE'
         step = 100 / self.__classify_count
-        classRange = [cls * step for cls in reversed(range(0, self.__classify_count + 1))]
+        # classRange = [cls * step for cls in reversed(range(0, self.__classify_count + 1))]
+        classRange = [cls * step for cls in (range(0, self.__classify_count + 1))]
         clsfy = np.nanpercentile(dfScore[scorefield], classRange, interpolation='linear')
 
 
@@ -1664,6 +1668,7 @@ class soc_locator_model:
 
         if self.debugging:
             self.setProgressSubMsg("classify count : {}".format(len(clsfy)))
+            # self.setProgressSubMsg(("Max : "))
             self.setProgressSubMsg("classify : {}".format(clsfy))
 
         grade = self.__classify_count + 1
@@ -1674,9 +1679,9 @@ class soc_locator_model:
             if prevalue is not None:
                 if prevalue != gradeval:
                     # 접근성 분석은 +지표, 이부분 지표 성격에 따라 다름(+지표 or 0지표)
-                    # print('{} > {} >= {}'.format(prevalue, i, gradeval))
                     dfScore.loc[(prevalue < dfScore[scorefield]) & (dfScore[scorefield] <= gradeval), 'EF_GRADE'] = grade
-                    # print('{} 등급 : {} < AC_GRADE <= {}'.format(grade, prevalue, gradeval))
+                    if self.debugging:
+                        self.setProgressSubMsg("{}등급 : {} < score <= {}".format(grade, prevalue, gradeval))
             prevalue = gradeval
             grade -= 1
 
