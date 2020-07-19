@@ -41,7 +41,7 @@
     </message>
     <message>
         <source>Located Neighborhood Facility</source>
-        <translation>기존 생활SOC 시설(POINT)</translation>
+        <translation>생활SOC 시설(Point))</translation>
     </message>
     <message>
         <source>Sub-Neighborhood Unit</source>
@@ -49,7 +49,7 @@
     </message>
     <message>
         <source>Resident Population</source>
-        <translation>거주 인구(Point)</translation>
+        <translation>인구(Point)</translation>
     </message>
     <message>
         <source>Population Field</source>
@@ -57,19 +57,19 @@
     </message>
     <message>
         <source>Analysis Site</source>
-        <translation>분석 대상지(Polygon)</translation>
+        <translation>분석 지역(Polygon)</translation>
     </message>
     <message>
         <source>Analysis Unit(Cell size : m)</source>
-        <translation>최소 분석 크기(Cell size : m)</translation>
+        <translation>분석 격자 크기(Cell size : m)</translation>
     </message>
     <message>
         <source>Facility Effective Service Coverage</source>
-        <translation>유효 서비스 범위(m)</translation>
+        <translation>시설 서비스 범위(m)</translation>
     </message>
     <message>
         <source>Node Layer</source>
-        <translation>노드 레이어(POINT)</translation>
+        <translation>노드 레이어(Point)</translation>
     </message>
     <message>
         <source>Node ID FIELD</source>
@@ -105,7 +105,7 @@
     </message>
     <message>
         <source>Speed Field : If the speed value is zero, it is replaced by the minimum value</source>
-        <translation>최대 속도 필드</translation>
+        <translation>최대 속도 필드 : 속도 필드가 선택되지 않을 시에는 최단거리를 기준으로 분석</translation>
     </message>
     <message>
         <source>Analysis result grade number of sections: configurable range (2 ~ 100)</source>
@@ -137,7 +137,7 @@
     </message>
     <message>
         <source>Population Exclusion Ratio(%)</source>
-        <translation>기 서비스 지역 인구 배제 비율(%)</translation>
+        <translation>기존 서비스 지역 내 인구 배제 비율(%)</translation>
     </message>
 
 
