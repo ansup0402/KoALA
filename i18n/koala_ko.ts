@@ -45,7 +45,7 @@
     </message>
     <message>
         <source>Sub-Neighborhood Unit</source>
-        <translation>세생활권(Polygon))</translation>
+        <translation>세생활권(Polygon)</translation>
     </message>
     <message>
         <source>Resident Population</source>
@@ -57,7 +57,7 @@
     </message>
     <message>
         <source>Analysis Site</source>
-        <translation>분석 대상지((Polygon))</translation>
+        <translation>분석 대상지(Polygon)</translation>
     </message>
     <message>
         <source>Analysis Unit(Cell size : m)</source>
@@ -105,7 +105,7 @@
     </message>
     <message>
         <source>Speed Field : If the speed value is zero, it is replaced by the minimum value</source>
-        <translation>최대 속도 필드 : 속도 값이 0인 경우 최소 값으로 대체 됩니다</translation>
+        <translation>최대 속도 필드</translation>
     </message>
     <message>
         <source>Analysis result grade number of sections: configurable range (2 ~ 100)</source>
