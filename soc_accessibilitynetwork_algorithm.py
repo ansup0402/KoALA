@@ -88,13 +88,23 @@ class LivingSOCAccessibilitynetworkAlgorithm(QgsProcessingAlgorithm):
                 optional=debugging)
         )
 
+        # # 세생활권 인구 레이어
+        # self.addParameter(
+        #     QgsProcessingParameterFeatureSource(
+        #         self.IN_LIVINGAREA,
+        #         "❖ " + self.tr('Sub-Neighborhood Unit'),
+        #         [QgsProcessing.TypeVectorPolygon],
+        #         optional=debugging)
+        # )
+        #
         # 세생활권 인구 레이어
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
+            QgsProcessingParameterNumber(
                 self.IN_LIVINGAREA,
+                # "❖ " + self.tr('Facility Effective Service Coverage : If you input 0, it is regarded as the whole area'),
                 "❖ " + self.tr('Sub-Neighborhood Unit'),
-                [QgsProcessing.TypeVectorPolygon],
-                optional=debugging)
+                QgsProcessingParameterNumber.Integer,
+                200, False, 10, 10000)  # 디폴트, 옵션, 미니멈, 맥시멈
         )
 
         # 기존 SOC 시설 레이어
@@ -266,7 +276,8 @@ class LivingSOCAccessibilitynetworkAlgorithm(QgsProcessingAlgorithm):
         keyword['IN_CURSOC'], keyword['IN_CURSOC_ONLYSELECTED'] = self.getLayerfromParameter(parameters, context, self.IN_CURSOC)
 
 
-        keyword['IN_LIVINGAREA'], keyword['IN_LIVINGAREA_ONLYSELECTED'] = self.getLayerfromParameter(parameters, context, self.IN_LIVINGAREA)
+        # keyword['IN_LIVINGAREA'], keyword['IN_LIVINGAREA_ONLYSELECTED'] = self.getLayerfromParameter(parameters, context, self.IN_LIVINGAREA)
+        keyword['IN_LIVINGAREA'] = self.parameterAsInt(parameters, self.IN_LIVINGAREA, context)
         # keyword['IN_LIVINGAREA_ID'] = self.parameterAsFields(parameters, self.IN_LIVINGAREA_ID, context)[0]
 
         keyword['IN_POP'], keyword['IN_POP_ONLYSELECTED'] = self.getLayerfromParameter(parameters, context, self.IN_POP)

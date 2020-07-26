@@ -41,10 +41,11 @@ class qgsprocessUtils:
 
         return self.run_algprocessing(algname=algname, params=params)['OUTPUT']
 
-    def createGridfromLayer(self, sourcelayer, gridsize, output='TEMPORARY_OUTPUT'):
+    def createGridfromLayer(self, sourcelayer, gridsize, type=0, output='TEMPORARY_OUTPUT'):
         if output is None or output == '': output = 'TEMPORARY_OUTPUT'
         # qgis 3.10부터는 native:creategrid로 변경됨
-        algname = "qgis:creategrid"
+        # algname = "qgis:creategrid"
+        algname = "native:creategrid"
 
         layer = sourcelayer
         # layer = QgsVectorLayer(path=sourcelayer)
@@ -53,7 +54,14 @@ class qgsprocessUtils:
         xmin, ymin, xmax, ymax = extent.toRectF().getCoords()
         extent = str(xmin) + ',' + str(xmax) + ',' + str(ymin) + ',' + str(ymax)
 
-        params = dict(TYPE=0,
+        # TYPE
+        # 0 — Point
+        # 1 — Line
+        # 2 — Rectangle(polygon)
+        # 3 — Diamond(polygon)
+        # 4 — Hexagon(polygon)
+
+        params = dict(TYPE=type,
                       EXTENT=extent,
                       HSPACING=gridsize,
                       VSPACING=gridsize,

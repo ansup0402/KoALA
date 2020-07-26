@@ -238,8 +238,8 @@ class soc_locator_model:
     def bufferwithQgis(self, input, onlyselected, distance, output='TEMPORARY_OUTPUT'):
         return self.qgsutils.bufferwithQgis(input=input, onlyselected=onlyselected, distance=distance, output=output)
 
-    def createGridfromLayer(self, sourcelayer, gridsize, output='TEMPORARY_OUTPUT'):
-        return self.qgsutils.createGridfromLayer(sourcelayer=sourcelayer, gridsize=gridsize, output=output)
+    def createGridfromLayer(self, sourcelayer, gridsize, type=0, output='TEMPORARY_OUTPUT'):
+        return self.qgsutils.createGridfromLayer(sourcelayer=sourcelayer, gridsize=gridsize, type=type, output=output)
 
     def clipwithQgis(self, input, onlyselected, overlay, output='TEMPORARY_OUTPUT'):
         return self.qgsutils.clipwithQgis(input=input, onlyselected=onlyselected, overlay=overlay, output=output)
@@ -261,8 +261,8 @@ class soc_locator_model:
                                                   classfield=classfield,
                                                   output=output)
 
-    def joinattributesbylocation(self, input, join, joinfiels=[], prefix='', output='TEMPORARY_OUTPUT'):
-        return self.qgsutils.joinattributesbylocation(input=input, join=join, joinfiels=joinfiels, prefix=prefix, output=output)
+    def joinattributesbylocation(self, input, join, joinfiels=[], prefix='', discardnomatching=False, output='TEMPORARY_OUTPUT'):
+        return self.qgsutils.joinattributesbylocation(input=input, join=join, joinfiels=joinfiels, prefix=prefix, discardnomatching=discardnomatching, output=output)
 
 
     def intersection(self, input, inputfields, inputonlyseleceted, overlay, overayprefix, overlayer_fields=None, output='TEMPORARY_OUTPUT'):
@@ -1017,6 +1017,8 @@ class soc_locator_model:
 
             if self.__cutoff > 0 and dis >= self.__cutoff:
                 dis = self.__outofcutoff
+                # dis = 0
+
             
             listlivingID.append(poplivingID)
             listpopID.append(popID)
@@ -1067,7 +1069,7 @@ class soc_locator_model:
                 if dis is None:
                     if self.debugging:
                         self.setProgressSubMsg("[NODE-%s] 해당 세생권데이터의 %sm 이내에는 현재 생활SOC가 없습니다." % (str(popNodeid), str(self.cutoff)))
-                    dis = 0
+                    dis = self.__outofcutoff
 
                 calculatedNode[popNodeid] = dis
 
@@ -1161,23 +1163,27 @@ class soc_locator_model:
 
     def make_Accessbillityscore(self, isNetwork=True, output=None):
 
-        dfPop = self.__dfPop
-        dfPop['ACC_SCORE'] = dfPop[self.__popcntField] * dfPop['DISTANCE']
+        # ACC_SCORE : dataframe의 필드
+        # scorefield : final layer의 필드
+        scorefield = 'ACC_SCORE'
 
-        dfgroupy = dfPop.groupby([self.__livinglyrID])[self.__popcntField, 'DISTANCE', 'ACC_SCORE'].agg({'ACC_SCORE' : {'ACC_SCORE_SUM': 'sum'},
+        dfPop = self.__dfPop
+        dfPop[scorefield] = dfPop[self.__popcntField] * dfPop['DISTANCE']
+
+        dfgroupy = dfPop.groupby([self.__livinglyrID])[self.__popcntField, 'DISTANCE', scorefield].agg({scorefield : {'ACC_SCORE_SUM': 'sum'},
                                                                                                          self.__popcntField: {'POP_SUM': 'sum'}
                                                                                                          }).reset_index()
-        dfgroupy['ACC_SCORE'] = dfgroupy['ACC_SCORE_SUM'] / dfgroupy['POP_SUM']
+        dfgroupy[scorefield] = dfgroupy['ACC_SCORE_SUM'] / dfgroupy['POP_SUM']
 
         finanallayer = self.qgsutils.addField(input=self.__livingareaLayer,
-                                              fid="AC_GRADE",
+                                              fid='AC_GRADE',
                                               ftype=0,  # 0 — Integer, 1 — Float, 2 — String
                                               flen=10,
                                               fprecision=8)
 
         # if self.debugging:
         finanallayer = self.qgsutils.addField(input=finanallayer,
-                                     fid="AC_SCORE",
+                                     fid='AC_SCORE',
                                      ftype=1,  # 0 — Integer, 1 — Float, 2 — String
                                      flen=20,
                                      fprecision=8)
@@ -1190,37 +1196,71 @@ class soc_locator_model:
 
         # tmpdfPOP = self.__dfPop.astype({finalKeyID: str})
         tmpdfPOP = dfgroupy.astype({finalKeyID: str})
+        if self.debugging:
+            tempexcel = os.path.join(self.workpath, 'tmpdfPOP.csv')
+            tmpdfPOP.to_csv(tempexcel)
 
 
         ###################### 등급 산정 부분 ######################
-        # 점수가 높을 수록 좋은 등급(낮은 숫자)
-        scorefield = 'ACC_SCORE'
-        step = 100 / self.__classify_count
-        # classRange = [cls * step for cls in reversed(range(0, self.__classify_count + 1))]
-        classRange = [cls * step for cls in (range(0, self.__classify_count + 1))]
-        clsfy = np.nanpercentile(tmpdfPOP[scorefield], classRange, interpolation='linear')
+        # 접근성 분석은 1인당 인근의 가장 가까운 시설까지의 거리이므로 결과 값이 작을 수록 등급도 좋음
 
-        # + vs - 지표에 따라 아래 내용이 약간 달라짐
+
+        step = 100 / self.__classify_count
+
+
+
+        classRange = [cls * step for cls in range(0, self.__classify_count + 1)]
+        clsfy = np.nanpercentile(tmpdfPOP[scorefield], classRange, interpolation='linear')
+        # 값이 낮을 수록 좋은(낮은 숫자) 등급\
+
         clsfy[0] = tmpdfPOP[scorefield].min(skipna=True) - 1
         clsfy[len(clsfy) - 1] = tmpdfPOP[scorefield].max(skipna=True) + 1
 
-        # print(clsfy)
-
-        grade = self.__classify_count + 1
+        grade = 0
         gradeval = None
         prevalue = None
+
+        if self.debugging: self.setProgressSubMsg("classify count : {}".format(len(clsfy)))
+        if self.debugging: self.setProgressSubMsg("classify : {}".format(clsfy))
 
         for gradeval in clsfy:
             if prevalue is not None:
                 if prevalue != gradeval:
-                    # 접근성 분석은 +지표, 이부분 지표 성격에 따라 다름(+지표 or 0지표)
-                    # print('{} > {} >= {}'.format(prevalue, i, gradeval))
-                    tmpdfPOP.loc[(prevalue < tmpdfPOP[scorefield]) & (tmpdfPOP[scorefield] <= gradeval), 'AC_GRADE'] = grade
+                    # print('{} 등급 : {} < GRADE <= {}'.format(grade, prevalue, gradeval))
+                    tmpdfPOP.loc[(prevalue < tmpdfPOP[scorefield]) & (tmpdfPOP[scorefield] <= gradeval), "AC_GRADE"] = grade
                     if self.debugging:
                         self.setProgressSubMsg("{}등급 : {} < score <= {}".format(grade, prevalue, gradeval))
-                    # print('{} 등급 : {} < AC_GRADE <= {}'.format(grade, prevalue, gradeval))
+
             prevalue = gradeval
-            grade -= 1
+            grade += 1
+
+        # scorefield = 'ACC_SCORE'
+        # step = 100 / self.__classify_count
+        # # classRange = [cls * step for cls in reversed(range(0, self.__classify_count + 1))]
+        # classRange = [cls * step for cls in (range(0, self.__classify_count + 1))]
+        # clsfy = np.nanpercentile(tmpdfPOP[scorefield], classRange, interpolation='linear')
+        #
+        # # + vs - 지표에 따라 아래 내용이 약간 달라짐
+        # clsfy[0] = tmpdfPOP[scorefield].min(skipna=True) - 1
+        # clsfy[len(clsfy) - 1] = tmpdfPOP[scorefield].max(skipna=True) + 1
+        #
+        # # print(clsfy)
+        #
+        # grade = self.__classify_count + 1
+        # gradeval = None
+        # prevalue = None
+        #
+        # for gradeval in clsfy:
+        #     if prevalue is not None:
+        #         if prevalue != gradeval:
+        #             # 접근성 분석은 +지표, 이부분 지표 성격에 따라 다름(+지표 or 0지표)
+        #             # print('{} > {} >= {}'.format(prevalue, i, gradeval))
+        #             tmpdfPOP.loc[(prevalue < tmpdfPOP[scorefield]) & (tmpdfPOP[scorefield] <= gradeval), 'AC_GRADE'] = grade
+        #             if self.debugging:
+        #                 self.setProgressSubMsg("{}등급 : {} < score <= {}".format(grade, prevalue, gradeval))
+        #             # print('{} 등급 : {} < AC_GRADE <= {}'.format(grade, prevalue, gradeval))
+        #     prevalue = gradeval
+        #     grade -= 1
 
         #
         # clsfy[len(clsfy) - 1] = tmpdfPOP[scorefield].min(skipna=True) - 1
@@ -1327,8 +1367,9 @@ class soc_locator_model:
 
 
         dfScore = self.__dtFinalwithsScore
-        ###################### 등급 산정 부분 ######################
 
+        ###################### 등급 산정 부분 ######################
+        # 형평성 분석은 잠재적 지역에 신규 서비스 할 경우 총 편차크기를 나타내는 것이므로, 편차 크기 값이 작을 수록 등급도 좋음
 
         scorefield = 'EQ_SCORE'
         step = 100 / self.__classify_count

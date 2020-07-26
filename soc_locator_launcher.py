@@ -43,12 +43,75 @@ class soc_locator_launcher:
         boundary = model.dissolvewithQgis(input=self.parameters['IN_SITE'].sourceName(),
                                           onlyselected=self.parameters['IN_SITE_ONLYSELECTED'])
 
-        # 1-2 분석 지역 데이터 추출 : 세생활권
-        # self.setProgressMsg('..... 분석 지역 데이터 추출 : 세생활권')
+        if isinstance(boundary, str):
+            model.boundary = model.writeAsVectorLayer(boundary)
+        else:
+            model.boundary = boundary
+
+
+        # 1-2 분석 지역 데이터 추출 : 인구데이터
+        # self.setProgressMsg('..... 분석 지역 데이터 추출 : 인구 데이터')
         if self.feedback.isCanceled(): return None
-        clipedliving = model.clipwithQgis(input=self.parameters['IN_LIVINGAREA'].sourceName(),
-                                          onlyselected=self.parameters['IN_LIVINGAREA_ONLYSELECTED'],
-                                          overlay=boundary)
+        clipedpop = model.clipwithQgis(input=self.parameters['IN_POP'].sourceName(),
+                                       onlyselected=self.parameters['IN_POP_ONLYSELECTED'],
+                                       overlay=model.boundary)
+        out_path = ''
+        if self.debugging: out_path = os.path.join(self.workpath, 'cliped_pop.shp')
+        clipedpop = model.addIDField(input=clipedpop, idfid=popID, output=out_path)
+        model.popIDField = popID
+        model.popcntField = self.parameters['IN_POP_CNTFID']
+
+        # 불필요한 필드 값 제거(IN_POP)
+        out_path = ''
+        if self.debugging: out_path = os.path.join(self.workpath, 'cliped_pop2.shp')
+        clipedpop = model.deleteFields(input=clipedpop, requredfields=[popID, self.parameters['IN_POP_CNTFID']],
+                                       output=out_path)
+
+        # 1-3 분석 지역 데이터 추출 : 세생활권
+###### Case1 세생활권 데이터를 "레이어(폴리곤) 타입"으로 받을 경우
+        # # self.setProgressMsg('..... 분석 지역 데이터 추출 : 세생활권')
+        # if self.feedback.isCanceled(): return None
+        # clipedliving = model.clipwithQgis(input=self.parameters['IN_LIVINGAREA'].sourceName(),
+        #                                   onlyselected=self.parameters['IN_LIVINGAREA_ONLYSELECTED'],
+        #                                   overlay=boundary)
+
+
+###### Case2 세생활권 데이터를 "격자크기(숫자) 타입"으로 받을 경우
+        # 세생활권 레이어 생성 : 분석 영역을 기준으로 Fishnet 레이어 생성
+        if self.feedback.isCanceled(): return None
+        if self.debugging: self.setProgressMsg('세생활권 레이어 생성.....')
+        out_path = ''
+        if self.debugging: out_path = os.path.join(self.workpath, 'fishnetliving.shp')
+        fishnetliving = model.createGridfromLayer(sourcelayer=model.boundary,
+                                              gridsize=self.parameters['IN_LIVINGAREA'],
+                                              type=2,
+                                              output=out_path)
+
+        if self.feedback.isCanceled(): return None
+        if self.debugging:self.setProgressMsg('세생활권 데이터를 초기화 합니다.....')
+        out_path = ''
+        if self.debugging: out_path = os.path.join(self.workpath, 'cliped_fishnetliving.shp')
+        clipedfishnetliving = model.clipwithQgis(input=fishnetliving,
+                                        onlyselected=False,
+                                        overlay=model.boundary,
+                                        output=out_path)
+
+
+        # 세생활권 레이어 정리 : 인구 레이어와의 Spatial Join을 통해 연계되지 않은 피처 제거
+        out_path = ''
+        if self.debugging: out_path = os.path.join(self.workpath, 'cliped_fishnetliving_discarded.shp')
+        clipedliving = model.joinattributesbylocation(input=clipedfishnetliving,
+                                                       join=clipedpop,
+                                                       joinfiels=[],
+                                                       discardnomatching=True,
+                                                       output=out_path
+                                                       )
+
+
+######################################################################################################
+
+
+
         out_path = ''
         if self.debugging: out_path = os.path.join(self.workpath, 'cliped_living.shp')
         clipedliving = model.addIDField(input=clipedliving, idfid=livingID, output=out_path)
@@ -64,23 +127,13 @@ class soc_locator_launcher:
             model.livingareaLayer = clipedliving
         model.livingareaIDField = livingID
 
-        # 1-3 분석 지역 데이터 추출 : 인구데이터
-        # self.setProgressMsg('..... 분석 지역 데이터 추출 : 인구 데이터')
-        if self.feedback.isCanceled(): return None
-        clipedpop = model.clipwithQgis(input=self.parameters['IN_POP'].sourceName(),
-                                       onlyselected=self.parameters['IN_POP_ONLYSELECTED'],
-                                       overlay=boundary)
-        out_path = ''
-        if self.debugging: out_path = os.path.join(self.workpath, 'cliped_pop.shp')
-        clipedpop = model.addIDField(input=clipedpop, idfid=popID, output=out_path)
-        model.popIDField = popID
-        model.popcntField = self.parameters['IN_POP_CNTFID']
 
-        # 불필요한 필드 값 제거(IN_POP)
-        out_path = ''
-        if self.debugging: out_path = os.path.join(self.workpath, 'cliped_pop2.shp')
-        clipedpop = model.deleteFields(input=clipedpop, requredfields=[popID, self.parameters['IN_POP_CNTFID']],
-                                       output=out_path)
+
+
+
+
+
+
 
 
         # 1-4 분석 지역 데이터 추출 : 기존 생활 SOC 시설
@@ -133,7 +186,7 @@ class soc_locator_launcher:
                                                                  model.popcntField,
                                                                  'HubDist'],
                                                     inputonlyseleceted=False,
-                                                    overlay=clipedliving,
+                                                    overlay=model.livingareaLayer,
                                                     overayprefix='',
                                                     overlayer_fields=[model.livingareaIDField],
                                                     output=out_path
@@ -197,7 +250,7 @@ class soc_locator_launcher:
         if self.debugging: self.setProgressMsg('세생활권 레이어를 초기화 합니다.....')
         clipedliving = model.clipwithQgis(input=self.parameters['IN_LIVINGAREA'].sourceName(),
                                         onlyselected=self.parameters['IN_LIVINGAREA_ONLYSELECTED'],
-                                        overlay=boundary)
+                                        overlay=model.boundary)
         out_path = ''
         if self.debugging: out_path = os.path.join(self.workpath, 'cliped_living.shp')
         clipedliving = model.addIDField(input=clipedliving, idfid=livingID, output=out_path)
@@ -225,7 +278,7 @@ class soc_locator_launcher:
         if self.debugging: out_path = os.path.join(self.workpath, 'cliped_pop.shp')
         clipedpop = model.clipwithQgis(input=self.parameters['IN_POP'].sourceName(),
                                        onlyselected=self.parameters['IN_POP_ONLYSELECTED'],
-                                       overlay=boundary,
+                                       overlay=model.boundary,
                                        output=out_path)
 
         # 불필요한 필드 값 제거(IN_POP)
@@ -245,7 +298,7 @@ class soc_locator_launcher:
         if self.debugging: self.setProgressMsg('기존의 생활SOC 레이어를 초기화 합니다.....')
         clipedCurSOC = model.clipwithQgis(input=self.parameters['IN_CURSOC'].sourceName(),
                                           onlyselected=self.parameters['IN_CURSOC_ONLYSELECTED'],
-                                          overlay=boundary)
+                                          overlay=model.boundary)
 
         out_path = ''
         if self.debugging: out_path = os.path.join(self.workpath, 'cliped_curSOC.shp')
@@ -328,7 +381,7 @@ class soc_locator_launcher:
         if self.debugging: out_path = os.path.join(self.workpath, 'cliped_grid.shp')
         clipedgrid = model.clipwithQgis(input=gridlayer,
                                         onlyselected=False,
-                                        overlay=boundary,
+                                        overlay=model.boundary,
                                         output=out_path)
 
         if isinstance(clipedgrid, str):
@@ -447,14 +500,76 @@ class soc_locator_launcher:
         model.linkTonodefield = self.parameters['IN_LINK_TNODE']
         model.linklengthfield = self.parameters['IN_LINK_LENGTH']
         model.linkSpeed = self.parameters['IN_LINK_SPEED']
-        
-        # 1-4 분석 지역 데이터 추출 : 세생활권
-        # 6. 인구레이어 노드 찾기
+
+
+
+        # 1-2 분석 지역 데이터 추출 : 인구데이터
+        # self.setProgressMsg('..... 분석 지역 데이터 추출 : 인구 데이터')
         if self.feedback.isCanceled(): return None
-        if self.debugging: self.setProgressMsg('세생활권의 인구정보를 분석합니다.....')
-        clipedliving = model.clipwithQgis(input=self.parameters['IN_LIVINGAREA'].sourceName(),
-                                          onlyselected=self.parameters['IN_LIVINGAREA_ONLYSELECTED'],
-                                          overlay=boundary)
+        clipedpop = model.clipwithQgis(input=self.parameters['IN_POP'].sourceName(),
+                                       onlyselected=self.parameters['IN_POP_ONLYSELECTED'],
+                                       overlay=model.boundary)
+        out_path = ''
+        if self.debugging: out_path = os.path.join(self.workpath, 'cliped_pop.shp')
+        clipedpop = model.addIDField(input=clipedpop, idfid=popID, output=out_path)
+        model.popIDField = popID
+        model.popcntField = self.parameters['IN_POP_CNTFID']
+
+        # 불필요한 필드 값 제거(IN_POP)
+        out_path = ''
+        if self.debugging: out_path = os.path.join(self.workpath, 'cliped_pop2.shp')
+        clipedpop = model.deleteFields(input=clipedpop, requredfields=[popID, self.parameters['IN_POP_CNTFID']],
+                                       output=out_path)
+
+
+
+        # 1-4 분석 지역 데이터 추출 : 세생활권
+###### Case1 세생활권 데이터를 "레이어(폴리곤) 타입"으로 받을 경우
+        # # self.setProgressMsg('..... 분석 지역 데이터 추출 : 세생활권')
+        # if self.feedback.isCanceled(): return None
+        # clipedliving = model.clipwithQgis(input=self.parameters['IN_LIVINGAREA'].sourceName(),
+        #                                   onlyselected=self.parameters['IN_LIVINGAREA_ONLYSELECTED'],
+        #                                   overlay=boundary)
+
+
+###### Case2 세생활권 데이터를 "격자크기(숫자) 타입"으로 받을 경우
+        # 세생활권 레이어 생성 : 분석 영역을 기준으로 Fishnet 레이어 생성
+        if self.feedback.isCanceled(): return None
+        if self.debugging: self.setProgressMsg('세생활권 레이어 생성.....')
+        out_path = ''
+        if self.debugging: out_path = os.path.join(self.workpath, 'fishnetliving.shp')
+        fishnetliving = model.createGridfromLayer(sourcelayer=model.boundary,
+                                                  gridsize=self.parameters['IN_LIVINGAREA'],
+                                                  type=2,
+                                                  output=out_path)
+
+        if self.feedback.isCanceled(): return None
+        if self.debugging: self.setProgressMsg('세생활권 데이터를 초기화 합니다.....')
+        out_path = ''
+        if self.debugging: out_path = os.path.join(self.workpath, 'cliped_fishnetliving.shp')
+        clipedfishnetliving = model.clipwithQgis(input=fishnetliving,
+                                                 onlyselected=False,
+                                                 overlay=model.boundary,
+                                                 output=out_path)
+
+        # 세생활권 레이어 정리 : 인구 레이어와의 Spatial Join을 통해 연계되지 않은 피처 제거
+        out_path = ''
+        if self.debugging: out_path = os.path.join(self.workpath, 'cliped_fishnetliving_discarded.shp')
+        clipedliving = model.joinattributesbylocation(input=clipedfishnetliving,
+                                                      join=clipedpop,
+                                                      joinfiels=[],
+                                                      discardnomatching=True,
+                                                      output=out_path
+                                                      )
+
+        ######################################################################################################
+
+
+
+
+
+
+
         out_path = ''
         if self.debugging: out_path = os.path.join(self.workpath, 'cliped_living.shp')
         clipedliving = model.addIDField(input=clipedliving, idfid=livingID, output=out_path)
@@ -476,27 +591,27 @@ class soc_locator_launcher:
         model.livingareaIDField = livingID
 
 
-        # 1-5 분석 지역 데이터 추출 : 인구데이터
-        if self.feedback.isCanceled(): return None
-        clipedpop = model.clipwithQgis(input=self.parameters['IN_POP'].sourceName(),
-                                       onlyselected=self.parameters['IN_NODE_ONLYSELECTED'],
-                                       overlay=boundary)
-
-        out_path = ''
-        if self.debugging: out_path = os.path.join(self.workpath, 'cliped_pop.shp')
-        clipedpop = model.addIDField(input=clipedpop, idfid=popID, output=out_path)
-        model.popIDField = popID
-        model.popcntField = self.parameters['IN_POP_CNTFID']
-
-
-        # 불필요한 필드 값 제거(IN_POP)
-        out_path = ''
-        if self.debugging: out_path = os.path.join(self.workpath, 'cliped_pop2.shp')
-        # if isinstance(clipedpop, str):
-        #     tmplyr = model.writeAsVectorLayer(clipedpop)
-        # else:
-        #     tmplyr = clipedpop
-        clipedpop = model.deleteFields(input=clipedpop, requredfields=[popID, self.parameters['IN_POP_CNTFID']], output=out_path)
+        # # 1-5 분석 지역 데이터 추출 : 인구데이터
+        # if self.feedback.isCanceled(): return None
+        # clipedpop = model.clipwithQgis(input=self.parameters['IN_POP'].sourceName(),
+        #                                onlyselected=self.parameters['IN_NODE_ONLYSELECTED'],
+        #                                overlay=boundary)
+        #
+        # out_path = ''
+        # if self.debugging: out_path = os.path.join(self.workpath, 'cliped_pop.shp')
+        # clipedpop = model.addIDField(input=clipedpop, idfid=popID, output=out_path)
+        # model.popIDField = popID
+        # model.popcntField = self.parameters['IN_POP_CNTFID']
+        #
+        #
+        # # 불필요한 필드 값 제거(IN_POP)
+        # out_path = ''
+        # if self.debugging: out_path = os.path.join(self.workpath, 'cliped_pop2.shp')
+        # # if isinstance(clipedpop, str):
+        # #     tmplyr = model.writeAsVectorLayer(clipedpop)
+        # # else:
+        # #     tmplyr = clipedpop
+        # clipedpop = model.deleteFields(input=clipedpop, requredfields=[popID, self.parameters['IN_POP_CNTFID']], output=out_path)
 
 
         # 1-6 분석 지역 데이터 추출 : 기존 생활 SOC 시설
