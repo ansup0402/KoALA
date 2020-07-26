@@ -72,20 +72,13 @@ class LivingSOCEquityStraightAlgorithm(QgsProcessingAlgorithm):
 
 
     def initAlgorithm(self, config):
-        """
-        Here we define the inputs and output of the algorithm, along
-        with some other properties.
-        """
 
-        # We add the input vector features source. It can have any kind of
-        # geometry.
-
-        # 기존 SOC 시설 레이어
+        #분석지역
         self.addParameter(
             QgsProcessingParameterFeatureSource(
-                self.IN_CURSOC,
-                '❖ ' + self.tr('Located Neighborhood Facility'),
-                [QgsProcessing.TypeVectorPoint],
+                self.IN_SITE,
+                '❖ ' + self.tr('Analysis Site'),
+                [QgsProcessing.TypeVectorPolygon],
                 optional=debugging)
         )
 
@@ -95,6 +88,15 @@ class LivingSOCEquityStraightAlgorithm(QgsProcessingAlgorithm):
                 self.IN_LIVINGAREA,
                 '❖ ' + self.tr('Sub-Neighborhood Unit'),
                 [QgsProcessing.TypeVectorPolygon],
+                optional=debugging)
+        )
+
+        # 기존 SOC 시설 레이어
+        self.addParameter(
+            QgsProcessingParameterFeatureSource(
+                self.IN_CURSOC,
+                '❖ ' + self.tr('Located Neighborhood Facility'),
+                [QgsProcessing.TypeVectorPoint],
                 optional=debugging)
         )
 
@@ -118,14 +120,7 @@ class LivingSOCEquityStraightAlgorithm(QgsProcessingAlgorithm):
                 optional=debugging)
         )
 
-        #분석지역
-        self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.IN_SITE,
-                '❖ ' + self.tr('Analysis Site'),
-                [QgsProcessing.TypeVectorPolygon],
-                optional=debugging)
-        )
+
         # 분석 최소단위(잠재적 위치 격자 사이즈)
         self.addParameter(
             QgsProcessingParameterNumber(

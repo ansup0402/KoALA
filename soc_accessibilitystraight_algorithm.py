@@ -72,12 +72,13 @@ class LivingSOCAccessibilitystraightAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, config):
 
-        # 기존 SOC 시설 레이어
+
+        #분석지역
         self.addParameter(
             QgsProcessingParameterFeatureSource(
-                self.IN_CURSOC,
-                '❖ ' + self.tr('Located Neighborhood Facility'),
-                [QgsProcessing.TypeVectorPoint],
+                self.IN_SITE,
+                '❖ ' + self.tr('Analysis Site'),
+                [QgsProcessing.TypeVectorPolygon],
                 optional=debugging)
         )
 
@@ -89,6 +90,16 @@ class LivingSOCAccessibilitystraightAlgorithm(QgsProcessingAlgorithm):
                 [QgsProcessing.TypeVectorPolygon],
                 optional=debugging)
         )
+
+        # 기존 SOC 시설 레이어
+        self.addParameter(
+            QgsProcessingParameterFeatureSource(
+                self.IN_CURSOC,
+                '❖ ' + self.tr('Located Neighborhood Facility'),
+                [QgsProcessing.TypeVectorPoint],
+                optional=debugging)
+        )
+
 
         # 거주 인구 레이어
         self.addParameter(
@@ -110,14 +121,6 @@ class LivingSOCAccessibilitystraightAlgorithm(QgsProcessingAlgorithm):
                 optional=debugging)
         )
 
-        #분석지역
-        self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.IN_SITE,
-                '❖ ' + self.tr('Analysis Site'),
-                [QgsProcessing.TypeVectorPolygon],
-                optional=debugging)
-        )
 
         # 거리 조날
         self.addParameter(

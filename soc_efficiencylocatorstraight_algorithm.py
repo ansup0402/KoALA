@@ -67,6 +67,15 @@ class LivingSOCEfficiencystraightAlgorithm(QgsProcessingAlgorithm):
 
 
     def initAlgorithm(self, config):
+        #분석지역
+        self.addParameter(
+            QgsProcessingParameterFeatureSource(
+                self.IN_SITE,
+                '❖ ' + self.tr('Analysis Site'),
+                [QgsProcessing.TypeVectorPolygon],
+                optional=debugging)
+        )
+
         # 기존 SOC 시설 레이어
         self.addParameter(
             QgsProcessingParameterFeatureSource(
@@ -96,14 +105,7 @@ class LivingSOCEfficiencystraightAlgorithm(QgsProcessingAlgorithm):
                 optional=debugging)
         )
 
-        #분석지역
-        self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.IN_SITE,
-                '❖ ' + self.tr('Analysis Site'),
-                [QgsProcessing.TypeVectorPolygon],
-                optional=debugging)
-        )
+
 
         # 분석 최소단위(잠재적 위치 격자 사이즈)
         self.addParameter(
