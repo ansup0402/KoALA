@@ -223,7 +223,9 @@ class soc_locator_launcher:
             from soc_locator_model import soc_locator_model
         model = soc_locator_model(feedback=self.feedback, context=self.context, debugmode=self.debugging, workpath=self.workpath)
 
+        curStep = 0
         curSOCID = 'CSOC_ID'
+        popID = 'POP_ID'
         livingID = 'LIV_ID'
         #
         #
@@ -231,7 +233,8 @@ class soc_locator_launcher:
         #
         #
         ################# [1 단계] 분석 위한 데이터 초기화 : 분석 영역 데이터 추출 #################
-        self.setProgressMsg('[1 단계] 분석을 위한 데이터를 초기화 합니다......')
+        curStep += 1
+        self.setProgressMsg('[{} 단계] 분석을 위한 데이터를 초기화 합니다......'.format(curStep))
         # 1-1 분석 영역 데이터 생성
         if self.feedback.isCanceled(): return None
         out_path = ''
@@ -245,31 +248,8 @@ class soc_locator_launcher:
         else:
             model.boundary = boundary
 
-        # 1-2 분석 지역 데이터 추출 : 세생활권
-        if self.feedback.isCanceled(): return None
-        if self.debugging: self.setProgressMsg('세생활권 레이어를 초기화 합니다.....')
-        clipedliving = model.clipwithQgis(input=self.parameters['IN_LIVINGAREA'].sourceName(),
-                                        onlyselected=self.parameters['IN_LIVINGAREA_ONLYSELECTED'],
-                                        overlay=model.boundary)
-        out_path = ''
-        if self.debugging: out_path = os.path.join(self.workpath, 'cliped_living.shp')
-        clipedliving = model.addIDField(input=clipedliving, idfid=livingID, output=out_path)
 
-        # 불필요한 필드 값 제거(IN_LIVINGAREA)
-        out_path = ''
-        if self.debugging: out_path = os.path.join(self.workpath, 'cliped_living2.shp')
-        # if isinstance(clipedliving, str):
-        #     tmplyr = model.writeAsVectorLayer(clipedliving)
-        # else:
-        #     tmplyr = clipedliving
-        clipedliving = model.deleteFields(input=clipedliving, requredfields=[livingID], output=out_path)
 
-        if isinstance(clipedliving, str):
-            clipedliving = model.writeAsVectorLayer(clipedliving)
-        else:
-            clipedliving = clipedliving
-
-        model.livingareaIDField = livingID
 
 
         # 1-3 분석 지역 데이터 추출 : 인구데이터
@@ -284,12 +264,14 @@ class soc_locator_launcher:
         # 불필요한 필드 값 제거(IN_POP)
         out_path = ''
         if self.debugging: out_path = os.path.join(self.workpath, 'cliped_pop2.shp')
-        # if isinstance(clipedpop, str):
-        #     tmplyr = model.writeAsVectorLayer(clipedpop)
-        # else:
-        #     tmplyr = clipedpop
         clipedpop = model.deleteFields(input=clipedpop, requredfields=[self.parameters['IN_POP_CNTFID']], output=out_path)
 
+        out_path = ''
+        if self.debugging: out_path = os.path.join(self.workpath, 'cliped_pop3_withID.shp')
+        clipedpop = model.addIDField(input=clipedpop, idfid=popID, output=out_path)
+        model.populationLayer = clipedpop
+        model.popcntField = self.parameters['IN_POP_CNTFID']
+        model.popIDField = popID
 
 
 
@@ -326,37 +308,67 @@ class soc_locator_launcher:
         #
         #
         ################# [2 단계] 세생활권 인구정보와 생활SOC정보 분석 #################
-        self.setProgressMsg('[2 단계] 세생활권 인구정보와 생활SOC 분석......')
-        # 2-1 세생활권내 인구 분석
-        # 인구 계산
-        if self.feedback.isCanceled(): return None
-        out_path = ""
-        if self.debugging: out_path = os.path.join(self.workpath, 'cliped_livingwithpop.shp')
-        clipelivingwithpop = model.countpointsinpolygon(polylayer=clipedliving,
-                                                        pointslayer=clipedpop,
-                                                        field=self.parameters['IN_POP_CNTFID'],
-                                                        weight=self.parameters['IN_POP_CNTFID'],
-                                                        classfield=None,
-                                                        output=out_path)
+        if False:   # 세생활권 인구를 적용 할 경우(주석만 제거 하면 바로 활용 가능)
+            curStep += 1
+            self.setProgressMsg('[{} 단계] 세생활권 인구정보와 생활SOC 분석......'.format(curStep))
 
-        if isinstance(clipelivingwithpop, str):
-            clipelivingwithpop = model.writeAsVectorLayer(clipelivingwithpop)
-        else:
-            clipelivingwithpop = clipelivingwithpop
+            # 2-1 분석 지역 데이터 추출 : 세생활권
+            if self.feedback.isCanceled(): return None
+            if self.debugging: self.setProgressMsg('세생활권 레이어를 초기화 합니다.....')
+            clipedliving = model.clipwithQgis(input=self.parameters['IN_LIVINGAREA'].sourceName(),
+                                            onlyselected=self.parameters['IN_LIVINGAREA_ONLYSELECTED'],
+                                            overlay=model.boundary)
+            out_path = ''
+            if self.debugging: out_path = os.path.join(self.workpath, 'cliped_living.shp')
+            clipedliving = model.addIDField(input=clipedliving, idfid=livingID, output=out_path)
 
-        # 세생활권(인구수)레이어를 Point레이어로 변경
-        if self.feedback.isCanceled(): return None
-        out_path = ""
-        if self.debugging: out_path = os.path.join(self.workpath, 'cliped_pointlivingwithpop.shp')
-        clipepointlivingwithpop = model.centroidlayer(input=clipelivingwithpop,
-                                                 output=out_path)
+            # 불필요한 필드 값 제거(IN_LIVINGAREA)
+            out_path = ''
+            if self.debugging: out_path = os.path.join(self.workpath, 'cliped_living2.shp')
+            clipedliving = model.deleteFields(input=clipedliving, requredfields=[livingID], output=out_path)
 
-        if isinstance(clipepointlivingwithpop, str):
-            model.populationLayer = model.writeAsVectorLayer(clipepointlivingwithpop)
-        else:
-            model.populationLayer = clipepointlivingwithpop
-        model.popcntField = self.parameters['IN_POP_CNTFID']
-        model.popIDField = livingID
+            if isinstance(clipedliving, str):
+                clipedliving = model.writeAsVectorLayer(clipedliving)
+            else:
+                clipedliving = clipedliving
+
+            model.livingareaIDField = livingID
+
+            # 2-2 세생활권내 인구 분석
+            # 인구 계산
+            if self.feedback.isCanceled(): return None
+            out_path = ""
+            if self.debugging: out_path = os.path.join(self.workpath, 'cliped_livingwithpop.shp')
+            clipelivingwithpop = model.countpointsinpolygon(polylayer=clipedliving,
+                                                            pointslayer=clipedpop,
+                                                            field=self.parameters['IN_POP_CNTFID'],
+                                                            weight=self.parameters['IN_POP_CNTFID'],
+                                                            classfield=None,
+                                                            output=out_path)
+
+            if isinstance(clipelivingwithpop, str):
+                clipelivingwithpop = model.writeAsVectorLayer(clipelivingwithpop)
+            else:
+                clipelivingwithpop = clipelivingwithpop
+
+            # 세생활권(인구수)레이어를 Point레이어로 변경
+            if self.feedback.isCanceled(): return None
+            out_path = ""
+            if self.debugging: out_path = os.path.join(self.workpath, 'cliped_pointlivingwithpop.shp')
+            clipepointlivingwithpop = model.centroidlayer(input=clipelivingwithpop,
+                                                     output=out_path)
+
+            if isinstance(clipepointlivingwithpop, str):
+                model.populationLayer = model.writeAsVectorLayer(clipepointlivingwithpop)
+            else:
+                model.populationLayer = clipepointlivingwithpop
+            model.popcntField = self.parameters['IN_POP_CNTFID']
+            model.popIDField = livingID
+
+
+
+
+
 
         #
         #
@@ -364,7 +376,8 @@ class soc_locator_launcher:
         #
         #
         ################# [3 단계] 생활 SOC 잠재적 위치 데이터 생성 #################
-        self.setProgressMsg('[3 단계] 생활 SOC 잠재적 위치 데이터 생성......')
+        curStep += 1
+        self.setProgressMsg('[{} 단계] 생활 SOC 잠재적 위치 데이터 생성......'.format(curStep))
         # 3-1  잠재적 위치 데이터 생성
         if self.feedback.isCanceled(): return None
         if self.debugging:self.setProgressMsg('잠재적 후보지 그리드 데이터를 생성합니다.....')
@@ -406,7 +419,9 @@ class soc_locator_launcher:
         #
         #
         ################# [4 단계] 형평성 분석(직선거리) #################
-        self.setProgressMsg('[4 단계] 형평성 분석(직선거리)......')
+        curStep += 1
+        self.setProgressMsg('[{} 단계] 형평성 분석(직선거리)......'.format(curStep))
+
         # 4-1 형평성 분석 : 기존 생활 SOC 시설
         if self.feedback.isCanceled(): return None
         if self.debugging: self.setProgressMsg('기존 SOC 시설의 직선거리를 분석합니다.....')
@@ -1240,6 +1255,11 @@ class soc_locator_launcher:
             from soc_locator_model import soc_locator_model
         model = soc_locator_model(feedback=self.feedback, context=self.context, debugmode=self.debugging, workpath=self.workpath)
 
+        curStep = 0
+        curSOCID = 'CSOC_ID'
+        popID = 'POP_ID'
+        livingID = 'LIV_ID'
+
         #
         #
         #
@@ -1248,7 +1268,8 @@ class soc_locator_launcher:
         model.classify_count = self.parameters['IN_CALSSIFYNUM']
 
         ################# [1 단계] 분석 위한 데이터 초기화 : 분석 영역 데이터 추출 #################
-        self.setProgressMsg('[1 단계] 분석을 위한 데이터를 초기화 합니다......')
+        curStep += 1
+        self.setProgressMsg('[{} 단계] 분석을 위한 데이터를 초기화 합니다......'.format(curStep))
         # 1-1 분석 영역 데이터 생성
         if self.feedback.isCanceled(): return None
         out_path = ''
@@ -1301,30 +1322,6 @@ class soc_locator_launcher:
         model.linklengthfield = self.parameters['IN_LINK_LENGTH']
         model.linkSpeed = self.parameters['IN_LINK_SPEED']
 
-        # 1-4 분석 지역 데이터 추출 : 세생활권
-        if self.feedback.isCanceled(): return None
-        if self.debugging: self.setProgressMsg('세생활권 인구 레이어의 인근 노드를 찾습니다.....')
-
-        out_path = ''
-        if self.debugging: out_path = os.path.join(self.workpath, 'cliped_living.shp')
-        clipedliving = model.clipwithQgis(input=self.parameters['IN_LIVINGAREA'].sourceName(),
-                                             onlyselected=self.parameters['IN_LIVINGAREA_ONLYSELECTED'],
-                                             overlay=boundary,
-                                             output=out_path)
-
-
-        # 불필요한 필드 값 제거(IN_LIVINGAREA)
-        out_path = ''
-        if self.debugging:
-            out_path = os.path.join(self.workpath, 'cliped_living2.shp')
-        # if isinstance(clipedliving, str):
-        #     tmplyr = model.writeAsVectorLayer(clipedliving)
-        # else:
-        #     tmplyr = clipedliving
-        clipedliving = model.deleteFields(input=clipedliving, requredfields=[], output=out_path)
-
-
-
 
 
 
@@ -1341,11 +1338,12 @@ class soc_locator_launcher:
         # 불필요한 필드 값 제거(IN_POP)
         out_path = ''
         if self.debugging: out_path = os.path.join(self.workpath, 'cliped_pop2.shp')
-        # if isinstance(clipedpop, str):
-        #     tmplyr = model.writeAsVectorLayer(clipedpop)
-        # else:
-        #     tmplyr = clipedpop
         clipedpop = model.deleteFields(input=clipedpop, requredfields=[self.parameters['IN_POP_CNTFID']], output=out_path)
+
+        out_path = ''
+        if self.debugging: out_path = os.path.join(self.workpath, 'cliped_pop3_withID.shp')
+        clipedpop = model.addIDField(input=clipedpop, idfid=popID, output=out_path)
+
         #
 
         # 1-6 분석 지역 데이터 추출 : 기존 생활 SOC 시설
@@ -1393,42 +1391,74 @@ class soc_locator_launcher:
         #
         #
         #
+
         ################# [2 단계] 세생활권 인구정보와 생활SOC정보 분석 #################
-        self.setProgressMsg('[2 단계] 세생활권 인구정보와 생활SOC 분석......')
-        # 2-1 세생활권내 인구 분석
-        if self.debugging: self.setProgressMsg('세생활권내에 인구 분석......')
-        if self.debugging: out_path = os.path.join(self.workpath, 'cliped_livingwithpop.shp')
-        if self.feedback.isCanceled(): return None
+        curStep += 1
+        if False:
+            self.setProgressMsg('[{} 단계] 세생활권 인구정보와 생활SOC 분석......'.format(curStep))
+            # 2-1 분석 지역 데이터 추출 : 세생활권
+            if self.feedback.isCanceled(): return None
+            if self.debugging: self.setProgressMsg('세생활권 레이어를 초기화 합니다.....')
+            clipedliving = model.clipwithQgis(input=self.parameters['IN_LIVINGAREA'].sourceName(),
+                                              onlyselected=self.parameters['IN_LIVINGAREA_ONLYSELECTED'],
+                                              overlay=model.boundary)
+            out_path = ''
+            if self.debugging: out_path = os.path.join(self.workpath, 'cliped_living.shp')
+            clipedliving = model.addIDField(input=clipedliving, idfid=livingID, output=out_path)
 
-        # # clipedliving
-        # # clipedpop
-        #
-        # self.setProgressMsg('1111.............')
-        # clipedpop222 = model.createspatialindex(input=clipedpop)
-        # self.setProgressMsg('2222.............')
+            # 불필요한 필드 값 제거(IN_LIVINGAREA)
+            out_path = ''
+            if self.debugging: out_path = os.path.join(self.workpath, 'cliped_living2.shp')
+            clipedliving = model.deleteFields(input=clipedliving, requredfields=[livingID], output=out_path)
+
+            if isinstance(clipedliving, str):
+                clipedliving = model.writeAsVectorLayer(clipedliving)
+            else:
+                clipedliving = clipedliving
+
+            model.livingareaIDField = livingID
 
 
-        clipelivingwithpop = model.countpointsinpolygon(polylayer=clipedliving,
-                                                        pointslayer=clipedpop,
-                                                        field=self.parameters['IN_POP_CNTFID'],
-                                                        weight=self.parameters['IN_POP_CNTFID'],
-                                                        classfield=None,
-                                                        output=out_path)
 
-        # self.setProgressMsg('3333.............')
+            # 2-1 세생활권내 인구 분석
+            if self.feedback.isCanceled(): return None
+            out_path = ""
+            if self.debugging: out_path = os.path.join(self.workpath, 'cliped_livingwithpop.shp')
+            clipelivingwithpop = model.countpointsinpolygon(polylayer=clipedliving,
+                                                            pointslayer=clipedpop,
+                                                            field=self.parameters['IN_POP_CNTFID'],
+                                                            weight=self.parameters['IN_POP_CNTFID'],
+                                                            classfield=None,
+                                                            output=out_path)
 
-        # 2-2 거주인구 지점의 최근린 노드  검색
-        if self.debugging: self.setProgressMsg('세생활권(인구) 인근 노드 찾기......')
-        if self.feedback.isCanceled(): return None
-        out_path = ''
-        if self.debugging: out_path = os.path.join(self.workpath, 'popwithNode.shp')
-        popWithNode = model.nearesthubpoints(input=clipelivingwithpop,
-                                             onlyselected=False,
-                                             sf_hub=model.nodelayer,
-                                             hubfield=self.parameters['IN_NODE_ID'],
-                                             output=out_path
-                                             )
+            if isinstance(clipelivingwithpop, str):
+                clipelivingwithpop = model.writeAsVectorLayer(clipelivingwithpop)
+            else:
+                clipelivingwithpop = clipelivingwithpop
 
+            # 2-2 거주인구 지점의 최근린 노드  검색
+            if self.debugging: self.setProgressMsg('세생활권(인구) 인근 노드 찾기......')
+            if self.feedback.isCanceled(): return None
+            out_path = ''
+            if self.debugging: out_path = os.path.join(self.workpath, 'popwithNode.shp')
+            popWithNode = model.nearesthubpoints(input=clipelivingwithpop,
+                                                 onlyselected=False,
+                                                 sf_hub=model.nodelayer,
+                                                 hubfield=self.parameters['IN_NODE_ID'],
+                                                 output=out_path
+                                                 )
+        else:
+            if self.debugging: self.setProgressMsg('인구레이어의 인근 노드 찾기......')
+            if self.feedback.isCanceled(): return None
+            out_path = ''
+            if self.debugging: out_path = os.path.join(self.workpath, 'popwithNode.shp')
+
+            popWithNode = model.nearesthubpoints(input=clipedpop,
+                                                 onlyselected=False,
+                                                 sf_hub=model.nodelayer,
+                                                 hubfield=self.parameters['IN_NODE_ID'],
+                                                 output=out_path
+                                                 )
 
 
         if isinstance(popWithNode, str):
@@ -1443,7 +1473,8 @@ class soc_locator_launcher:
         #
         #
         ################# [3 단계] 생활 SOC 잠재적 위치 데이터 생성 #################
-        self.setProgressMsg('[3 단계] 생활 SOC 잠재적 위치 데이터 생성......')
+        curStep += 1
+        self.setProgressMsg('[{} 단계] 생활 SOC 잠재적 위치 데이터 생성......'.format(curStep))
         # 3-1  잠재적 위치 데이터 생성
         if self.feedback.isCanceled(): return None
         if self.debugging: self.setProgressMsg('잠재적 후보지 그리드 데이터를 생성합니다.....')
@@ -1494,7 +1525,8 @@ class soc_locator_launcher:
         #
         #
         ################# [4 단계] 최단거리 분석을 위한 네트워크 데이터 생성 #################
-        self.setProgressMsg('[4 단계] 최단거리 분석을 위한 네트워크 데이터 생성......\n(분석 조건에 따라 10분~60분 이상 소요됩니다...)')
+        curStep += 1
+        self.setProgressMsg('[{} 단계] 최단거리 분석을 위한 네트워크 데이터 생성......\n(분석 조건에 따라 10분~60분 이상 소요됩니다...)'.format(curStep))
         # 4-1 networkx 객체 생성
         if self.feedback.isCanceled(): return None
         if self.debugging: self.setProgressMsg('최단거리 분석을 위한 노드링크 객체를 생성합니다.....')
@@ -1518,7 +1550,8 @@ class soc_locator_launcher:
         #
         #
         ################# [5 단계] 형평성 분석(네트워크) #################
-        self.setProgressMsg('[5 단계] 형평성 분석(네트워크)......')
+        curStep += 1
+        self.setProgressMsg('[{} 단계] 형평성 분석(네트워크)......'.format(curStep))
         # 5-1 형평성 분석 : 기존 생활 SOC 시설
         if self.feedback.isCanceled(): return None
         if self.debugging: self.setProgressMsg('기존 SOC 시설의 최단거리를 분석합니다.....')
