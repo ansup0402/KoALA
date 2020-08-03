@@ -92,14 +92,14 @@ class LivingSOCEquityNetworkAlgorithm(QgsProcessingAlgorithm):
         )
 
 
-        # 세생활권 인구 레이어
-        self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.IN_LIVINGAREA,
-                "❖ " + self.tr('Sub-Neighborhood Unit'),
-                [QgsProcessing.TypeVectorPolygon],
-                optional=debugging)
-        )
+        # # 세생활권 인구 레이어
+        # self.addParameter(
+        #     QgsProcessingParameterFeatureSource(
+        #         self.IN_LIVINGAREA,
+        #         "❖ " + self.tr('Sub-Neighborhood Unit'),
+        #         [QgsProcessing.TypeVectorPolygon],
+        #         optional=debugging)
+        # )
 
 
         # 기존 SOC 시설 레이어
@@ -264,7 +264,7 @@ class LivingSOCEquityNetworkAlgorithm(QgsProcessingAlgorithm):
         keyword = {}
         keyword['IN_CURSOC'], keyword['IN_CURSOC_ONLYSELECTED'] = self.getLayerfromParameter(parameters, context, self.IN_CURSOC)
 
-        keyword['IN_LIVINGAREA'], keyword['IN_LIVINGAREA_ONLYSELECTED'] = self.getLayerfromParameter(parameters, context, self.IN_LIVINGAREA)
+        # keyword['IN_LIVINGAREA'], keyword['IN_LIVINGAREA_ONLYSELECTED'] = self.getLayerfromParameter(parameters, context, self.IN_LIVINGAREA)
 
         keyword['IN_POP'], keyword['IN_POP_ONLYSELECTED'] = self.getLayerfromParameter(parameters, context, self.IN_POP)
         keyword['IN_POP_CNTFID'] = self.parameterAsFields(parameters, self.IN_POP_CNTFID, context)[0]
