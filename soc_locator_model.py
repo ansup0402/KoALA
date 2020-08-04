@@ -782,6 +782,7 @@ class soc_locator_model:
                                                         targetlayerID=self.__currentSOCID,
                                                         output=tmpoutput)
 
+        # todo 여기 할 차례
         tmpoutput = ''
         if (self.debugging): tmpoutput = os.path.join(self.workpath, 'AllCurSOC2')
         statstable = self.qgsutils.statisticsbycategories(input=matrixDisLayer,

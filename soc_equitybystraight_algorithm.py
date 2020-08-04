@@ -58,7 +58,7 @@ class LivingSOCEquityStraightAlgorithm(QgsProcessingAlgorithm):
 
     IN_CURSOC = 'IN_CURSOC'
     # IN_CURSOC_ID = 'IN_CURSOC_ID'
-    IN_LIVINGAREA = 'IN_LIVINGAREA'
+    # IN_LIVINGAREA = 'IN_LIVINGAREA'
     IN_POP = 'IN_POP'
     # IN_LIVINGAREA_ID = 'IN_LIVINGAREA_ID'
     IN_POP_CNTFID = 'IN_POP_CNTFID'
@@ -82,14 +82,14 @@ class LivingSOCEquityStraightAlgorithm(QgsProcessingAlgorithm):
                 optional=debugging)
         )
 
-        # 세생활권 인구 레이어
-        self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.IN_LIVINGAREA,
-                '❖ ' + self.tr('Sub-Neighborhood Unit'),
-                [QgsProcessing.TypeVectorPolygon],
-                optional=debugging)
-        )
+        # # 세생활권 인구 레이어
+        # self.addParameter(
+        #     QgsProcessingParameterFeatureSource(
+        #         self.IN_LIVINGAREA,
+        #         '❖ ' + self.tr('Sub-Neighborhood Unit'),
+        #         [QgsProcessing.TypeVectorPolygon],
+        #         optional=debugging)
+        # )
 
         # 기존 SOC 시설 레이어
         self.addParameter(
@@ -174,7 +174,7 @@ class LivingSOCEquityStraightAlgorithm(QgsProcessingAlgorithm):
         keyword['IN_CURSOC'], keyword['IN_CURSOC_ONLYSELECTED'] = self.getLayerfromParameter(parameters, context, self.IN_CURSOC)
         # keyword['IN_CURSOC_ID'] = self.parameterAsFields(parameters, self.IN_CURSOC_ID, context)[0]
 
-        keyword['IN_LIVINGAREA'], keyword['IN_LIVINGAREA_ONLYSELECTED'] = self.getLayerfromParameter(parameters, context, self.IN_LIVINGAREA)
+        # keyword['IN_LIVINGAREA'], keyword['IN_LIVINGAREA_ONLYSELECTED'] = self.getLayerfromParameter(parameters, context, self.IN_LIVINGAREA)
         # keyword['IN_LIVINGAREA_ID'] = self.parameterAsFields(parameters, self.IN_LIVINGAREA_ID, context)[0]
 
         keyword['IN_POP'], keyword['IN_POP_ONLYSELECTED'] = self.getLayerfromParameter(parameters, context, self.IN_POP)
