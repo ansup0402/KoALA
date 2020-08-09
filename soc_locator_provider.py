@@ -41,6 +41,8 @@ from .soc_accessibilitystraight_algorithm import LivingSOCAccessibilitystraightA
 from .soc_efficiencylocatornetwork_algorithm import LivingSOCEfficiencynetworkAlgorithm
 from .soc_efficiencylocatorstraight_algorithm import LivingSOCEfficiencystraightAlgorithm
 
+# from .soc_test_algorithm import LivingSOCTestAlgorithm
+
 import os
 
 class LivingSOCLocatorProvider(QgsProcessingProvider):
@@ -86,6 +88,7 @@ class LivingSOCLocatorProvider(QgsProcessingProvider):
         self.addAlgorithm(LivingSOCEfficiencystraightAlgorithm())
         # add additional algorithms here
         # self.addAlgorithm(MyOtherAlgorithm())
+
 
     def id(self):
         """

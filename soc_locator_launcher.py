@@ -208,6 +208,12 @@ class soc_locator_launcher:
         if self.feedback.isCanceled(): return None
         dfPop = model.anal_accessibilityCurSOC_straight()
 
+
+        if self.debugging:
+            out_path = os.path.join(self.workpath, 'dfopop.csv')
+            dfPop.to_csv(out_path)
+
+
         # 3-2 접근성 분석 결과 평가
         # self.setProgressMsg('....... 접근성 분석 결과 평가')
         if self.feedback.isCanceled(): return None
@@ -891,11 +897,11 @@ class soc_locator_launcher:
         #                                overlayer=bufferedSOC,
         #                                overonlyselected=False,
         #                                output=out_path)
-
         if isinstance(poplyr, str):
             model.populationLayer = model.writeAsVectorLayer(poplyr)
         else:
             model.populationLayer = poplyr
+
 
 
         # 5-3 효율성 분석 : 잠재적 위치(서비스 영역 설정)
@@ -915,6 +921,9 @@ class soc_locator_launcher:
                                                        output=out_path
                                                        )
 
+
+
+
         # 해당 인구레이어는 잠재적레이어와 outter join 된 결과임
         if isinstance(popaddedpoten, str):
             model.populationLayer = model.writeAsVectorLayer(popaddedpoten)
@@ -928,10 +937,14 @@ class soc_locator_launcher:
         # 각 잠재적 위치의 서비스 영역내 포함되는 인구수
         potengpd = model.anal_efficiencyPotenSOC_straight(relpotenID=model.potentialID)
 
+
+
         # 5-6 효율성 분석 결과 평가
         if self.feedback.isCanceled(): return None
         if self.debugging: self.setProgressMsg('효율성 지수를 계산합니다.....')
         finallayer = model.make_efficiencyscore(output=self.parameters["OUTPUT"])
+
+        self.setProgressMsg("666666")
 
         return finallayer
 

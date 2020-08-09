@@ -3,6 +3,7 @@ import networkx as nx
 import pandas as pd
 import numpy as np
 from qgis.core import QgsVectorLayer
+import tempfile
 
 from processing.core.Processing import Processing
 Processing.initialize()
@@ -460,7 +461,7 @@ class soc_locator_model:
                                                   formula='\"{}\"'.format(popfield),
                                                   newfield=True)
 
-        applyedpoplyr = self.qgsutils.fieldCalculate(input=tmp,
+        applyedpoplyr = self.qgsutils.fieldCalculate(input=poplyr,
                                             fid=popfield,
                                             ftype=0,
                                             flen=10,
@@ -782,7 +783,11 @@ class soc_locator_model:
                                                         targetlayerID=self.__currentSOCID,
                                                         output=tmpoutput)
 
-        # todo 여기 할 차례
+
+        # tmpdir = tempfile.TemporaryDirectory()
+        # tmpoutput = os.path.join(tmpdir.name, 'AllCurSOC2')
+        # self.setProgressSubMsg('{} : {}'.format(tmpdir.name, os.path.exists(tmpdir.name)))
+
         tmpoutput = ''
         if (self.debugging): tmpoutput = os.path.join(self.workpath, 'AllCurSOC2')
         statstable = self.qgsutils.statisticsbycategories(input=matrixDisLayer,
@@ -790,6 +795,12 @@ class soc_locator_model:
                                                  categoriesfields=['InputID'],
                                                  valuefield='Distance',
                                                  output=tmpoutput)
+
+        if self.debugging:
+            self.setProgressSubMsg(len(matrixDisLayer))
+            self.setProgressSubMsg(len(self.__popSinglepartlayer))
+            self.setProgressSubMsg(len(statstable))
+
 
         tmpoutput = ''
         if (self.debugging): tmpoutput = os.path.join(self.workpath, 'AllCurSOC3.shp')
@@ -803,7 +814,13 @@ class soc_locator_model:
                                             output=tmpoutput
                                             )
 
+
+
         if isinstance(joinedpop, str): joinedpop = self.qgsutils.writeAsVectorLayer(joinedpop)
+
+        # # 임시디토리 삭제
+        # tmpdir.cleanup()
+        # self.setProgressSubMsg('{} : {}'.format(tmpdir.name, os.path.exists(tmpdir.name)))
 
         listPopID = []
         listPopCnt = []
@@ -829,7 +846,7 @@ class soc_locator_model:
                 accval = feature['M_MEAN'] * targetcnt
 
             # if str(accval).isnumeric() == False:
-            if str(accval) is None or str(accval) == 'NULL':
+            if accval is None or str(accval) is None or str(accval) == 'NULL':
                 accval = 0
 
             listPoptoSocDis.append(accval)
@@ -1171,9 +1188,15 @@ class soc_locator_model:
         dfPop = self.__dfPop
         dfPop[scorefield] = dfPop[self.__popcntField] * dfPop['DISTANCE']
 
-        dfgroupy = dfPop.groupby([self.__livinglyrID])[self.__popcntField, 'DISTANCE', scorefield].agg({scorefield : {'ACC_SCORE_SUM': 'sum'},
-                                                                                                         self.__popcntField: {'POP_SUM': 'sum'}
-                                                                                                         }).reset_index()
+        # 구 버전 문법
+        # dfgroupy = dfPop.groupby([self.__livinglyrID])[self.__popcntField, 'DISTANCE', scorefield].agg({scorefield : {'ACC_SCORE_SUM': 'sum'},
+        #                                                                                                  self.__popcntField: {'POP_SUM': 'sum'}
+        #                                                                                                  }).reset_index()
+        # 문법 변경
+        dfgroupy = dfPop.groupby([self.__livinglyrID])[self.__popcntField, 'DISTANCE', scorefield].agg(ACC_SCORE_SUM=(scorefield, 'sum'),
+                                                                                                       POP_SUM=("val", 'sum')).reset_index()
+
+
         dfgroupy[scorefield] = dfgroupy['ACC_SCORE_SUM'] / dfgroupy['POP_SUM']
 
         finanallayer = self.qgsutils.addField(input=self.__livingareaLayer,
@@ -1612,7 +1635,9 @@ class soc_locator_model:
                 addedpopCnt = 0
 
             # 잠재적 위치 서비스 영역안에 인구데이터가 하나도 없는 경우
-            if str(popCnt) is None or str(popCnt) == 'NULL': popCnt = 0
+            # self.setProgressSubMsg(str(popCnt))
+
+            if popCnt is None or str(popCnt) is None or str(popCnt) == 'NULL': popCnt = 0
 
             svrdPOPDict[potenID] = addedpopCnt + int(popCnt)
 
@@ -1672,7 +1697,7 @@ class soc_locator_model:
                 addedpopCnt = 0
 
             # 잠재적 위치 서비스 영역안에 인구데이터가 하나도 없는 경우
-            if str(popCnt) is None or str(popCnt) == 'NULL': popCnt = 0
+            if popCnt is None or str(popCnt) is None or str(popCnt) == 'NULL': popCnt = 0
 
             svrdPOPDict[potenID] = addedpopCnt + int(popCnt)
 
