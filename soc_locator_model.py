@@ -1193,8 +1193,12 @@ class soc_locator_model:
         #                                                                                                  self.__popcntField: {'POP_SUM': 'sum'}
         #                                                                                                  }).reset_index()
         # 문법 변경
-        dfgroupy = dfPop.groupby([self.__livinglyrID])[self.__popcntField, 'DISTANCE', scorefield].agg(ACC_SCORE_SUM=(scorefield, 'sum'),
-                                                                                                       POP_SUM=("val", 'sum')).reset_index()
+        # dfgroupy = dfPop.groupby([self.__livinglyrID])[self.__popcntField, 'DISTANCE', scorefield].agg(ACC_SCORE_SUM=(scorefield, 'sum'),
+        #                                                                                                POP_SUM=("val", 'sum')).reset_index()
+
+        dfgroupy = dfPop.groupby([self.__livinglyrID])[self.__popcntField, 'DISTANCE', scorefield].agg(['sum']).reset_index()
+        dfgroupy.columns = ["".join(x) for x in dfgroupy.columns.ravel()]
+        dfgroupy.rename(columns={self.__popcntField+"sum": "POP_SUM", "DISTANCE"+"sum": "DISTANCE_SUM", scorefield+"sum": "ACC_SCORE_SUM"}, inplace=True)
 
 
         dfgroupy[scorefield] = dfgroupy['ACC_SCORE_SUM'] / dfgroupy['POP_SUM']
