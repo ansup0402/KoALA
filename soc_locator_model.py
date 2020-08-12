@@ -643,20 +643,20 @@ class soc_locator_model:
 
         if self.debugging: self.setProgressSubMsg("[start] shortestAllnodes")
 
-        if self.debugging and output_alllink is not None and os.path.exists(output_alllink):
-            with open(output_alllink, 'rb') as handle:
-                allNodes = pickle.load(handle)
-        else:
-            if algorithm.lower() == 'johnson':
-                allNodes = dict(nx.johnson(self.nxGraph, weight='weight'))
-            elif algorithm.lower() == 'dijkstra':
-                allNodes = dict(nx.all_pairs_dijkstra_path_length(self.nxGraph, weight='weight', cutoff=cutoff))
-            elif algorithm.lower() == 'bellman':
-                allNodes = dict(nx.all_pairs_bellman_ford_path_length(self.nxGraph, weight='weight'))
+        # if self.debugging and output_alllink is not None and os.path.exists(output_alllink):
+        #     with open(output_alllink, 'rb') as handle:
+        #         allNodes = pickle.load(handle)
+        # else:
+        if algorithm.lower() == 'johnson':
+            allNodes = dict(nx.johnson(self.nxGraph, weight='weight'))
+        elif algorithm.lower() == 'dijkstra':
+            allNodes = dict(nx.all_pairs_dijkstra_path_length(self.nxGraph, weight='weight', cutoff=cutoff))
+        elif algorithm.lower() == 'bellman':
+            allNodes = dict(nx.all_pairs_bellman_ford_path_length(self.nxGraph, weight='weight'))
 
-            if self.debugging and output_alllink is not None:
-                with open(output_alllink, 'wb') as handle:
-                    pickle.dump(allNodes, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            # if self.debugging and output_alllink is not None:
+            #     with open(output_alllink, 'wb') as handle:
+            #         pickle.dump(allNodes, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
         if self.debugging: self.setProgressSubMsg("[END] shortestAllnodes")
 
@@ -1049,6 +1049,10 @@ class soc_locator_model:
                    'DISTANCE': listpopAccscore}
 
         self.__dfPop = pd.DataFrame(rawData)
+
+        if self.debugging:
+            self.__dfPop.to_csv(os.path.join(self.workpath, 'analyze_fromAllCurSOC.csv'))
+
 
         return self.__dfPop
 
