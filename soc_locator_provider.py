@@ -44,6 +44,7 @@ from .soc_efficiencylocatorstraight_algorithm import LivingSOCEfficiencystraight
 # from .soc_test_algorithm import LivingSOCTestAlgorithm
 
 import os
+import tempfile
 
 class LivingSOCLocatorProvider(QgsProcessingProvider):
 
@@ -51,6 +52,12 @@ class LivingSOCLocatorProvider(QgsProcessingProvider):
         """
         Default constructor.
         """
+
+        self.debugging = False
+
+
+        self.tempdir = tempfile.TemporaryDirectory()
+
         QgsProcessingProvider.__init__(self)
 
         locale = QSettings().value('locale/userLocale')[0:2]
@@ -72,22 +79,52 @@ class LivingSOCLocatorProvider(QgsProcessingProvider):
         Unloads the provider. Any tear-down steps required by the provider
         should be implemented here.
         """
-        pass
+        self.tempdir.cleanup()
+        # pass
 
     def loadAlgorithms(self):
         """
         Loads all algorithms belonging to this provider.
         """
-        self.addAlgorithm(LivingSOCEquityNetworkAlgorithm())
-        self.addAlgorithm(LivingSOCEquityStraightAlgorithm())
+        # self.addAlgorithm(LivingSOCEquityNetworkAlgorithm())
+        eqt_network = LivingSOCEquityNetworkAlgorithm()
+        eqt_network.temporaryDirectory = self.tempdir.name
+        eqt_network.debugmode = self.debugging
+        self.addAlgorithm(eqt_network)
 
-        self.addAlgorithm(LivingSOCAccessibilitynetworkAlgorithm())
-        self.addAlgorithm(LivingSOCAccessibilitystraightAlgorithm())
+        # self.addAlgorithm(LivingSOCEquityStraightAlgorithm())
+        eqt_straight = LivingSOCEquityStraightAlgorithm()
+        eqt_straight.temporaryDirectory = self.tempdir.name
+        eqt_straight.debugmode = self.debugging
+        self.addAlgorithm(eqt_straight)
 
-        self.addAlgorithm(LivingSOCEfficiencynetworkAlgorithm())
-        self.addAlgorithm(LivingSOCEfficiencystraightAlgorithm())
-        # add additional algorithms here
-        # self.addAlgorithm(MyOtherAlgorithm())
+
+        # self.addAlgorithm(LivingSOCAccessibilitynetworkAlgorithm())
+        acc_network = LivingSOCAccessibilitynetworkAlgorithm()
+        acc_network.temporaryDirectory = self.tempdir.name
+        acc_network.debugmode = self.debugging
+        self.addAlgorithm(acc_network)
+
+
+        # self.addAlgorithm(LivingSOCAccessibilitystraightAlgorithm())
+        acc_straight = LivingSOCAccessibilitystraightAlgorithm()
+        acc_straight.temporaryDirectory = self.tempdir.name
+        acc_straight.debugmode = self.debugging
+        self.addAlgorithm(acc_straight)
+
+
+
+        # self.addAlgorithm(LivingSOCEfficiencynetworkAlgorithm())
+        eff_network = LivingSOCEfficiencynetworkAlgorithm()
+        eff_network.temporaryDirectory = self.tempdir.name
+        eff_network.debugmode = self.debugging
+        self.addAlgorithm(eff_network)
+
+        # self.addAlgorithm(LivingSOCEfficiencystraightAlgorithm())
+        eff_straight = LivingSOCEfficiencystraightAlgorithm()
+        eff_straight.temporaryDirectory = self.tempdir.name
+        eff_straight.debugmode = self.debugging
+        self.addAlgorithm(eff_straight)
 
 
     def id(self):

@@ -38,6 +38,8 @@ from qgis.core import QgsProcessingAlgorithm, QgsApplication
 from .soc_locator_provider import LivingSOCLocatorProvider
 
 
+
+
 cmd_folder = os.path.split(inspect.getfile(inspect.currentframe()))[0]
 
 if cmd_folder not in sys.path:
@@ -49,6 +51,8 @@ class LivingSOCLocatorPlugin(object):
     def __init__(self):
         self.provider = None
 
+
+
     def initProcessing(self):
         """Init Processing provider for QGIS >= 3.8."""
         self.provider = LivingSOCLocatorProvider()
@@ -59,3 +63,5 @@ class LivingSOCLocatorPlugin(object):
 
     def unload(self):
         QgsApplication.processingRegistry().removeProvider(self.provider)
+
+

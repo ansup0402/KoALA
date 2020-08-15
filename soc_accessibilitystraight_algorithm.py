@@ -43,13 +43,15 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingParameterString,
                        QgsProcessingParameterFeatureSink)
 
-import os
-import pathlib
-cur_dir = pathlib.Path(__file__).parent
-debugging = os.path.exists(os.path.join(cur_dir, 'debugmode'))
-if debugging:
-    file = open(os.path.join(cur_dir, 'debugmode'), "r")
-    cur_dir = file.readline()
+# import tempfile
+# import os
+# import pathlib
+
+# cur_dir = pathlib.Path(__file__).parent
+# debugging = os.path.exists(os.path.join(cur_dir, 'debugmode'))
+# if debugging:
+#     file = open(os.path.join(cur_dir, 'debugmode'), "r")
+#     cur_dir = file.readline()
 
 class LivingSOCAccessibilitystraightAlgorithm(QgsProcessingAlgorithm):
 
@@ -69,6 +71,39 @@ class LivingSOCAccessibilitystraightAlgorithm(QgsProcessingAlgorithm):
 
     IN_CALSSIFYNUM = 'IN_CALSSIFYNUM'
 
+    # TEMP_DIR = None
+    #
+    #
+    # debugging = False
+    __debugging = False
+    __cur_dir = None
+
+    @property
+    def debugmode(self):
+        global __debugging
+        return __debugging
+        # return self.__debugging
+
+    @debugmode.setter
+    def debugmode(self, value):
+        global __debugging
+        __debugging = value
+        # self.__debugging = value
+
+    @property
+    def temporaryDirectory(self):
+        global __cur_dir
+        return __cur_dir
+
+
+    @temporaryDirectory.setter
+    def temporaryDirectory(self, value):
+        global __cur_dir
+        __cur_dir = value
+
+
+
+
 
     def initAlgorithm(self, config):
 
@@ -79,7 +114,7 @@ class LivingSOCAccessibilitystraightAlgorithm(QgsProcessingAlgorithm):
                 self.IN_SITE,
                 '❖ ' + self.tr('Analysis Site'),
                 [QgsProcessing.TypeVectorPolygon],
-                optional=debugging)
+                optional=False)
         )
 
         # # 세생활권 인구 레이어
@@ -109,7 +144,7 @@ class LivingSOCAccessibilitystraightAlgorithm(QgsProcessingAlgorithm):
                 self.IN_CURSOC,
                 '❖ ' + self.tr('Located Neighborhood Facility'),
                 [QgsProcessing.TypeVectorPoint],
-                optional=debugging)
+                optional=False)
         )
 
 
@@ -119,7 +154,7 @@ class LivingSOCAccessibilitystraightAlgorithm(QgsProcessingAlgorithm):
                 self.IN_POP,
                 '❖ ' + self.tr('Resident Population'),
                 [QgsProcessing.TypeVectorPoint],
-                optional=debugging)
+                optional=False)
         )
 
         # 인구 필드
@@ -130,7 +165,7 @@ class LivingSOCAccessibilitystraightAlgorithm(QgsProcessingAlgorithm):
                 None,
                 self.IN_POP,
                 QgsProcessingParameterField.Numeric,
-                optional=debugging)
+                optional=False)
         )
 
 
@@ -218,16 +253,22 @@ class LivingSOCAccessibilitystraightAlgorithm(QgsProcessingAlgorithm):
         except ImportError:
             from soc_locator_launcher import soc_locator_launcher
 
-        global debugging
-        global cur_dir
-        if debugging:
+        # global debugging
+        # global cur_dir
+
+        # feedback.pushInfo("debug :{}".format(str(self.debugmode)))
+
+        if self.debugmode:
             feedback.pushInfo("****** [START DEBUG] ******")
-            feedback.pushInfo(cur_dir)
-        launcher = soc_locator_launcher(feedback=feedback, context=context, parameters=params, debugging=debugging,
-                                        workpath=cur_dir)
+            feedback.pushInfo(self.temporaryDirectory)
+            # feedback.pushInfo(self.TEMP_DIR)
+
+        # launcher = soc_locator_launcher(feedback=feedback, context=context, parameters=params, debugging=debugging,
+        #                                 workpath=cur_dir)
+        launcher = soc_locator_launcher(feedback=feedback, context=context, parameters=params, debugging=self.debugmode,
+                                        workpath=self.temporaryDirectory)
 
         out_vector = launcher.execute_accessibility_in_straight()
-
         return {self.OUTPUT: out_vector}
 
 

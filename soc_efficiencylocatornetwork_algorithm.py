@@ -48,14 +48,14 @@ from qgis.core import (QgsProcessing,
                        QgsFeatureRequest,
                        QgsProcessingParameterFeatureSink)
 
-import os
-import pathlib
-
-cur_dir = pathlib.Path(__file__).parent
-debugging = os.path.exists(os.path.join(cur_dir, 'debugmode'))
-if debugging:
-    file = open(os.path.join(cur_dir, 'debugmode'), "r")
-    cur_dir = file.readline()
+# import os
+# import pathlib
+#
+# cur_dir = pathlib.Path(__file__).parent
+# debugging = os.path.exists(os.path.join(cur_dir, 'debugmode'))
+# if debugging:
+#     file = open(os.path.join(cur_dir, 'debugmode'), "r")
+#     cur_dir = file.readline()
 
 class LivingSOCEfficiencynetworkAlgorithm(QgsProcessingAlgorithm):
 
@@ -79,6 +79,33 @@ class LivingSOCEfficiencynetworkAlgorithm(QgsProcessingAlgorithm):
     IN_CALSSIFYNUM = 'IN_CALSSIFYNUM'
     OUTPUT = 'OUTPUT'
 
+    __debugging = False
+    __cur_dir = None
+
+    @property
+    def debugmode(self):
+        global __debugging
+        return __debugging
+        # return self.__debugging
+
+    @debugmode.setter
+    def debugmode(self, value):
+        global __debugging
+        __debugging = value
+        # self.__debugging = value
+
+    @property
+    def temporaryDirectory(self):
+        global __cur_dir
+        return __cur_dir
+
+
+    @temporaryDirectory.setter
+    def temporaryDirectory(self, value):
+        global __cur_dir
+        __cur_dir = value
+
+
     def initAlgorithm(self, config):
 
         #분석지역
@@ -87,7 +114,7 @@ class LivingSOCEfficiencynetworkAlgorithm(QgsProcessingAlgorithm):
                 self.IN_SITE,
                 '❖ ' + self.tr('Analysis Site'),
                 [QgsProcessing.TypeVectorPolygon],
-                optional=debugging)
+                optional=False)
         )
 
 
@@ -97,7 +124,7 @@ class LivingSOCEfficiencynetworkAlgorithm(QgsProcessingAlgorithm):
                 self.IN_CURSOC,
                 '❖ ' + self.tr('Located Neighborhood Facility'),
                 [QgsProcessing.TypeVectorPoint],
-                optional=debugging)
+                optional=False)
         )
 
 
@@ -108,7 +135,7 @@ class LivingSOCEfficiencynetworkAlgorithm(QgsProcessingAlgorithm):
                 self.IN_POP,
                 '❖ ' + self.tr('Resident Population'),
                 [QgsProcessing.TypeVectorPoint],
-                optional=debugging)
+                optional=False)
         )
 
         # 인구 필드
@@ -119,7 +146,7 @@ class LivingSOCEfficiencynetworkAlgorithm(QgsProcessingAlgorithm):
                 None,
                 self.IN_POP,
                 QgsProcessingParameterField.Numeric,
-                optional=debugging)
+                optional=False)
         )
 
 
@@ -151,7 +178,7 @@ class LivingSOCEfficiencynetworkAlgorithm(QgsProcessingAlgorithm):
                 self.IN_NODE,
                 '❖ ' + self.tr('Node Layer'),
                 [QgsProcessing.TypeVectorPoint],
-                optional=debugging)
+                optional=False)
         )
         # 노드레이어 PK
         self.addParameter(
@@ -161,7 +188,7 @@ class LivingSOCEfficiencynetworkAlgorithm(QgsProcessingAlgorithm):
                 None,
                 self.IN_NODE,
                 QgsProcessingParameterField.Any,
-                optional=debugging)
+                optional=False)
         )
 
         # 링크레이어
@@ -170,7 +197,7 @@ class LivingSOCEfficiencynetworkAlgorithm(QgsProcessingAlgorithm):
                 self.IN_LINK,
                 '❖ ' + self.tr('Link Layer'),
                 [QgsProcessing.TypeVectorLine],
-                optional=debugging)
+                optional=False)
         )
 
         self.addParameter(
@@ -179,7 +206,7 @@ class LivingSOCEfficiencynetworkAlgorithm(QgsProcessingAlgorithm):
                 self.tr('Network direction'),
                 options=[self.tr('One-way'), self.tr('Bidirectional')],
                 defaultValue=1,
-                optional=debugging)
+                optional=False)
         )
 
         # 기점 노드 필드
@@ -190,7 +217,7 @@ class LivingSOCEfficiencynetworkAlgorithm(QgsProcessingAlgorithm):
                 None,
                 self.IN_LINK,
                 QgsProcessingParameterField.Any,
-                optional=debugging)
+                optional=False)
         )
 
         self.addParameter(
@@ -200,7 +227,7 @@ class LivingSOCEfficiencynetworkAlgorithm(QgsProcessingAlgorithm):
                 None,
                 self.IN_LINK,
                 QgsProcessingParameterField.Any,
-                optional=debugging)
+                optional=False)
         )
 
         self.addParameter(
@@ -210,7 +237,7 @@ class LivingSOCEfficiencynetworkAlgorithm(QgsProcessingAlgorithm):
                 None,
                 self.IN_LINK,
                 QgsProcessingParameterField.Numeric,
-                optional=debugging)
+                optional=False)
         )
         self.addParameter(
             QgsProcessingParameterField(
@@ -316,13 +343,26 @@ class LivingSOCEfficiencynetworkAlgorithm(QgsProcessingAlgorithm):
         except ImportError:
             from soc_locator_launcher import soc_locator_launcher
 
-        global debugging
-        global cur_dir
-        if debugging:
+        # global debugging
+        # global cur_dir
+        # if debugging:
+        #     feedback.pushInfo("****** [START DEBUG] ******")
+        #     feedback.pushInfo(cur_dir)
+        # launcher = soc_locator_launcher(feedback=feedback, context=context, parameters=params, debugging=debugging,
+        #                                 workpath=cur_dir)
+
+
+
+        if self.debugmode:
             feedback.pushInfo("****** [START DEBUG] ******")
-            feedback.pushInfo(cur_dir)
-        launcher = soc_locator_launcher(feedback=feedback, context=context, parameters=params, debugging=debugging,
-                                        workpath=cur_dir)
+            feedback.pushInfo(self.temporaryDirectory)
+            # feedback.pushInfo(self.TEMP_DIR)
+
+        # launcher = soc_locator_launcher(feedback=feedback, context=context, parameters=params, debugging=debugging,
+        #                                 workpath=cur_dir)
+        launcher = soc_locator_launcher(feedback=feedback, context=context, parameters=params, debugging=self.debugmode,
+                                        workpath=self.temporaryDirectory)
+
 
         out_vector = launcher.execute_efficiency_in_network()
 
