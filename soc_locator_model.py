@@ -643,20 +643,22 @@ class soc_locator_model:
 
         if self.debugging: self.setProgressSubMsg("[start] shortestAllnodes")
 
+        if False:
         # if self.debugging and output_alllink is not None and os.path.exists(output_alllink):
-        #     with open(output_alllink, 'rb') as handle:
-        #         allNodes = pickle.load(handle)
-        # else:
-        if algorithm.lower() == 'johnson':
-            allNodes = dict(nx.johnson(self.nxGraph, weight='weight'))
-        elif algorithm.lower() == 'dijkstra':
-            allNodes = dict(nx.all_pairs_dijkstra_path_length(self.nxGraph, weight='weight', cutoff=cutoff))
-        elif algorithm.lower() == 'bellman':
-            allNodes = dict(nx.all_pairs_bellman_ford_path_length(self.nxGraph, weight='weight'))
+            with open(output_alllink, 'rb') as handle:
+                allNodes = pickle.load(handle)
+        else:
+            if algorithm.lower() == 'johnson':
+                allNodes = dict(nx.johnson(self.nxGraph, weight='weight'))
+            elif algorithm.lower() == 'dijkstra':
+                allNodes = dict(nx.all_pairs_dijkstra_path_length(self.nxGraph, weight='weight', cutoff=cutoff))
+            elif algorithm.lower() == 'bellman':
+                allNodes = dict(nx.all_pairs_bellman_ford_path_length(self.nxGraph, weight='weight'))
 
+            if False:
             # if self.debugging and output_alllink is not None:
-            #     with open(output_alllink, 'wb') as handle:
-            #         pickle.dump(allNodes, handle, protocol=pickle.HIGHEST_PROTOCOL)
+                with open(output_alllink, 'wb') as handle:
+                    pickle.dump(allNodes, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
         if self.debugging: self.setProgressSubMsg("[END] shortestAllnodes")
 
@@ -841,6 +843,8 @@ class soc_locator_model:
 
             accval = 0
             if (self.__cutoff is not None) and (self.__cutoff > 0):
+                # todo 거리조락 처리?? + 인구 배제율 처리...(구현 여부 확인 필요)
+
                 accval = feature['M_SUM']
             else:
                 accval = feature['M_MEAN'] * targetcnt
@@ -906,6 +910,8 @@ class soc_locator_model:
                     if self.debugging:
                         self.setProgressSubMsg("[NODE-%s] 해당 인구데이터의 %sm 이내에는 현재 생활SOC가 없습니다." % (str(popNodeid), str(self.cutoff)))
                     notfounddatacnt += 1
+
+                    # todo "CUR_ISSVRED" 필드 추가(확인 필요 : 여긴 모든 시설의 고려하기 때문에 부적절(효율성은 최인근시설 하나만 계산)
 
 
                 calculatedNode[popNodeid] = dis
