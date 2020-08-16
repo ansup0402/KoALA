@@ -129,7 +129,7 @@ class LivingSOCAccessibilitynetworkAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.IN_LIVINGAREA,
                 # "❖ " + self.tr('Facility Effective Service Coverage : If you input 0, it is regarded as the whole area'),
-                "❖ " + self.tr('Sub-Neighborhood Unit'),
+                "❖ " + self.tr('Sub-Neighborhood Unit(m)'),
                 QgsProcessingParameterNumber.Integer,
                 200, False, 10, 10000)  # 디폴트, 옵션, 미니멈, 맥시멈
         )

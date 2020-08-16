@@ -367,18 +367,33 @@ class soc_locator_launcher:
         self.setProgressMsg('[{} 단계] 생활 SOC 잠재적 위치 데이터 생성......'.format(curStep))
         # 3-1  잠재적 위치 데이터 생성
         if self.feedback.isCanceled(): return None
-        if self.debugging:self.setProgressMsg('잠재적 후보지 그리드 데이터를 생성합니다.....')
-        out_path = os.path.join(self.workpath, 'grid.shp')
-        gridlayer = model.createGridfromLayer(sourcelayer=model.boundary,
-                                              gridsize=self.parameters['IN_GRID_SIZE'],
-                                              output=out_path)
+
+
+        usergrid = self.parameters['IN_USERGRID']
+        if self.debugging: self.setProgressMsg('사용자 후보지 레이어 : {}'.format(str(usergrid)))
+
+        gridlayer = None
+        onlyselected = False
+        if usergrid == None:
+            if self.debugging: self.setProgressMsg('잠재적 후보지 그리드 데이터를 생성합니다.....')
+            out_path = os.path.join(self.workpath, 'grid.shp')
+            gridlayer = model.createGridfromLayer(sourcelayer=model.boundary,
+                                                  gridsize=self.parameters['IN_GRID_SIZE'],
+                                                  output=out_path)
+        else:
+            gridlayer = self.parameters['IN_USERGRID'].sourceName()
+            onlyselected = self.parameters['IN_USERGRID_ONLYSELECTED']
+
+
+        if self.debugging: self.setProgressMsg('분석할 후보지 타입 : {}({})'.format(type(gridlayer), len(gridlayer)))
+
 
         # 3-2 분석 지역 데이터 추출 : 잠재적 위치
         if self.feedback.isCanceled(): return None
         if self.debugging:self.setProgressMsg('잠재적 후보지 데이터를 초기화 합니다.....')
         out_path = os.path.join(self.workpath, 'cliped_grid.shp')
         clipedgrid = model.clipwithQgis(input=gridlayer,
-                                        onlyselected=False,
+                                        onlyselected=onlyselected,
                                         overlay=model.boundary,
                                         output=out_path)
 
@@ -387,17 +402,34 @@ class soc_locator_launcher:
         else:
             grid = clipedgrid
 
+        #add grid id : 코드 일관성 유지를 위해 자동으로 생성되는 id사용안함(사용자 후보지 고려)
+        gridid = "GRID_ID"
+        out_path = os.path.join(self.workpath, 'final_grid.shp')
+        grid = model.addIDField(input=grid, idfid=gridid, output=out_path)
+        model.potentialID = gridid
+
+
         if isinstance(grid, str):
             model.potentiallayer = model.writeAsVectorLayer(grid)
         else:
             model.potentiallayer = grid
-        model.potentialID = "id"    # "ID"필드가 자동으로 생성됨
+
+
+        if self.debugging: self.setProgressMsg("잠재적 후보지 : {}개 ".format(len(model.potentiallayer)))
+
+
+        #
+        #
+        #
+        #
+        #
+        #
+        #
+
 
         # 10. 분석 실행(기존 시설 거리 분석)
         model.cutoff = self.parameters['IN_LIMIT_DIST']
         model.outofcutoff = self.parameters['IN_LIMIT_DIST'] * 2
-
-
         #
         #
         #
@@ -784,31 +816,60 @@ class soc_locator_launcher:
         #
         #
         ################# [2 단계] 생활 SOC 잠재적 위치 데이터 생성 #################
-        self.setProgressMsg('[2 단계] 세생활권 인구정보와 생활SOC 분석......')
+        curStep = 2
+        self.setProgressMsg('[{} 단계] 생활 SOC 잠재적 위치 데이터 생성......'.format(curStep))
         # 3-1  잠재적 위치 데이터 생성
         if self.feedback.isCanceled(): return None
-        if self.debugging: self.setProgressMsg('잠재적 후보지 그리드 데이터를 생성합니다.....')
-        out_path = os.path.join(self.workpath, 'grid.shp')
-        gridlayer = model.createGridfromLayer(sourcelayer=model.boundary,
-                                              gridsize=self.parameters['IN_GRID_SIZE'],
-                                              output=out_path)
 
+
+        usergrid = self.parameters['IN_USERGRID']
+        if self.debugging: self.setProgressMsg('사용자 후보지 레이어 : {}'.format(str(usergrid)))
+
+        gridlayer = None
+        onlyselected = False
+        if usergrid == None:
+            if self.debugging: self.setProgressMsg('잠재적 후보지 그리드 데이터를 생성합니다.....')
+            out_path = os.path.join(self.workpath, 'grid.shp')
+            gridlayer = model.createGridfromLayer(sourcelayer=model.boundary,
+                                                  gridsize=self.parameters['IN_GRID_SIZE'],
+                                                  output=out_path)
+        else:
+            gridlayer = self.parameters['IN_USERGRID'].sourceName()
+            onlyselected = self.parameters['IN_USERGRID_ONLYSELECTED']
+
+
+        if self.debugging: self.setProgressMsg('분석할 후보지 타입 : {}({})'.format(type(gridlayer), len(gridlayer)))
 
 
         # 3-2 분석 지역 데이터 추출 : 잠재적 위치
         if self.feedback.isCanceled(): return None
-        if self.debugging: self.setProgressMsg('잠재적 후보지 데이터를 초기화 합니다.....')
+        if self.debugging:self.setProgressMsg('잠재적 후보지 데이터를 초기화 합니다.....')
         out_path = os.path.join(self.workpath, 'cliped_grid.shp')
         clipedgrid = model.clipwithQgis(input=gridlayer,
-                                        onlyselected=False,
+                                        onlyselected=onlyselected,
                                         overlay=model.boundary,
                                         output=out_path)
 
         if isinstance(clipedgrid, str):
-            model.potentiallayer = model.writeAsVectorLayer(clipedgrid)
+            grid = model.writeAsVectorLayer(clipedgrid)
         else:
-            model.potentiallayer = clipedgrid
-        model.potentialID = "id"  # "ID"필드가 자동으로 생성됨
+            grid = clipedgrid
+
+        #add grid id : 코드 일관성 유지를 위해 자동으로 생성되는 id사용안함(사용자 후보지 고려)
+        gridid = "GRID_ID"
+        out_path = os.path.join(self.workpath, 'final_grid.shp')
+        grid = model.addIDField(input=grid, idfid=gridid, output=out_path)
+        model.potentialID = gridid
+
+
+        if isinstance(grid, str):
+            model.potentiallayer = model.writeAsVectorLayer(grid)
+        else:
+            model.potentiallayer = grid
+
+
+        if self.debugging: self.setProgressMsg("잠재적 후보지 : {}개 ".format(len(model.potentiallayer)))
+
 
 
         #
@@ -886,7 +947,7 @@ class soc_locator_launcher:
         if self.feedback.isCanceled(): return None
         if self.debugging: self.setProgressMsg('잠재적 위치의 최단거리를 분석합니다.....')
         # 각 잠재적 위치의 서비스 영역내 포함되는 인구수
-        potengpd = model.anal_efficiencyPotenSOC_straight(relpotenID=model.potentialID)
+        potengpd = model.anal_efficiencyPotenSOC_straight()
 
 
 
@@ -1042,21 +1103,34 @@ class soc_locator_launcher:
         #
         #
         ################# [3 단계] 생활 SOC 잠재적 위치 데이터 생성 #################
-        self.setProgressMsg('[3 단계] 생활 SOC 잠재적 위치 데이터 생성......')
+        curStep = 3
+        self.setProgressMsg('[{} 단계] 생활 SOC 잠재적 위치 데이터 생성......'.format(curStep))
         # 3-1  잠재적 위치 데이터 생성
         if self.feedback.isCanceled(): return None
-        if self.debugging: self.setProgressMsg('잠재적 후보지 그리드 데이터를 생성합니다.....')
-        out_path = os.path.join(self.workpath, 'grid.shp')
-        gridlayer = model.createGridfromLayer(sourcelayer=model.boundary,
-                                              gridsize=self.parameters['IN_GRID_SIZE'],
-                                              output=out_path)
+
+        usergrid = self.parameters['IN_USERGRID']
+        if self.debugging: self.setProgressMsg('사용자 후보지 레이어 : {}'.format(str(usergrid)))
+
+        gridlayer = None
+        onlyselected = False
+        if usergrid == None:
+            if self.debugging: self.setProgressMsg('잠재적 후보지 그리드 데이터를 생성합니다.....')
+            out_path = os.path.join(self.workpath, 'grid.shp')
+            gridlayer = model.createGridfromLayer(sourcelayer=model.boundary,
+                                                  gridsize=self.parameters['IN_GRID_SIZE'],
+                                                  output=out_path)
+        else:
+            gridlayer = self.parameters['IN_USERGRID'].sourceName()
+            onlyselected = self.parameters['IN_USERGRID_ONLYSELECTED']
+
+        if self.debugging: self.setProgressMsg('분석할 후보지 타입 : {}({})'.format(type(gridlayer), len(gridlayer)))
 
         # 3-2 분석 지역 데이터 추출 : 잠재적 위치
         if self.feedback.isCanceled(): return None
         if self.debugging: self.setProgressMsg('잠재적 후보지 데이터를 초기화 합니다.....')
         out_path = os.path.join(self.workpath, 'cliped_grid.shp')
         clipedgrid = model.clipwithQgis(input=gridlayer,
-                                        onlyselected=False,
+                                        onlyselected=onlyselected,
                                         overlay=model.boundary,
                                         output=out_path)
 
@@ -1064,6 +1138,12 @@ class soc_locator_launcher:
             grid = model.writeAsVectorLayer(clipedgrid)
         else:
             grid = clipedgrid
+
+        # add grid id : 코드 일관성 유지를 위해 자동으로 생성되는 id사용안함(사용자 후보지 고려)
+        gridid = "GRID_ID"
+        out_path = os.path.join(self.workpath, 'final_grid.shp')
+        grid = model.addIDField(input=grid, idfid=gridid, output=out_path)
+        model.potentialID = gridid
 
         # 3-3 잠재적 위치의 최근린 노드  검색
         if self.feedback.isCanceled(): return None
@@ -1079,7 +1159,6 @@ class soc_locator_launcher:
             model.potentiallayer = model.writeAsVectorLayer(gridwithNode)
         else:
             model.potentiallayer = gridwithNode
-        model.potentialID = "id"  # "ID"필드가 자동으로 생성됨
         #
         #
         #
@@ -1408,28 +1487,43 @@ class soc_locator_launcher:
         self.setProgressMsg('[{} 단계] 생활 SOC 잠재적 위치 데이터 생성......'.format(curStep))
         # 3-1  잠재적 위치 데이터 생성
         if self.feedback.isCanceled(): return None
-        if self.debugging: self.setProgressMsg('잠재적 후보지 그리드 데이터를 생성합니다.....')
-        out_path = os.path.join(self.workpath, 'grid.shp')
-        gridlayer = model.createGridfromLayer(sourcelayer=model.boundary,
-                                              gridsize=self.parameters['IN_GRID_SIZE'],
-                                              output=out_path)
+
+        usergrid = self.parameters['IN_USERGRID']
+        if self.debugging: self.setProgressMsg('사용자 후보지 레이어 : {}'.format(str(usergrid)))
+
+        gridlayer = None
+        onlyselected = False
+        if usergrid == None:
+            if self.debugging: self.setProgressMsg('잠재적 후보지 그리드 데이터를 생성합니다.....')
+            out_path = os.path.join(self.workpath, 'grid.shp')
+            gridlayer = model.createGridfromLayer(sourcelayer=model.boundary,
+                                                  gridsize=self.parameters['IN_GRID_SIZE'],
+                                                  output=out_path)
+        else:
+            gridlayer = self.parameters['IN_USERGRID'].sourceName()
+            onlyselected = self.parameters['IN_USERGRID_ONLYSELECTED']
+
+        if self.debugging: self.setProgressMsg('분석할 후보지 타입 : {}({})'.format(type(gridlayer), len(gridlayer)))
 
         # 3-2 분석 지역 데이터 추출 : 잠재적 위치
         if self.feedback.isCanceled(): return None
         if self.debugging: self.setProgressMsg('잠재적 후보지 데이터를 초기화 합니다.....')
         out_path = os.path.join(self.workpath, 'cliped_grid.shp')
         clipedgrid = model.clipwithQgis(input=gridlayer,
-                                        onlyselected=False,
+                                        onlyselected=onlyselected,
                                         overlay=model.boundary,
                                         output=out_path)
-
-
-
 
         if isinstance(clipedgrid, str):
             grid = model.writeAsVectorLayer(clipedgrid)
         else:
             grid = clipedgrid
+
+        # add grid id : 코드 일관성 유지를 위해 자동으로 생성되는 id사용안함(사용자 후보지 고려)
+        gridid = "GRID_ID"
+        out_path = os.path.join(self.workpath, 'final_grid.shp')
+        grid = model.addIDField(input=grid, idfid=gridid, output=out_path)
+        model.potentialID = gridid
 
         # 3-3 잠재적 위치의 최근린 노드  검색
         if self.feedback.isCanceled(): return None
@@ -1445,7 +1539,9 @@ class soc_locator_launcher:
             model.potentiallayer = model.writeAsVectorLayer(gridwithNode)
         else:
             model.potentiallayer = gridwithNode
-        model.potentialID = "ID"  # "ID"필드가 자동으로 생성됨
+
+
+        if self.debugging: self.setProgressMsg("잠재적 후보지 : {}개 ".format(len(model.potentiallayer)))
 
         #
         #

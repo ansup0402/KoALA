@@ -53,7 +53,8 @@ class LivingSOCLocatorProvider(QgsProcessingProvider):
         Default constructor.
         """
 
-        self.debugging = False
+        # self.debugging = False
+        self.debugging = True
 
 
         self.tempdir = tempfile.TemporaryDirectory()
@@ -79,7 +80,8 @@ class LivingSOCLocatorProvider(QgsProcessingProvider):
         Unloads the provider. Any tear-down steps required by the provider
         should be implemented here.
         """
-        self.tempdir.cleanup()
+
+        if not self.debugging: self.tempdir.cleanup()
         # pass
 
     def loadAlgorithms(self):

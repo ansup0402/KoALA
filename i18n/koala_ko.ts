@@ -44,8 +44,8 @@
         <translation>생활SOC 시설(Point))</translation>
     </message>
     <message>
-        <source>Sub-Neighborhood Unit</source>
-        <translation>세생활권(Polygon)</translation>
+        <source>Sub-Neighborhood Unit(m)</source>
+        <translation>세생활권(m)</translation>
     </message>
     <message>
         <source>Resident Population</source>
@@ -139,8 +139,10 @@
         <source>Population Exclusion Ratio(%)</source>
         <translation>기존 서비스 지역 내 인구 배제 비율(%)</translation>
     </message>
-
-
+    <message>
+        <source>New Facility Location Review Area(Point)</source>
+        <translation>잠재적 후보지 지정(Point)</translation>
+    </message>
 </context>
 </TS>
 

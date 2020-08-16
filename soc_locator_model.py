@@ -429,6 +429,7 @@ class soc_locator_model:
 
 
 
+    # 선택된 인구만(서비스 중인 시설) 배제율 적용
     def calpopexclusratio(self, poplyr, popratiofield, popfield, exlusrate, output=None):
 
         editstatus = poplyr.startEditing()
@@ -437,6 +438,8 @@ class soc_locator_model:
         selection = poplyr.selectedFeatures()
 
         totalcnt  = len(selection)
+        if self.debugging: self.setProgressSubMsg("선택피처 : %s" % str(totalcnt))
+
         i = 0
         for feature in selection:
             i += 1
@@ -574,57 +577,8 @@ class soc_locator_model:
 
         # # selbyloc : applyArea
         self.selectbylocation(input=poplyr, intersect=applyArea)
-        # self, poplyr, popratiofield, popfield, exlusrate, output = None
         return self.calpopexclusratio(poplyr=poplyr, popratiofield=popratiofield, popfield=popfield, exlusrate=exlusrate, output=output)
-        # self.selpopinsvrareaEuclidean(input=poplyr, intersect=applyArea)
 
-        #
-        # editstatus = poplyr.startEditing()
-        # if self.debugging: self.setProgressSubMsg("editmode : %s" % str(editstatus))
-        #
-        # selection = poplyr.selectedFeatures()
-        #
-        # totalcnt  = len(selection)
-        # i = 0
-        # for feature in selection:
-        #     i += 1
-        #     if self.feedback.isCanceled(): return None
-        #     self.feedback.setProgress(int(i / totalcnt * 100))
-        #
-        #     # 선택객체 : pop_ratio = ratio 변경
-        #     feature[popratiofield] = exlusrate
-        #     poplyr.updateFeature(feature)
-        #
-        # editstatus = poplyr.commitChanges()
-        # if self.debugging: self.setProgressSubMsg("commit : %s" % str(editstatus))
-        #
-        # # poprate = (100 - popexlusrate) / 100
-        # # popfield = popfield * pop_ratio 변경
-        # if self.debugging:
-        #     tmp = self.qgsutils.fieldCalculate(input=poplyr,
-        #                                           fid="ORG_POP",
-        #                                           ftype=1,
-        #                                           flen=10,
-        #                                           fprecision=4,
-        #                                           formula='\"{}\"'.format(popfield),
-        #                                           newfield=True)
-        #
-        # applyedpoplyr = self.qgsutils.fieldCalculate(input=tmp,
-        #                                     fid=popfield,
-        #                                     ftype=0,
-        #                                     flen=10,
-        #                                     fprecision=4,
-        #                                     formula='(100 - \"{}\") / 100 * \"{}\"'.format(popratiofield, popfield),
-        #                                     newfield=False)
-        #
-        # if output is None:
-        #     if self.debugging: self.setProgressSubMsg("output is none")
-        #     resultlayer = applyedpoplyr
-        # else:
-        #     if self.debugging: self.setProgressSubMsg("output is not none")
-        #     resultlayer = self.vectoclayer2output(input=applyedpoplyr, output=output)
-        #
-        # return resultlayer
 
 
 
@@ -732,6 +686,7 @@ class soc_locator_model:
 
 
 
+    #사용 : 형평성(직선)
     def getPopdistmatrixDataLayer(self, targetlayer, targetlayerID, output):
 
         # 1) 싱글파트로 변경
@@ -749,9 +704,10 @@ class soc_locator_model:
         matrixtype = 2
         if (self.__cutoff is not None) and (self.__cutoff > 0): matrixtype = 0
 
-        tmpoutput = ''
-        if (self.debugging): tmpoutput = os.path.join(self.workpath, 'popdistmatrix1_%s.shp' % targetlayer.sourceName())
 
+        tmpoutput = os.path.join(self.workpath, 'popdistmatrix1_%s.shp' % targetlayer.sourceName())
+        if self.debugging:
+            self.setProgressSubMsg("distancematrix(인구-SOC(기존 or 신규) : {}".format(tmpoutput))
         matrix_distance = self.qgsutils.distancematrix(input=singlepop,
                                                       inputonlyselected=False,
                                                       inputfield=self.popIDField,
@@ -776,22 +732,29 @@ class soc_locator_model:
 
     def anal_AllCurSOC_straight(self):
 
-        tmpoutput = ''
         if self.debugging:
-            tmpoutput = os.path.join(self.workpath, 'AllCurSOC1.shp')
-            self.setProgressSubMsg("__currentSOClayer : %s" % str(self.__currentSOClayer.featureCount()))
+            self.setProgressSubMsg("===기존 시설 분석 시작===")
+            self.setProgressSubMsg("기존 SOC 레이어 갯수 : {}".format(str(self.__currentSOClayer.featureCount())))
 
+        tmpoutput = os.path.join(self.workpath, 'AllCurSOC1.shp')
+        if self.debugging:
+            self.setProgressSubMsg("Distancematrix(인구-기존) : {}".format(tmpoutput))
+        # [향후-인구배제율] 추가1) 거리조락 밖에 있는 것도 반환하도록 수정(getPopdistmatrixDataLayer 함수 내)
         matrixDisLayer = self.getPopdistmatrixDataLayer(targetlayer=self.__currentSOClayer,
                                                         targetlayerID=self.__currentSOCID,
                                                         output=tmpoutput)
 
-
-        # tmpdir = tempfile.TemporaryDirectory()
-        # tmpoutput = os.path.join(tmpdir.name, 'AllCurSOC2')
-        # self.setProgressSubMsg('{} : {}'.format(tmpdir.name, os.path.exists(tmpdir.name)))
-
-        tmpoutput = ''
-        if (self.debugging): tmpoutput = os.path.join(self.workpath, 'AllCurSOC2')
+        # [향후-인구배제율] 추가2) maxrixAllDisLayer = 매트릭스 결과와 인구 조인(인구-시설매트릭스+인구수)
+        #
+        #
+        #
+        # [향후-인구배제율] 추가3) maxrixAllDisLayer를 이용하여, statisticsbycategories 대신 loop 돌면서 처리하도록 변경
+        #
+        #
+        #
+        tmpoutput = os.path.join(self.workpath, 'AllCurSOC2')
+        if self.debugging:
+            self.setProgressSubMsg("통계(AllCurSOC1.Distance) : {}".format(tmpoutput))
         statstable = self.qgsutils.statisticsbycategories(input=matrixDisLayer,
                                                  onlyselected=False,
                                                  categoriesfields=['InputID'],
@@ -804,8 +767,10 @@ class soc_locator_model:
             self.setProgressSubMsg(len(statstable))
 
 
-        tmpoutput = ''
-        if (self.debugging): tmpoutput = os.path.join(self.workpath, 'AllCurSOC3.shp')
+
+        tmpoutput = os.path.join(self.workpath, 'AllCurSOC3.shp')
+        if (self.debugging):
+            self.setProgressSubMsg("조인(인구-통계) : {}".format(tmpoutput))
         joinedpop = self.qgsutils.joinattributetable(input1=self.__popSinglepartlayer,
                                             input1onlyselected=False,
                                             field1=self.popIDField,
@@ -817,12 +782,10 @@ class soc_locator_model:
                                             )
 
 
-
+        self.setProgressSubMsg(type(joinedpop))
         if isinstance(joinedpop, str): joinedpop = self.qgsutils.writeAsVectorLayer(joinedpop)
+        self.setProgressSubMsg(type(joinedpop))
 
-        # # 임시디토리 삭제
-        # tmpdir.cleanup()
-        # self.setProgressSubMsg('{} : {}'.format(tmpdir.name, os.path.exists(tmpdir.name)))
 
         listPopID = []
         listPopCnt = []
@@ -843,8 +806,6 @@ class soc_locator_model:
 
             accval = 0
             if (self.__cutoff is not None) and (self.__cutoff > 0):
-                # todo 거리조락 처리?? + 인구 배제율 처리...(구현 여부 확인 필요)
-
                 accval = feature['M_SUM']
             else:
                 accval = feature['M_MEAN'] * targetcnt
@@ -872,6 +833,12 @@ class soc_locator_model:
         return self.__dfPop
 
 
+
+
+    # [향후-인구배제율] 추가) 구배제률 계산하여 적용
+    #
+    #
+    #
     def anal_AllCurSOC_network(self):
         dists = []
         i = 0
@@ -911,13 +878,14 @@ class soc_locator_model:
                         self.setProgressSubMsg("[NODE-%s] 해당 인구데이터의 %sm 이내에는 현재 생활SOC가 없습니다." % (str(popNodeid), str(self.cutoff)))
                     notfounddatacnt += 1
 
-                    # todo "CUR_ISSVRED" 필드 추가(확인 필요 : 여긴 모든 시설의 고려하기 때문에 부적절(효율성은 최인근시설 하나만 계산)
+
 
 
                 calculatedNode[popNodeid] = dis
 
-            listpopNode.append(popNodeid)
             listpopCnt.append(poppnt)
+
+            listpopNode.append(popNodeid)
             listpopAccscore.append(dis)
 
         rawData = {self.nodeIDfield: listpopNode,
@@ -942,7 +910,10 @@ class soc_locator_model:
         matrixDisLayer = self.getPopdistmatrixDataLayer(targetlayer=self.__potentiallayer,
                                                         targetlayerID=self.__potentialID,
                                                         output=tmpoutput)
-
+        # [향후-인구배제율] 추가) 인구배제률 계산하여 적용
+        #
+        #
+        #
         if isinstance(matrixDisLayer, str): matrixDisLayer = self.qgsutils.writeAsVectorLayer(matrixDisLayer)
 
         # 2) 거리 2차 dict 생성
@@ -1128,6 +1099,10 @@ class soc_locator_model:
         return self.__dfPop
 
 
+    # [향후-인구배제율] 추가) 구배제률 계산하여 적용
+    #
+    #
+    #
     def anal_AllPotenSOC_network(self):
 
         tmppotenlayer = self.__potentiallayer
@@ -1625,7 +1600,7 @@ class soc_locator_model:
 
 
 
-    def anal_efficiencyPotenSOC_straight(self, relpotenID):
+    def anal_efficiencyPotenSOC_straight(self):
 
         potenID = None
         popCnt = None
@@ -1641,7 +1616,7 @@ class soc_locator_model:
             self.feedback.setProgress(int(i / popFeacnt * 100))
 
             popCnt = feature[self.__popcntField]
-            potenID = feature[relpotenID]
+            potenID = feature[self.__potentialID]
 
             try:
                 addedpopCnt = svrdPOPDict[potenID]

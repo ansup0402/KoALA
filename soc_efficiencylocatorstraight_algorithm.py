@@ -34,6 +34,7 @@ __revision__ = '$Format:%H$'
 
 from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import (QgsProcessing,
+                       QgsProcessingParameterDefinition,
                        # QgsFeatureSink,
                        QgsProcessingParameterVectorDestination,
                        QgsProcessingAlgorithm,
@@ -60,6 +61,8 @@ class LivingSOCEfficiencystraightAlgorithm(QgsProcessingAlgorithm):
     IN_POP_CNTFID = 'IN_POP_CNTFID'
     IN_SITE = 'IN_SITE'
     IN_GRID_SIZE = 'IN_GRID_SIZE'
+    IN_USERGRID = 'IN_USERGRID'
+
     IN_LIMIT_DIST = 'IN_LIMIT_DIST'
     IN_POP_EXCLUSION = 'IN_POP_EXCLUSION'
     IN_CALSSIFYNUM = 'IN_CALSSIFYNUM'
@@ -142,6 +145,18 @@ class LivingSOCEfficiencystraightAlgorithm(QgsProcessingAlgorithm):
                 1000, False, 100, 10000)        #디폴트, 옵션, 미니멈, 맥시멈
         )
 
+        paramUsrgridlyr = QgsProcessingParameterFeatureSource(
+                name=self.IN_USERGRID,
+                description=self.tr('New Facility Location Review Area(Point)'),
+                types=[QgsProcessing.TypeVectorPoint],
+                defaultValue='',
+                optional=True
+        )
+        paramUsrgridlyr.setFlags(paramUsrgridlyr.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
+        self.addParameter(paramUsrgridlyr)
+
+
+
         # 거리 조락
         self.addParameter(
             QgsProcessingParameterNumber(
@@ -185,10 +200,11 @@ class LivingSOCEfficiencystraightAlgorithm(QgsProcessingAlgorithm):
         return onlyselectedFeature
 
     def getLayerfromParameter(self, parameters, context, paramID):
-        if self.onlyselectedfeature(parameters, context, paramID):
-            return self.parameterAsSource(parameters, paramID, context), True
+        layer = self.parameterAsSource(parameters, paramID, context)
+        if layer is None:
+            return None, 0
         else:
-            return self.parameterAsSource(parameters, paramID, context), False
+            return layer, self.onlyselectedfeature(parameters, context, paramID)
 
     def parameter2Dict(self, parameters, context):
         keyword = {}
@@ -202,6 +218,9 @@ class LivingSOCEfficiencystraightAlgorithm(QgsProcessingAlgorithm):
                                                                                          self.IN_SITE)
 
         keyword['IN_GRID_SIZE'] = self.parameterAsInt(parameters, self.IN_GRID_SIZE, context)
+        keyword['IN_USERGRID'], keyword['IN_USERGRID_ONLYSELECTED'] = self.getLayerfromParameter(parameters, context,
+                                                                                                 self.IN_USERGRID)
+
         keyword['IN_LIMIT_DIST'] = self.parameterAsInt(parameters, self.IN_LIMIT_DIST, context)
 
         keyword['IN_POP_EXCLUSION'] = self.parameterAsInt(parameters, self.IN_POP_EXCLUSION, context)
