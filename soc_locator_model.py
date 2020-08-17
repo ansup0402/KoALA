@@ -825,8 +825,8 @@ class soc_locator_model:
         dfPopwidthDis['ACC_SCORE'].fillna(0, inplace=True)
         # dfPopwidthDis.loc[dfPopwidthDis['ACC_SCORE'] == 'NULL', 'ACC_SCORE'] = 0
 
-        if self.debugging:
-            dfPopwidthDis.to_csv(os.path.join(self.workpath, 'matrix4_AllCurSOC.csv'))
+
+        dfPopwidthDis.to_csv(os.path.join(self.workpath, 'matrix4_AllCurSOC.csv'))
 
         self.__dfPop = dfPopwidthDis
 
@@ -898,15 +898,14 @@ class soc_locator_model:
             self.setProgressSubMsg("총 %s의 인구 데이터 중에 %s개의 인구데이터는 %sm 이내의 인근 생활 SOC를 찾지 못했습니다."
                                    % (str(totalcnt), str(notfounddatacnt), str(self.cutoff))
                                    )
-            self.__dfPop.to_csv(os.path.join(self.workpath, 'analyze_fromAllCurSOC.csv'))
+        self.__dfPop.to_csv(os.path.join(self.workpath, 'analyze_fromAllCurSOC.csv'))
 
         return self.__dfPop
 
     def anal_AllPotenSOC_straight(self):
 
         # 1) 잠재적위치 레이어와 세생활권 인구레이어 distance matrix
-        tmpoutput = ''
-        if (self.debugging): tmpoutput = os.path.join(self.workpath, 'AllPotenSOC1.shp')
+        tmpoutput = os.path.join(self.workpath, 'AllPotenSOC1.shp')
         matrixDisLayer = self.getPopdistmatrixDataLayer(targetlayer=self.__potentiallayer,
                                                         targetlayerID=self.__potentialID,
                                                         output=tmpoutput)
@@ -1027,8 +1026,8 @@ class soc_locator_model:
 
         self.__dfPop = pd.DataFrame(rawData)
 
-        if self.debugging:
-            self.__dfPop.to_csv(os.path.join(self.workpath, 'analyze_fromAllCurSOC.csv'))
+
+        self.__dfPop.to_csv(os.path.join(self.workpath, 'analyze_fromAllCurSOC.csv'))
 
 
         return self.__dfPop
@@ -1086,13 +1085,9 @@ class soc_locator_model:
 
         self.__dfPop = pd.DataFrame(rawData)
 
-        if self.debugging:
-            # self.setProgressSubMsg("count of unsearchable node : %s" % str(errcnt))
-            # self.setProgressSubMsg("count of success node : %s" % str(noerrcnt))
-            # self.__logger.info("count of unsearchable node : %s" % str(errcnt))
-            # self.__logger.info("count of success node : %s" % str(noerrcnt))
-            tempexcel = os.path.join(self.workpath, 'anal_NeartestCurSOC_network.csv')
-            self.__dfPop.to_csv(tempexcel)
+
+        tempexcel = os.path.join(self.workpath, 'anal_NeartestCurSOC_network.csv')
+        self.__dfPop.to_csv(tempexcel)
         # except MemoryError as error:
         #     self.setProgressSubMsg(type(error))
 
@@ -1157,9 +1152,9 @@ class soc_locator_model:
         self.__dtFinalwithsScore = pd.DataFrame(rawData)
         self.__dictFinalwithScore = dictResultwithsScore
 
-        if self.debugging:
-            tempexcel = os.path.join(self.workpath, 'anal_AllPotenSOC_network.csv')
-            self.__dtFinalwithsScore.to_csv(tempexcel)
+
+        tempexcel = os.path.join(self.workpath, 'anal_AllPotenSOC_network.csv')
+        self.__dtFinalwithsScore.to_csv(tempexcel)
 
         return self.__dtFinalwithsScore
 
@@ -1209,9 +1204,9 @@ class soc_locator_model:
 
         # tmpdfPOP = self.__dfPop.astype({finalKeyID: str})
         tmpdfPOP = dfgroupy.astype({finalKeyID: str})
-        if self.debugging:
-            tempexcel = os.path.join(self.workpath, 'tmpdfPOP.csv')
-            tmpdfPOP.to_csv(tempexcel)
+
+        tempexcel = os.path.join(self.workpath, 'tmpdfPOP.csv')
+        tmpdfPOP.to_csv(tempexcel)
 
 
         ###################### 등급 산정 부분 ######################
@@ -1293,9 +1288,9 @@ class soc_locator_model:
         #     grade += 1
         ########################################################################################
 
-        if self.debugging:
-            tempexcel = os.path.join(self.workpath, 'final_Accessbillityscore.csv')
-            tmpdfPOP.to_csv(tempexcel)
+
+        tempexcel = os.path.join(self.workpath, 'final_Accessbillityscore.csv')
+        tmpdfPOP.to_csv(tempexcel)
 
 
         potencnt = finanallayer.featureCount()
@@ -1333,6 +1328,8 @@ class soc_locator_model:
         editstatus = finanallayer.commitChanges()
         if self.debugging: self.setProgressSubMsg("commit : %s" % str(editstatus))
 
+
+        # 불필요한 필드 제거
         if not self.debugging:
             reqfiels = [finalKeyID, 'AC_GRADE', 'AC_SCORE']
             # self.setProgressSubMsg("start finanallayer type is %s" % str(type(finanallayer)))
@@ -1592,9 +1589,9 @@ class soc_locator_model:
 
         # self.__dfPop = pd.merge(dfCur, dfNew[[self.__nodeID, "NEW_DIST", "NEW_ISSVRED"]], on=self.__nodeID)
 
-        if self.debugging:
-            tempexcel = os.path.join(self.workpath, 'anal_NeartestCurSOC_network.csv')
-            self.__dfPop.to_csv(tempexcel)
+
+        tempexcel = os.path.join(self.workpath, 'anal_NeartestCurSOC_network.csv')
+        self.__dfPop.to_csv(tempexcel)
 
         return self.__dfPop
 
@@ -1640,9 +1637,9 @@ class soc_locator_model:
         self.__dictFinalwithScore = svrdPOPDict
         self.__dtFinalwithsScore = pd.DataFrame(rawData)
 
-        if self.debugging:
-            tempexcel = os.path.join(self.workpath, 'efscore.csv')
-            self.__dtFinalwithsScore.to_csv(tempexcel)
+
+        tempexcel = os.path.join(self.workpath, 'efscore.csv')
+        self.__dtFinalwithsScore.to_csv(tempexcel)
 
         return self.__dtFinalwithsScore
 
@@ -1697,7 +1694,7 @@ class soc_locator_model:
         self.__dictFinalwithScore = svrdPOPDict
         self.__dtFinalwithsScore = pd.DataFrame(rawData)
 
-        if self.debugging: self.__dtFinalwithsScore.to_csv(os.path.join(self.workpath, 'efscore.csv'))
+        self.__dtFinalwithsScore.to_csv(os.path.join(self.workpath, 'efscore.csv'))
 
         return self.__dtFinalwithsScore
 
@@ -1745,7 +1742,7 @@ class soc_locator_model:
 
         nullvalgrade = dfScore['EF_GRADE'].max(skipna=True)
         if self.debugging: self.setProgressSubMsg("nullvalgrade : %s" % str(nullvalgrade))
-        if self.debugging: dfScore.to_csv(os.path.join(self.workpath, 'efgrade.csv'))
+        dfScore.to_csv(os.path.join(self.workpath, 'efgrade.csv'))
 
         dictefGrade = dict(zip(dfScore[finalKeyID].tolist(), dfScore['EF_GRADE'].tolist()))
 
@@ -1791,6 +1788,7 @@ class soc_locator_model:
 
         finanallayer.commitChanges()
 
+        # 불필요한 필드 제거
         if not self.debugging:
             reqfiels = [finalKeyID, 'EF_GRADE', 'EF_SCORE']
             finanallayer = self.deleteFields(input=finanallayer, requredfields=reqfiels)
