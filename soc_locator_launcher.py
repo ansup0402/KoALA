@@ -9,6 +9,10 @@ class soc_locator_launcher:
         self.parameters = parameters
         self.workpath = workpath
 
+        self.cutoffconst_acc = 1000000
+        self.cutoffconst_eff = 1000000
+        self.cutoffconst_equ = 1000000
+        
     def setProgressMsg(self, msg):
         import time
         now = time.localtime()
@@ -145,7 +149,7 @@ class soc_locator_launcher:
 
         model.currentSOCID = curSOCID
         model.cutoff = self.parameters['IN_LIMIT_DIST']
-        model.outofcutoff = self.parameters['IN_LIMIT_DIST'] * 2
+        model.outofcutoff = self.parameters['IN_LIMIT_DIST'] * self.cutoffconst_acc
 
         if isinstance(clipedCurSOC, str):
             model.currentSOC = model.writeAsVectorLayer(clipedCurSOC)
@@ -429,7 +433,7 @@ class soc_locator_launcher:
 
         # 10. 분석 실행(기존 시설 거리 분석)
         model.cutoff = self.parameters['IN_LIMIT_DIST']
-        model.outofcutoff = self.parameters['IN_LIMIT_DIST'] * 2
+        model.outofcutoff = self.parameters['IN_LIMIT_DIST'] * self.cutoffconst_equ
         #
         #
         #
@@ -725,7 +729,7 @@ class soc_locator_launcher:
         alllink = None
         if self.debugging: alllink = os.path.join(self.workpath, 'alllink.pickle')
         model.cutoff = self.parameters['IN_LIMIT_DIST']
-        model.outofcutoff = self.parameters['IN_LIMIT_DIST'] * 2
+        model.outofcutoff = self.parameters['IN_LIMIT_DIST'] * self.cutoffconst_acc
         allshortestnodes = model.shortestAllnodes(algorithm='dijkstra',
                                                   output_alllink=alllink)
 
@@ -809,7 +813,7 @@ class soc_locator_launcher:
             model.currentSOC = clipedCurSOC
 
         model.cutoff = self.parameters['IN_LIMIT_DIST']
-        model.outofcutoff = self.parameters['IN_LIMIT_DIST'] * 2
+        model.outofcutoff = self.parameters['IN_LIMIT_DIST'] * self.cutoffconst_eff
         #
         #
         #
@@ -1179,7 +1183,7 @@ class soc_locator_launcher:
         alllink = None
         if self.debugging: alllink = os.path.join(self.workpath, 'alllink.pickle')
         model.cutoff = self.parameters['IN_LIMIT_DIST']
-        model.outofcutoff = self.parameters['IN_LIMIT_DIST'] * 2
+        model.outofcutoff = self.parameters['IN_LIMIT_DIST'] * self.cutoffconst_eff
         allshortestnodes = model.shortestAllnodes(algorithm='dijkstra',
                                                   output_alllink=alllink)
 
@@ -1564,7 +1568,7 @@ class soc_locator_launcher:
         alllink = None
         if self.debugging: alllink = os.path.join(self.workpath, 'alllink.pickle')
         model.cutoff = self.parameters['IN_LIMIT_DIST']
-        model.outofcutoff = self.parameters['IN_LIMIT_DIST'] * 2
+        model.outofcutoff = self.parameters['IN_LIMIT_DIST'] * self.cutoffconst_equ
         allshortestnodes = model.shortestAllnodes(algorithm='dijkstra',
                                                   output_alllink=alllink)
 
