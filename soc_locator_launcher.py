@@ -123,12 +123,6 @@ class soc_locator_launcher:
 
 
 
-
-
- #       clipedliving를 Dissolve한다.
- #        out_path = os.path.join(self.workpath, 'cliped_living.shp')
- #        clipedliving = model.addIDField(input=clipedliving, idfid=livingID, output=out_path)
-
         # 불필요한 필드 값 제거(IN_LIVINGAREA)
         out_path = os.path.join(self.workpath, 'cliped_living2.shp')
         if self.debugging: self.setProgressMsg('세생활권2 필드 정리 : \n{}\n\n'.format(out_path))

@@ -246,7 +246,6 @@ class soc_locator_model:
         return self.qgsutils.clipwithQgis(input=input, onlyselected=onlyselected, overlay=overlay, output=output)
 
     def dissolvewithQgis(self, input, onlyselected, field=None, output='TEMPORARY_OUTPUT'):
-        self.setProgressSubMsg(type(field))
         return self.qgsutils.dissolvewithQgis(input=input, onlyselected=onlyselected, field=field, output=output)
 
     def dissolvewithQgis2(self, input, onlyselected, field=None, output='TEMPORARY_OUTPUT'):
