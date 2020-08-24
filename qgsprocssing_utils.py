@@ -96,7 +96,21 @@ class qgsprocessUtils:
             inputsource = QgsProcessingFeatureSourceDefinition(input, True)
 
         params = dict(INPUT=inputsource,
-                      Field=field,
+                      FIELD=field,
+                      OUTPUT=output)
+
+        return self.run_algprocessing(algname=algname, params=params)['OUTPUT']
+
+    def dissolvewithQgis2(self, input, onlyselected, field=None, output='TEMPORARY_OUTPUT'):
+        if output is None or output == '': output = 'TEMPORARY_OUTPUT'
+        algname = 'qgis:dissolve'
+
+        inputsource = input
+        if onlyselected:
+            inputsource = QgsProcessingFeatureSourceDefinition(input, True)
+
+        params = dict(INPUT=inputsource,
+                      FIELD=field,
                       OUTPUT=output)
 
         return self.run_algprocessing(algname=algname, params=params)['OUTPUT']

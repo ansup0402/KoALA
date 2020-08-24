@@ -59,13 +59,14 @@ class soc_locator_launcher:
         clipedpop = model.clipwithQgis(input=self.parameters['IN_POP'].sourceName(),
                                        onlyselected=self.parameters['IN_POP_ONLYSELECTED'],
                                        overlay=model.boundary)
-        out_path = os.path.join(self.workpath, 'cliped_pop.shp')
+        out_path = os.path.join(self.workpath, 'cliped_pop_tmp.shp')
         clipedpop = model.addIDField(input=clipedpop, idfid=popID, output=out_path)
         model.popIDField = popID
         model.popcntField = self.parameters['IN_POP_CNTFID']
 
         # 불필요한 필드 값 제거(IN_POP)
-        out_path = os.path.join(self.workpath, 'cliped_pop2.shp')
+        out_path = os.path.join(self.workpath, 'cliped_pop.shp')
+        if self.debugging: self.setProgressMsg("대상지역 인구 클립(필드 정리)(인구2) : \n{}\n\n".format(out_path))
         clipedpop = model.deleteFields(input=clipedpop, requredfields=[popID, self.parameters['IN_POP_CNTFID']],
                                        output=out_path)
 
@@ -81,41 +82,56 @@ class soc_locator_launcher:
 ###### Case2 세생활권 데이터를 "격자크기(숫자) 타입"으로 받을 경우
         # 세생활권 레이어 생성 : 분석 영역을 기준으로 Fishnet 레이어 생성
         if self.feedback.isCanceled(): return None
-        if self.debugging: self.setProgressMsg('세생활권 레이어 생성.....')
+        if self.debugging: self.setProgressMsg('세생활권 레이어 생성 : \n{}\n\n'.format(out_path))
         out_path = os.path.join(self.workpath, 'fishnetliving.shp')
         fishnetliving = model.createGridfromLayer(sourcelayer=model.boundary,
                                               gridsize=self.parameters['IN_LIVINGAREA'],
                                               type=2,
                                               output=out_path)
 
+
         if self.feedback.isCanceled(): return None
-        if self.debugging:self.setProgressMsg('세생활권 데이터를 초기화 합니다.....')
         out_path = os.path.join(self.workpath, 'cliped_fishnetliving.shp')
+        if self.debugging:self.setProgressMsg('생성된 세생활권 클립 : \n{}\n\n'.format(out_path))
         clipedfishnetliving = model.clipwithQgis(input=fishnetliving,
                                         onlyselected=False,
                                         overlay=model.boundary,
                                         output=out_path)
 
 
+        # ID 추가
+        out_path = os.path.join(self.workpath, 'cliped_living.shp')
+        clipedfishnetliving2 = model.addIDField(input=clipedfishnetliving, idfid=livingID, output=out_path)
+
+
+
+
         # 세생활권 레이어 정리 : 인구 레이어와의 Spatial Join을 통해 연계되지 않은 피처 제거
         out_path = os.path.join(self.workpath, 'cliped_fishnetliving_discarded.shp')
-        clipedliving = model.joinattributesbylocation(input=clipedfishnetliving,
+        if self.debugging: self.setProgressMsg('인구-세생활권(세생활권2) 공간 조인 : \n{}\n\n'.format(out_path))
+        tmpliving = model.joinattributesbylocation(input=clipedfishnetliving2,
                                                        join=clipedpop,
                                                        joinfiels=[],
                                                        discardnomatching=True,
                                                        output=out_path
                                                        )
 
-
 ######################################################################################################
+        out_path = os.path.join(self.workpath, 'only_living_has_pop.shp')
+        if self.debugging: self.setProgressMsg('인구포인트 있는 세생활권만 추출(dissolve = {}) : \n{}\n\n'.format(livingID, out_path))
+        clipedliving = model.dissolvewithQgis(input=tmpliving, onlyselected=False, field=[livingID], output=out_path)
 
 
 
-        out_path = os.path.join(self.workpath, 'cliped_living.shp')
-        clipedliving = model.addIDField(input=clipedliving, idfid=livingID, output=out_path)
+
+
+ #       clipedliving를 Dissolve한다.
+ #        out_path = os.path.join(self.workpath, 'cliped_living.shp')
+ #        clipedliving = model.addIDField(input=clipedliving, idfid=livingID, output=out_path)
 
         # 불필요한 필드 값 제거(IN_LIVINGAREA)
         out_path = os.path.join(self.workpath, 'cliped_living2.shp')
+        if self.debugging: self.setProgressMsg('세생활권2 필드 정리 : \n{}\n\n'.format(out_path))
         clipedliving = model.deleteFields(input=clipedliving, requredfields=[livingID], output=out_path)
 
         if isinstance(clipedliving, str):
@@ -145,7 +161,10 @@ class soc_locator_launcher:
 
         # 불필요한 필드 값 제거(IN_CURSOC)
         out_path = os.path.join(self.workpath, 'cliped_curSOC2.shp')
+        if self.debugging: self.setProgressMsg('기존 SOC 클립(필드 정리) : \n{}\n\n'.format(out_path))
         clipedCurSOC = model.deleteFields(input=clipedCurSOC, requredfields=[curSOCID], output=out_path)
+
+
 
         model.currentSOCID = curSOCID
         model.cutoff = self.parameters['IN_LIMIT_DIST']
@@ -165,6 +184,7 @@ class soc_locator_launcher:
         # self.setProgressMsg('..... 거주인구 지점의 최근린 생활SOC지점 검색')
         if self.feedback.isCanceled(): return None
         out_path = os.path.join(self.workpath, 'popwithnearestSOC.shp')
+        if self.debugging: self.setProgressMsg('인구2 최근린 기존 SOC ID(인구3) : \n{}\n\n'.format(out_path))
         popwithNearSOC = model.nearesthubpoints(input=clipedpop,
                                                 onlyselected=False,
                                                 sf_hub=model.currentSOC,
@@ -176,6 +196,7 @@ class soc_locator_launcher:
         # self.setProgressMsg('..... 거주인구 데이터와 생활 SOC 데이터 거리 분석\n')
         if self.feedback.isCanceled(): return None
         out_path = os.path.join(self.workpath, 'cliped_popaddedlivingarea.shp')
+        if self.debugging: self.setProgressMsg('인구3에 인터섹션 with 세생활권2(인구4) : \n{}\n\n'.format(out_path))
         popWithNodeaddedliving = model.intersection(input=popwithNearSOC,
                                                     inputfields=[popID,
                                                                  model.popcntField,
@@ -201,17 +222,17 @@ class soc_locator_launcher:
         self.setProgressMsg('[3 단계] 접근성 분석(직선거리)......')
         # self.setProgressMsg('....... 세생활권 접근성 분석')
         if self.feedback.isCanceled(): return None
+
+        output = os.path.join(self.workpath, 'analyze_fromAllCurSOC.csv')
+        if self.debugging: self.setProgressMsg("거리조락 밖의 SOC 거리 일괄처리(인구 최종) {}m : \n{}\n\n".format(str(model.outofcutoff), output))
         dfPop = model.anal_accessibilityCurSOC_straight()
-
-
-        # if self.debugging:
-        out_path = os.path.join(self.workpath, 'dfopop.csv')
-        dfPop.to_csv(out_path)
+        dfPop.to_csv(output)
 
 
         # 3-2 접근성 분석 결과 평가
         # self.setProgressMsg('....... 접근성 분석 결과 평가')
         if self.feedback.isCanceled(): return None
+
         finallayer = model.make_Accessbillityscore(isNetwork=False, output=self.parameters["OUTPUT"])
 
         return finallayer
@@ -564,8 +585,8 @@ class soc_locator_launcher:
 ###### Case2 세생활권 데이터를 "격자크기(숫자) 타입"으로 받을 경우
         # 세생활권 레이어 생성 : 분석 영역을 기준으로 Fishnet 레이어 생성
         if self.feedback.isCanceled(): return None
-        if self.debugging: self.setProgressMsg('세생활권 레이어 생성.....')
         out_path = os.path.join(self.workpath, 'fishnetliving.shp')
+        if self.debugging: self.setProgressMsg('세생활권 레이어 생성.....')
         fishnetliving = model.createGridfromLayer(sourcelayer=model.boundary,
                                                   gridsize=self.parameters['IN_LIVINGAREA'],
                                                   type=2,

@@ -246,7 +246,11 @@ class soc_locator_model:
         return self.qgsutils.clipwithQgis(input=input, onlyselected=onlyselected, overlay=overlay, output=output)
 
     def dissolvewithQgis(self, input, onlyselected, field=None, output='TEMPORARY_OUTPUT'):
+        self.setProgressSubMsg(type(field))
         return self.qgsutils.dissolvewithQgis(input=input, onlyselected=onlyselected, field=field, output=output)
+
+    def dissolvewithQgis2(self, input, onlyselected, field=None, output='TEMPORARY_OUTPUT'):
+        return self.qgsutils.dissolvewithQgis2(input=input, onlyselected=onlyselected, field=field, output=output)
 
     def nearesthubpoints(self, input, onlyselected, sf_hub, hubfield, output='TEMPORARY_OUTPUT'):
         return self.qgsutils.nearesthubpoints(input=input, onlyselected=onlyselected, sf_hub=sf_hub, hubfield=hubfield, output=output)
@@ -1027,7 +1031,6 @@ class soc_locator_model:
         self.__dfPop = pd.DataFrame(rawData)
 
 
-        self.__dfPop.to_csv(os.path.join(self.workpath, 'analyze_fromAllCurSOC.csv'))
 
 
         return self.__dfPop
@@ -1205,7 +1208,9 @@ class soc_locator_model:
         # tmpdfPOP = self.__dfPop.astype({finalKeyID: str})
         tmpdfPOP = dfgroupy.astype({finalKeyID: str})
 
+
         tempexcel = os.path.join(self.workpath, 'tmpdfPOP.csv')
+        if self.debugging: self.setProgressSubMsg("인구 최종->그룹바이 세새활권 id.sum of(인구, 거리, 인구*거리)-> (인구*거리)/총인구 : \n{}\n\n".format(tempexcel))
         tmpdfPOP.to_csv(tempexcel)
 
 
@@ -1290,6 +1295,7 @@ class soc_locator_model:
 
 
         tempexcel = os.path.join(self.workpath, 'final_Accessbillityscore.csv')
+        if self.debugging: self.setProgressSubMsg("등급 계산 : \n{}\n\n".format(tempexcel))
         tmpdfPOP.to_csv(tempexcel)
 
 
@@ -1327,7 +1333,7 @@ class soc_locator_model:
 
         editstatus = finanallayer.commitChanges()
         if self.debugging: self.setProgressSubMsg("commit : %s" % str(editstatus))
-
+        if self.debugging: self.setProgressSubMsg("세생활 ID에 해당하는 최종인구 데이터의 ACC_SCORE, AC_GRADE 세생활권 레이어에 필드가 추가됨(최종결과물)")
 
         # 불필요한 필드 제거
         if not self.debugging:
