@@ -41,7 +41,8 @@ from .soc_accessibilitystraight_algorithm import LivingSOCAccessibilitystraightA
 from .soc_efficiencylocatornetwork_algorithm import LivingSOCEfficiencynetworkAlgorithm
 from .soc_efficiencylocatorstraight_algorithm import LivingSOCEfficiencystraightAlgorithm
 
-# from .soc_test_algorithm import LivingSOCTestAlgorithm
+from .soc_tools_point2polygon import LivingSOCToolsPoint2Polygon
+
 
 import os
 import tempfile
@@ -127,6 +128,10 @@ class LivingSOCLocatorProvider(QgsProcessingProvider):
         eff_straight.temporaryDirectory = self.tempdir.name
         eff_straight.debugmode = self.debugging
         self.addAlgorithm(eff_straight)
+
+        tools_pnt2poly = LivingSOCToolsPoint2Polygon()
+        self.addAlgorithm(tools_pnt2poly)
+
 
 
     def id(self):

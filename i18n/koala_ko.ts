@@ -12,6 +12,10 @@
         <translation>생활SOC 우선검토지역 분석</translation>
     </message>
     <message>
+        <source>Koala Support Tool</source>
+        <translation>KoALA 지원 도구</translation>
+    </message>
+    <message>
         <source>Neighborhood Facility Accessibility Analysis</source>
         <translation>생활SOC 접근성 분석</translation>
     </message>
