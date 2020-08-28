@@ -130,6 +130,8 @@ class LivingSOCLocatorProvider(QgsProcessingProvider):
         self.addAlgorithm(eff_straight)
 
         tools_pnt2poly = LivingSOCToolsPoint2Polygon()
+        tools_pnt2poly.temporaryDirectory = self.tempdir.name
+        tools_pnt2poly.debugmode = self.debugging
         self.addAlgorithm(tools_pnt2poly)
 
 

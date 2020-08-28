@@ -231,6 +231,24 @@ class soc_locator_launcher:
 
         return finallayer
 
+    def execute_tools_point2polygone(self):
+        try:
+            from .soc_locator_model import soc_locator_model
+        except ImportError:
+            from soc_locator_model import soc_locator_model
+        model = soc_locator_model(feedback=self.feedback, context=self.context, debugmode=self.debugging, workpath=self.workpath)
+
+        pointlayer = self.parameters['IN_ORGPOINT'].sourceName()
+        onlyselectedfeatureinpointlayer = self.parameters['IN_ORGPOINT_ONLYSELECTED']
+        gridsize = self.parameters['IN_GRID_SIZE']
+        output = self.parameters["OUTPUT"]
+
+        self.setProgressMsg("선택한 레이어를 폴리곤 레이어로 변환 합니다.")
+        polylayer = model.rectanglesovalsdiamonds(input=pointlayer, onlyselected=onlyselectedfeatureinpointlayer,
+                                                  width=gridsize, height=gridsize,
+                                                  output=output)
+
+        return polylayer
 
     def execute_equity_in_straight(self):
         try:

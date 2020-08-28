@@ -233,6 +233,10 @@ class soc_locator_model:
 
 
     # processing funtions
+    def rectanglesovalsdiamonds(self, input, onlyselected=False, shape=0, width=1.0, height=1.0, rotation=None, segment=36, output='TEMPORARY_OUTPUT'):
+        return self.qgsutils.rectanglesovalsdiamonds(input=input, onlyselected=onlyselected, shape=shape, width=width,
+                                                     height=height, rotation=rotation, segment=segment, output=output)
+
     def writeAsVectorLayer(self, layername):
         return self.qgsutils.writeAsVectorLayer(layername=layername)
 

@@ -26,6 +26,28 @@ class qgsprocessUtils:
         return result
 
 
+    def rectanglesovalsdiamonds(self, input, onlyselected=False, shape=0, width=1.0, height=1.0, rotation=None, segment=36, output='TEMPORARY_OUTPUT'):
+        # 0 — Rectangles
+        # 1 — Ovals
+        # 2 — Diamonds
+        if output is None or output == '': output = 'TEMPORARY_OUTPUT'
+        algname = 'qgis:rectanglesovalsdiamonds'
+
+        inputsource = input
+        if onlyselected:
+            inputsource = QgsProcessingFeatureSourceDefinition(input, True)
+
+        params = dict(INPUT=inputsource,
+                      SHAPE=shape,
+                      WIDTH=width,
+                      HEIGHT=height,
+                      ROTATION=rotation,
+                      SEGMENTS=segment,
+                      OUTPUT=output)
+
+        return self.run_algprocessing(algname=algname, params=params)['OUTPUT']
+
+
     def bufferwithQgis(self, input, onlyselected, distance, output='TEMPORARY_OUTPUT'):
         if output is None or output == '': output = 'TEMPORARY_OUTPUT'
         algname = 'native:multiringconstantbuffer'

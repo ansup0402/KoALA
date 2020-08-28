@@ -147,12 +147,30 @@
         <source>New Facility Location Review Area(Point)</source>
         <translation>잠재적 후보지 지정(Point)</translation>
     </message>
+
+    <message>
+        <source>Input point vector layer(Point)</source>
+        <translation>입력 레이어(Point)</translation>
+    </message>
+
+    <message>
+        <source>Polygon Size(Unit : m)</source>
+        <translation>폴리곤 크기(단위 : m)</translation>
+    </message>
+
+    <message>
+        <source>Specify the output vector layer</source>
+        <translation>폴리곤</translation>
+    </message>
+
+    <message>
+        <source>Convert to Polygon</source>
+        <translation>폴리곤으로 변환</translation>
+    </message>
+
+
 </context>
 </TS>
-
-
-
-
 
 
 
