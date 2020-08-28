@@ -258,8 +258,8 @@ class soc_locator_model:
     def nearesthubpoints(self, input, onlyselected, sf_hub, hubfield, output='TEMPORARY_OUTPUT'):
         return self.qgsutils.nearesthubpoints(input=input, onlyselected=onlyselected, sf_hub=sf_hub, hubfield=hubfield, output=output)
 
-    def createspatialindex(self, input, output='TEMPORARY_OUTPUT'):
-        return self.qgsutils.createspatialindex(input=input, output=output)
+    def createspatialindex(self, input):
+        return self.qgsutils.createspatialindex(input=input)
 
     def countpointsinpolygon(self, polylayer, pointslayer, field, weight=None, classfield=None, output='TEMPORARY_OUTPUT'):
         return self.qgsutils.countpointsinpolygon(polygons=polylayer,

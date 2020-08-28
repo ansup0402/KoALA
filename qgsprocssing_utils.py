@@ -479,13 +479,10 @@ class qgsprocessUtils:
         return self.run_algprocessing(algname=algname, params=params)
 
     # 테스트 되지 않은 함수... 확인 필요
-    def createspatialindex(self, input, output='TEMPORARY_OUTPUT'):
-        if output is None or output == '': output = 'TEMPORARY_OUTPUT'
-        # algname = 'native:createspatialindex'
+    def createspatialindex(self, input):
         algname = 'qgis:createspatialindex'
 
         inputsource = input
-        params = dict(INPUT=inputsource,
-                      OUTPUT=output)
+        params = dict(INPUT=inputsource)
 
         return self.run_algprocessing(algname=algname, params=params)['OUTPUT']
