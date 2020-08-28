@@ -1322,6 +1322,7 @@ class soc_locator_model:
                 eqscore = tmpdfPOP["ACC_SCORE"].loc[tmpdfPOP[finalKeyID] == str(finalkey)].head(1)
                 eqscore = float(eqscore)
                 if float(eqscore) == 0.0: eqscore = 0.00000001
+                # if float(eqscore) == 0.0: eqscore = 999999999
 
                 eqgrade = tmpdfPOP["AC_GRADE"].loc[tmpdfPOP[finalKeyID] == str(finalkey)].head(1)
                 eqgrade = int(eqgrade)
