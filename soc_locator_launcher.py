@@ -131,7 +131,7 @@ class soc_locator_launcher:
 
 
         self.setDebugProgressMsg("세생활권 레이어(Point)의 공간인덱스를 생성합니다")
-        model.createspatialindex(clipedfishnetliving2)
+        clipedfishnetliving2 = model.createspatialindex(clipedfishnetliving2)
 
 
         # 세생활권 레이어 정리 : 인구 레이어와의 Spatial Join을 통해 연계되지 않은 피처 제거
@@ -660,7 +660,7 @@ class soc_locator_launcher:
         clipedfishnetliving2 = model.addIDField(input=clipedfishnetliving, idfid=livingID, output=out_path)
 
         self.setDebugProgressMsg("세생활권 레이어(Point)의 공간인덱스를 생성합니다")
-        model.createspatialindex(clipedfishnetliving2)
+        clipedfishnetliving2 = model.createspatialindex(clipedfishnetliving2)
 
 
         # 세생활권 레이어 정리 : 인구 레이어와의 Spatial Join을 통해 연계되지 않은 피처 제거
@@ -807,7 +807,6 @@ class soc_locator_launcher:
 
         # 3-2 모든 노드간의 최단 거리 분석
         if self.feedback.isCanceled(): return None
-        if self.debugging: self.setProgressMsg('최단거리 분석 위한 기초자료를 생성합니다.....')
         alllink = None
         # if self.debugging: alllink = os.path.join(self.workpath, 'alllink.pickle')
         model.cutoff = self.parameters['IN_LIMIT_DIST']
@@ -857,8 +856,8 @@ class soc_locator_launcher:
         self.setProgressMsg('[1 단계] 분석을 위한 데이터를 초기화 합니다......')
         # 1-1 분석 영역 데이터 생성
         if self.feedback.isCanceled(): return None
-        if self.debugging: self.setProgressMsg('바운더리 초기화 합니다.....')
         out_path = os.path.join(self.workpath, 'boundary.shp')
+        self.setDebugProgressMsg("대상지 레이어에서 분석 영역을 추출합니다...", out_path)
         boundary = model.dissolvewithQgis(input=self.parameters['IN_SITE'].sourceName(),
                                           onlyselected=self.parameters['IN_SITE_ONLYSELECTED'],
                                           output=out_path)
@@ -869,8 +868,8 @@ class soc_locator_launcher:
 
         # 1-2 분석 지역 데이터 추출 : 인구데이터
         if self.feedback.isCanceled(): return None
-        if self.debugging: self.setProgressMsg('주거인구 레이어를 초기화 합니다.....')
         out_path = os.path.join(self.workpath, 'cliped_pop.shp')
+        self.setDebugProgressMsg("분석 영역에 해당하는 인구 데이터를 추출합니다...", out_path)
         clipedpop = model.clipwithQgis(input=self.parameters['IN_POP'].sourceName(),
                                        onlyselected=self.parameters['IN_POP_ONLYSELECTED'],
                                        overlay=boundary,
@@ -878,12 +877,14 @@ class soc_locator_launcher:
 
         # 불필요한 필드 값 제거(IN_POP)
         out_path = os.path.join(self.workpath, 'cliped_pop2.shp')
+        self.setDebugProgressMsg("인구 데이터에 필수 필드({})를 제외한 데이터를 삭제합니다...".format(self.parameters['IN_POP_CNTFID']), out_path)
         clipedpop = model.deleteFields(input=clipedpop, requredfields=[self.parameters['IN_POP_CNTFID']],
                                        output=out_path)
 
         # 1-3 분석 지역 데이터 추출 : 기존 생활 SOC 시설
         if self.feedback.isCanceled(): return None
         out_path = os.path.join(self.workpath, 'cliped_curSOC.shp')
+        self.setDebugProgressMsg("분석 영역에 해당하는 기존시설데이터를 추출합니다...", out_path)
         clipedCurSOC = model.clipwithQgis(input=self.parameters['IN_CURSOC'].sourceName(),
                                           onlyselected=self.parameters['IN_CURSOC_ONLYSELECTED'],
                                           overlay=boundary,
@@ -891,6 +892,7 @@ class soc_locator_launcher:
 
         # 불필요한 필드 값 제거(IN_CURSOC)
         out_path = os.path.join(self.workpath, 'cliped_curSOC2.shp')
+        self.setDebugProgressMsg("기존시설데이터에 필수 필드({})를 제외한 데이터를 삭제합니다...".format("NONE"), out_path)
         clipedCurSOC = model.deleteFields(input=clipedCurSOC, requredfields=[], output=out_path)
 
         if isinstance(clipedCurSOC, str):
@@ -910,15 +912,12 @@ class soc_locator_launcher:
         self.setProgressMsg('[{} 단계] 생활 SOC 잠재적 위치 데이터 생성......'.format(curStep))
         # 3-1  잠재적 위치 데이터 생성
         if self.feedback.isCanceled(): return None
-
-
         usergrid = self.parameters['IN_USERGRID']
-        if self.debugging: self.setProgressMsg('사용자 후보지 레이어 : {}'.format(str(usergrid)))
 
         gridlayer = None
         onlyselected = False
         if usergrid == None:
-            if self.debugging: self.setProgressMsg('잠재적 후보지 그리드 데이터를 생성합니다.....')
+            self.setDebugProgressMsg("잠재적 후보지 데이터(Point-{}m)를 생성합니다..".format(self.parameters['IN_GRID_SIZE']), out_path)
             out_path = os.path.join(self.workpath, 'grid.shp')
             gridlayer = model.createGridfromLayer(sourcelayer=model.boundary,
                                                   gridsize=self.parameters['IN_GRID_SIZE'],
@@ -928,13 +927,11 @@ class soc_locator_launcher:
             onlyselected = self.parameters['IN_USERGRID_ONLYSELECTED']
 
 
-        if self.debugging: self.setProgressMsg('분석할 후보지 타입 : {}({})'.format(type(gridlayer), len(gridlayer)))
-
 
         # 3-2 분석 지역 데이터 추출 : 잠재적 위치
         if self.feedback.isCanceled(): return None
-        if self.debugging:self.setProgressMsg('잠재적 후보지 데이터를 초기화 합니다.....')
         out_path = os.path.join(self.workpath, 'cliped_grid.shp')
+        self.setDebugProgressMsg("분석 영역에 해당하는 잠재적 후보지 데이터를 추출합니다...", out_path)
         clipedgrid = model.clipwithQgis(input=gridlayer,
                                         onlyselected=onlyselected,
                                         overlay=model.boundary,
@@ -948,6 +945,7 @@ class soc_locator_launcher:
         #add grid id : 코드 일관성 유지를 위해 자동으로 생성되는 id사용안함(사용자 후보지 고려)
         gridid = "GRID_ID"
         out_path = os.path.join(self.workpath, 'final_grid.shp')
+        self.setDebugProgressMsg("후보지 데이터에 ID필드({})를 추가합니다...".format(gridid), out_path)
         grid = model.addIDField(input=grid, idfid=gridid, output=out_path)
         model.potentialID = gridid
 
@@ -971,8 +969,8 @@ class soc_locator_launcher:
         self.setProgressMsg('[3 단계] 효율성 분석(직선거리)......')
         # 5-1 효율성 분석 : 기존 생활 SOC 시설
         if self.feedback.isCanceled(): return None
-        if self.debugging: self.setProgressMsg('생활SOC 버퍼......')
         out_path = os.path.join(self.workpath, 'bufferedCurSOC.shp')
+        self.setDebugProgressMsg("기존시설 레이어에 버퍼({}m)데이터를 생성합니다...".format(model.cutoff), out_path)
         bufferedSOC = model.bufferwithQgis(input=model.currentSOC,
                                            onlyselected=False,
                                            distance=model.cutoff,
@@ -983,8 +981,8 @@ class soc_locator_launcher:
         popexlusrate = self.parameters['IN_POP_EXCLUSION']
 
         if self.feedback.isCanceled(): return None
-        if self.debugging: self.setProgressMsg('기 서비스 지역 인구 배제 처리 중......({}% 배제)'.format(popexlusrate))
         out_path = os.path.join(self.workpath, 'selbyloc.shp')
+        self.setDebugProgressMsg("인구 배제율({}%)이 적용된 인구데이터를 생성합니다...".format(popexlusrate), out_path)
         poplyr = model.applypopratioinselectedEuclidean(input=clipedpop,
                                                       popfield=self.parameters['IN_POP_CNTFID'],
                                                       exlusrate=popexlusrate,
@@ -1010,6 +1008,7 @@ class soc_locator_launcher:
 
         # 5-3 효율성 분석 : 잠재적 위치(서비스 영역 설정)
         out_path = os.path.join(self.workpath, 'popenSvrArea.shp')
+        self.setDebugProgressMsg("후보지 레이어에 버퍼({}m)데이터를 생성합니다...".format(model.cutoff), out_path)
         potenSvrArea = model.bufferwithQgis(input=model.potentiallayer,
                                             onlyselected=False,
                                             distance=model.cutoff,
@@ -1017,6 +1016,7 @@ class soc_locator_launcher:
 
         # 5-4 효율성 분석 : 잠재적 위치(잠재적 위치 서비스 지역 분석)
         out_path = os.path.join(self.workpath, 'popaddedpotenid.shp')
+        self.setDebugProgressMsg("후보지 레이어와 인구레이어를 공간 조인합니다...", out_path)
         popaddedpoten = model.joinattributesbylocation(input=potenSvrArea,
                                                        join=model.populationLayer,
                                                        joinfiels=[model.popcntField],
@@ -1035,15 +1035,16 @@ class soc_locator_launcher:
 
         # 5-5 효율성 분석 : 잠재적 위치 분석 실행
         if self.feedback.isCanceled(): return None
-        if self.debugging: self.setProgressMsg('잠재적 위치의 최단거리를 분석합니다.....')
         # 각 잠재적 위치의 서비스 영역내 포함되는 인구수
+        self.setDebugProgressMsg("효율성 점수를 계산합니다...")
+        self.setDebugProgressMsg("anal_efficiencyPotenSOC_straight 실행...")
         potengpd = model.anal_efficiencyPotenSOC_straight()
 
 
 
         # 5-6 효율성 분석 결과 평가
         if self.feedback.isCanceled(): return None
-        if self.debugging: self.setProgressMsg('효율성 지수를 계산합니다.....')
+        self.setDebugProgressMsg("효율성 지수를 계산합니다...")
         finallayer = model.make_efficiencyscore(output=self.parameters["OUTPUT"])
 
         return finallayer
@@ -1066,8 +1067,8 @@ class soc_locator_launcher:
         self.setProgressMsg('[1 단계] 분석을 위한 데이터를 초기화 합니다......')
         # 1-1 분석 영역 데이터 생성
         if self.feedback.isCanceled(): return None
-        if self.debugging: self.setProgressMsg('노드/링크 데이터를 초기화 합니다.....')
         out_path = os.path.join(self.workpath, 'boundary.shp')
+        self.setDebugProgressMsg("대상지 레이어에서 분석 영역을 추출합니다...", out_path)
         boundary = model.dissolvewithQgis(input=self.parameters['IN_SITE'].sourceName(),
                                           onlyselected=self.parameters['IN_SITE_ONLYSELECTED'],
                                           output=out_path)
@@ -1080,6 +1081,7 @@ class soc_locator_launcher:
         # 1-2 분석 지역 데이터 추출 : 노드
         if self.feedback.isCanceled(): return None
         out_path = os.path.join(self.workpath, 'cliped_node.shp')
+        self.setDebugProgressMsg("분석 영역에 해당하는 노드 데이터를 추출합니다...", out_path)
         clipednode = model.clipwithQgis(input=self.parameters['IN_NODE'].sourceName(),
                                         onlyselected=self.parameters['IN_NODE_ONLYSELECTED'],
                                         overlay=boundary,
@@ -1095,13 +1097,14 @@ class soc_locator_launcher:
 
         # 1-3 분석 지역 데이터 추출 : 링크
         if self.feedback.isCanceled(): return None
-        if self.debugging: self.setProgressMsg('링크 데이터를 초기화 합니다.....')
+        self.setDebugProgressMsg("분석 영역의 버퍼(2000m)데이터를 생성합니다...")
         boundary2000 = model.bufferwithQgis(input=boundary,
                                             onlyselected=False,
                                             distance=2000)
 
         if self.feedback.isCanceled(): return None
         out_path = os.path.join(self.workpath, 'cliped_link.shp')
+        self.setDebugProgressMsg("분석 영역(2000m)에 해당하는 링크 데이터를 추출합니다...", out_path)
         clipedlink = model.clipwithQgis(input=self.parameters['IN_LINK'].sourceName(),
                                         onlyselected=self.parameters['IN_LINK_ONLYSELECTED'],
                                         overlay=boundary2000,
@@ -1121,12 +1124,14 @@ class soc_locator_launcher:
         # 1-4 분석 지역 데이터 추출 : 인구데이터
         if self.feedback.isCanceled(): return None
         out_path = os.path.join(self.workpath, 'cliped_pop.shp')
+        self.setDebugProgressMsg("분석 영역에 해당하는 인구 데이터를 추출합니다...")
         clipedpop = model.clipwithQgis(input=self.parameters['IN_POP'].sourceName(),
                                        onlyselected=self.parameters['IN_NODE_ONLYSELECTED'],
                                        overlay=boundary,
                                        output=out_path)
         # 불필요한 필드 값 제거(IN_POP)
         out_path = os.path.join(self.workpath, 'cliped_pop2.shp')
+        self.setDebugProgressMsg("인구 데이터에 필수 필드({})를 제외한 데이터를 삭제합니다...".format(self.parameters['IN_POP_CNTFID']), out_path)
         clipedpop = model.deleteFields(input=clipedpop, requredfields=[self.parameters['IN_POP_CNTFID']],
                                        output=out_path)
 
@@ -1134,12 +1139,14 @@ class soc_locator_launcher:
         # 1-5 분석 지역 데이터 추출 : 기존 생활 SOC 시설
         if self.feedback.isCanceled(): return None
         out_path = os.path.join(self.workpath, 'cliped_curSOC.shp')
+        self.setDebugProgressMsg("분석 영역에 해당하는 기존시설데이터를 추출합니다...", out_path)
         clipedCurSOC = model.clipwithQgis(input=self.parameters['IN_CURSOC'].sourceName(),
                                           onlyselected=self.parameters['IN_CURSOC_ONLYSELECTED'],
                                           overlay=boundary,
                                           output=out_path)
 
         out_path = os.path.join(self.workpath, 'cliped_curSOC2.shp')
+        self.setDebugProgressMsg("기존시설데이터에 필수 필드({})를 제외한 데이터를 삭제합니다...".format("NONE"), out_path)
         clipedCurSOC = model.deleteFields(input=clipedCurSOC, requredfields=[], output=out_path)
 
         #
@@ -1151,8 +1158,8 @@ class soc_locator_launcher:
         self.setProgressMsg('[2 단계] 세생활권 인구정보와 생활SOC 분석......')
         # 2-1 거주인구 지점의 최근린 생활SOC지점 검색
         if self.feedback.isCanceled(): return None
-        if self.debugging: self.setProgressMsg('기존의 생활SOC 레이어의 인근 노드를 찾습니다.....')
         out_path = os.path.join(self.workpath, 'curSOCwithNode.shp')
+        self.setDebugProgressMsg("기존시설데이터에 최근린 NODE를 찾습니다...", out_path)
         curSocwithNode = model.nearesthubpoints(input=clipedCurSOC,
                                                 onlyselected=False,
                                                 sf_hub=model.nodelayer,
@@ -1167,7 +1174,8 @@ class soc_locator_launcher:
 
         # 2-2 거주인구 지점의 최근린 노드  검색
         if self.feedback.isCanceled(): return None
-        out_path = ''
+        out_path = os.path.join(self.workpath, 'popwithNode.shp')
+        self.setDebugProgressMsg("인구데이터의 최근린 NODE를 찾습니다...", out_path)
         popWithNode = model.nearesthubpoints(input=clipedpop,
                                              onlyselected=False,
                                              sf_hub=model.nodelayer,
@@ -1176,7 +1184,8 @@ class soc_locator_launcher:
                                              )
 
         # ID 만들어 넣기 $id
-        if self.debugging: out_path = os.path.join(self.workpath, 'popwithNode.shp')
+        out_path = os.path.join(self.workpath, 'popwithNode1.shp')
+        self.setDebugProgressMsg("인구 데이터에 ID필드({})를 추가합니다...".format(popID), out_path)
         popwthNode2 = model.addIDField(input=popWithNode, idfid=popID, output=out_path)
 
         model.popIDField = popID
@@ -1197,12 +1206,11 @@ class soc_locator_launcher:
         if self.feedback.isCanceled(): return None
 
         usergrid = self.parameters['IN_USERGRID']
-        if self.debugging: self.setProgressMsg('사용자 후보지 레이어 : {}'.format(str(usergrid)))
 
         gridlayer = None
         onlyselected = False
         if usergrid == None:
-            if self.debugging: self.setProgressMsg('잠재적 후보지 그리드 데이터를 생성합니다.....')
+            self.setDebugProgressMsg("잠재적 후보지 데이터(Point-{}m)를 생성합니다..".format(self.parameters['IN_GRID_SIZE']), out_path)
             out_path = os.path.join(self.workpath, 'grid.shp')
             gridlayer = model.createGridfromLayer(sourcelayer=model.boundary,
                                                   gridsize=self.parameters['IN_GRID_SIZE'],
@@ -1211,11 +1219,10 @@ class soc_locator_launcher:
             gridlayer = self.parameters['IN_USERGRID'].sourceName()
             onlyselected = self.parameters['IN_USERGRID_ONLYSELECTED']
 
-        if self.debugging: self.setProgressMsg('분석할 후보지 타입 : {}({})'.format(type(gridlayer), len(gridlayer)))
 
         # 3-2 분석 지역 데이터 추출 : 잠재적 위치
         if self.feedback.isCanceled(): return None
-        if self.debugging: self.setProgressMsg('잠재적 후보지 데이터를 초기화 합니다.....')
+        self.setDebugProgressMsg("분석 영역에 해당하는 잠재적 후보지 데이터를 추출합니다...", out_path)
         out_path = os.path.join(self.workpath, 'cliped_grid.shp')
         clipedgrid = model.clipwithQgis(input=gridlayer,
                                         onlyselected=onlyselected,
@@ -1230,13 +1237,14 @@ class soc_locator_launcher:
         # add grid id : 코드 일관성 유지를 위해 자동으로 생성되는 id사용안함(사용자 후보지 고려)
         gridid = "GRID_ID"
         out_path = os.path.join(self.workpath, 'final_grid.shp')
+        self.setDebugProgressMsg("후보지 데이터에 ID필드({})를 추가합니다...".format(gridid), out_path)
         grid = model.addIDField(input=grid, idfid=gridid, output=out_path)
         model.potentialID = gridid
 
         # 3-3 잠재적 위치의 최근린 노드  검색
         if self.feedback.isCanceled(): return None
-        if self.debugging: self.setProgressMsg('잠재적 후보지 레이어의 인근 노드를 찾습니다.....')
         out_path = os.path.join(self.workpath, 'gridwithNode.shp')
+        self.setDebugProgressMsg("후보지 데이터의 최근린 NODE를 찾습니다...", out_path)
         gridwithNode = model.nearesthubpoints(input=grid,
                                               onlyselected=False,
                                               sf_hub=model.nodelayer,
@@ -1256,18 +1264,19 @@ class soc_locator_launcher:
         self.setProgressMsg('[3 단계] 최단거리 분석을 위한 네트워크 데이터 생성......\n(분석 조건에 따라 10분~60분 이상 소요됩니다...)')
         # 3-1 networkx 객체 생성
         if self.feedback.isCanceled(): return None
-        if self.debugging: self.setProgressMsg('최단거리 분석을 위한 노드링크 객체를 생성합니다.....')
         isoneway = (self.parameters['IN_LINK_TYPE'] == 0)
         model.initNXGraph(isoneway=isoneway)
+        self.setDebugProgressMsg("링크데이터를 활용하여 networkx의 graph객체를 생성합니다...")
         graph = model.createNodeEdgeInGraph()
 
         # 3-2 모든 노드간의 최단 거리 분석
         if self.feedback.isCanceled(): return None
-        if self.debugging: self.setProgressMsg('최단거리 분석 위한 기초자료를 생성합니다.....')
         alllink = None
-        if self.debugging: alllink = os.path.join(self.workpath, 'alllink.pickle')
+        # if self.debugging: alllink = os.path.join(self.workpath, 'alllink.pickle')
         model.cutoff = self.parameters['IN_LIMIT_DIST']
         model.outofcutoff = self.parameters['IN_LIMIT_DIST'] * self.cutoffconst_eff
+
+        self.setDebugProgressMsg("{} 최단거리 알고리즘을 통해 네트워크분석을 수행하여 메모리에 저장합니다...".format("dijkstra"))
         allshortestnodes = model.shortestAllnodes(algorithm='dijkstra',
                                                   output_alllink=alllink)
 
@@ -1280,7 +1289,8 @@ class soc_locator_launcher:
         self.setProgressMsg('[4 단계] 효율성 분석(네트워크)......')
         # 5-1 효율성 분석 : 기존 생활 SOC 시설
         if self.feedback.isCanceled(): return None
-        if self.debugging: self.setProgressMsg('기존 SOC 시설을 분석합니다.....')
+        self.setDebugProgressMsg("세생활권의 최근린 SOC 시설을 찾습니다...")
+        self.setDebugProgressMsg("anal_efficiencyCurSOC_network 실행...")
         dfPop = model.anal_efficiencyCurSOC_network()
 
         # # 5-2 효율성 분석 : 기존 생활 SOC 시설(기 서비스 지역 배제 비율 적)
@@ -1288,8 +1298,8 @@ class soc_locator_launcher:
         popexlusrate = self.parameters['IN_POP_EXCLUSION']
 
         if self.feedback.isCanceled(): return None
-        if self.debugging: self.setProgressMsg('기 서비스 지역 인구 배제 처리 중......({}% 배제)'.format(popexlusrate))
         out_path = os.path.join(self.workpath, 'selbyloc.shp')
+        self.setDebugProgressMsg("인구 배제율({}%)이 적용된 인구데이터를 생성합니다...".format(popexlusrate), out_path)
         poplayerwithCurSOC = model.applypopratioinselectedNetwork(input=clipedpop,
                                                         popfield=self.parameters['IN_POP_CNTFID'],
                                                         exlusrate=popexlusrate,
@@ -1314,16 +1324,21 @@ class soc_locator_launcher:
 
         # 5-3 효율성 분석 : 잠재적 위치(서비스 영역 설정)
         if self.feedback.isCanceled(): return None
-        out_path = ''
-        if self.debugging: out_path = os.path.join(self.workpath, 'popenSvrArea.shp')
+        out_path = os.path.join(self.workpath, 'popenSvrArea.shp')
+        self.setDebugProgressMsg("후보지 레이어에 버퍼({}m)데이터를 생성합니다...".format(model.cutoff), out_path)
         potenSvrArea = model.bufferwithQgis(input=model.potentiallayer,
                                             onlyselected=False,
                                             distance=model.cutoff,
                                             output=out_path)
 
+        self.setDebugProgressMsg("후보지 레이어의 공간인덱스를 생성합니다")
+        potenSvrArea= model.createspatialindex(potenSvrArea)
+
+
         # 5-4 효율성 분석 : 잠재적 위치(잠재적 위치 서비스 지역 분석)
         if self.feedback.isCanceled(): return None
         out_path = os.path.join(self.workpath, 'popaddedpotenid.shp')
+        self.setDebugProgressMsg("후보지 레이어와 인구레이어를 공간 조인합니다...", out_path)
         overprefix = 'JN_'
         popWithNodeaddedpoten = model.joinattributesbylocation(input=potenSvrArea,
                                                                join=model.populationLayer,
@@ -1340,7 +1355,6 @@ class soc_locator_launcher:
 
         # 5-5 효율성 분석 : 잠재적 위치 분석 실행
         if self.feedback.isCanceled(): return None
-        if self.debugging: self.setProgressMsg('잠재적 위치의 최단거리를 분석합니다.....')
 
         # shape file의 필드명 최대길이는 10자리 / 메모리에 있을때는 상관없음
         relpopNodeID = overprefix + model.nodeIDfield
@@ -1349,12 +1363,14 @@ class soc_locator_launcher:
         if self.debugging: popcntfield = popcntfield[0: 10]
 
         # 각 잠재적 위치의 서비스 영역내 포함되는 인구수
+        self.setDebugProgressMsg("효율성 점수를 계산합니다...")
+        self.setDebugProgressMsg("anal_efficiencyPotenSOC_network 실행...")
         potengpd = model.anal_efficiencyPotenSOC_network(relpopNodeID=relpopNodeID,
                                                          relpopcntfid=popcntfield)
 
         # 5-6 효율성 분석 결과 평가
         if self.feedback.isCanceled(): return None
-        if self.debugging: self.setProgressMsg('효율성 지수를 계산합니다.....')
+        self.setDebugProgressMsg("효율성 지수를 계산합니다...")
         finallayer = model.make_efficiencyscore(output=self.parameters["OUTPUT"])
 
         return finallayer
