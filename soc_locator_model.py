@@ -583,7 +583,9 @@ class soc_locator_model:
                                             newfield=True)
 
         # # selbyloc : applyArea
-        self.selectbylocation(input=poplyr, intersect=applyArea)
+        # todo : 공간인덱스 오류 메세지 처리
+        poplyr = self.selectbylocation(input=poplyr, intersect=applyArea)
+
         return self.calpopexclusratio(poplyr=poplyr, popratiofield=popratiofield, popfield=popfield, exlusrate=exlusrate, output=output)
 
 
