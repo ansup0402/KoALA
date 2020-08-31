@@ -371,6 +371,8 @@ class soc_locator_model:
             completedlayer = inputsrc
 
         return completedlayer
+    def multiparttosingleparts(self, input, onlyselected=False, output='TEMPORARY_OUTPUT'):
+        self.qgsutils.multiparttosingleparts(input=input, onlyselected=onlyselected, output=output)
 
     def createNodeEdgeInGraph(self):
 

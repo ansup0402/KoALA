@@ -295,6 +295,7 @@ class qgsprocessUtils:
 
         if output is None or output == '': output = 'TEMPORARY_OUTPUT'
         algname = 'native:multiparttosingleparts'
+        #algname = 'qgis:multiparttosingleparts'
 
         inputsource = input
         if onlyselected: inputsource = QgsProcessingFeatureSourceDefinition(input, True)

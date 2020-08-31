@@ -54,7 +54,7 @@ class LivingSOCLocatorProvider(QgsProcessingProvider):
         Default constructor.
         """
 
-        # self.debugging = False
+        self.debugging = False
         self.debugging = True
 
 

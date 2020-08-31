@@ -13,24 +13,26 @@ class soc_locator_launcher:
         self.cutoffconst_eff = 1000000
         self.cutoffconst_equ = 1000000
 
+        self.enablelogmsg = False
 
     def setDebugProgressMsg(self, msg, output=None):
-        import time
-        now = time.localtime()
+        if self.debugging or self.enablelogmsg:
+            import time
+            now = time.localtime()
 
-        snow = "%04d-%02d-%02d %02d:%02d:%02d" % (
-        now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
+            snow = "%04d-%02d-%02d %02d:%02d:%02d" % (
+            now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
 
-        # self.feedback.pushConsoleInfo("\n%s %s" % (snow, msg))
-        outputmessage = "{} [debug] {}".format(snow, msg)
-        if not output is None:
-            outputmessage = outputmessage + "\n{}".format(output)
+            # self.feedback.pushConsoleInfo("\n%s %s" % (snow, msg))
+            outputmessage = "{} [debug] {}".format(snow, msg)
+            if not output is None:
+                outputmessage = outputmessage + "\n{}".format(output)
 
-        # self.feedback.pushCommandInfo(outputmessage)
-        self.feedback.pushDebugInfo(outputmessage)
-        # self.feedback.pushInfo("\n%s %s" % (snow, msg))
-        # self.feedback.pushConsoleInfo("\n%s %s" % (snow, msg))
-        # self.feedback.pushDebugInfo("\n%s %s" % (snow, msg))
+            # self.feedback.pushCommandInfo(outputmessage)
+            self.feedback.pushDebugInfo(outputmessage)
+            # self.feedback.pushInfo("\n%s %s" % (snow, msg))
+            # self.feedback.pushConsoleInfo("\n%s %s" % (snow, msg))
+            # self.feedback.pushDebugInfo("\n%s %s" % (snow, msg))
 
     def setProgressMsg(self, msg):
         import time
@@ -520,10 +522,18 @@ class soc_locator_launcher:
         # 4-3 형평성 분석 결과 평가
         if self.feedback.isCanceled(): return None
         self.setDebugProgressMsg("형평성 지수를 계산합니다...")
-        finallayer = model.make_equityscore(isNetwork=False, output=self.parameters["OUTPUT"])
+        out_path = os.path.join(self.workpath, 'analyzed_layer.shp')
+        finallayer = model.make_equityscore(isNetwork=False, output=out_path)
 
 
-        return finallayer
+        self.setDebugProgressMsg("최종결과를 폴리곤({})으로 변환합니다...".format(self.parameters['IN_GRID_SIZE']))
+        finallayer2 = model.rectanglesovalsdiamonds(input=finallayer, onlyselected=False,
+                                                    width=self.parameters['IN_GRID_SIZE'],
+                                                    height=self.parameters['IN_GRID_SIZE'],
+                                                    output=self.parameters["OUTPUT"])
+
+
+        return finallayer2
 
 
     def execute_accessbillity_in_network(self):
@@ -1048,9 +1058,23 @@ class soc_locator_launcher:
         # 5-6 효율성 분석 결과 평가
         if self.feedback.isCanceled(): return None
         self.setDebugProgressMsg("효율성 지수를 계산합니다...")
-        finallayer = model.make_efficiencyscore(output=self.parameters["OUTPUT"])
+        out_path = os.path.join(self.workpath, 'analyzed_layer.shp')
+        finallayer = model.make_efficiencyscore(output=out_path)
 
-        return finallayer
+
+        # todo 싱글파트 테스트 중...
+        finallayer1 = model.multiparttosingleparts(finallayer)
+
+
+        self.setDebugProgressMsg("최종결과를 폴리곤({})으로 변환합니다...".format(self.parameters['IN_GRID_SIZE']))
+        finallayer2 = model.rectanglesovalsdiamonds(input=finallayer1, onlyselected=False,
+                                                    width=self.parameters['IN_GRID_SIZE'],
+                                                    height=self.parameters['IN_GRID_SIZE'],
+                                                    output=self.parameters["OUTPUT"])
+
+
+
+        return finallayer2
 
     def execute_efficiency_in_network(self):
         try:
@@ -1374,9 +1398,17 @@ class soc_locator_launcher:
         # 5-6 효율성 분석 결과 평가
         if self.feedback.isCanceled(): return None
         self.setDebugProgressMsg("효율성 지수를 계산합니다...")
-        finallayer = model.make_efficiencyscore(output=self.parameters["OUTPUT"])
+        out_path = os.path.join(self.workpath, 'analyzed_layer.shp')
+        finallayer = model.make_efficiencyscore(output=out_path)
 
-        return finallayer
+
+        self.setDebugProgressMsg("최종결과를 폴리곤({})으로 변환합니다...".format(self.parameters['IN_GRID_SIZE']))
+        finallayer2 = model.rectanglesovalsdiamonds(input=finallayer, onlyselected=False,
+                                                    width=self.parameters['IN_GRID_SIZE'],
+                                                    height=self.parameters['IN_GRID_SIZE'],
+                                                    output=self.parameters["OUTPUT"])
+
+        return finallayer2
 
 
     def execute_equity_in_network(self):
@@ -1698,10 +1730,20 @@ class soc_locator_launcher:
         # 5-3 형평성 분석 결과 평가
         if self.feedback.isCanceled(): return None
         self.setDebugProgressMsg("형평성 지수를 계산합니다...")
-        finallayer = model.make_equityscore(isNetwork=True, output=self.parameters["OUTPUT"])
+        out_path = os.path.join(self.workpath, 'analyzed_layer.shp')
+        finallayer = model.make_equityscore(isNetwork=True, output=out_path)
 
 
-        return finallayer
+
+        self.setDebugProgressMsg("최종결과를 폴리곤({})으로 변환합니다...".format(self.parameters['IN_GRID_SIZE']))
+        finallayer2 = model.rectanglesovalsdiamonds(input=finallayer, onlyselected=False,
+                                                    width=self.parameters['IN_GRID_SIZE'],
+                                                    height=self.parameters['IN_GRID_SIZE'],
+                                                    output=self.parameters["OUTPUT"])
+
+
+
+        return finallayer2
 
 
 
