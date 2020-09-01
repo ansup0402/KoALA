@@ -475,6 +475,12 @@ class soc_locator_launcher:
         else:
             grid = clipedgrid
 
+
+        out_path = os.path.join(self.workpath, 'cliped_grid_single.shp')
+        self.setDebugProgressMsg("잠재적 후보지 데이터를 싱글파트로 변환합니다...", out_path)
+        grid = model.multiparttosingleparts(grid, output=out_path)
+
+
         #add grid id : 코드 일관성 유지를 위해 자동으로 생성되는 id사용안함(사용자 후보지 고려)
         gridid = "GRID_ID"
         out_path = os.path.join(self.workpath, 'final_grid.shp')
@@ -946,6 +952,13 @@ class soc_locator_launcher:
         else:
             grid = clipedgrid
 
+
+        out_path = os.path.join(self.workpath, 'cliped_grid_single.shp')
+        self.setDebugProgressMsg("잠재적 후보지 데이터를 싱글파트로 변환합니다...", out_path)
+        grid = model.multiparttosingleparts(grid, output=out_path)
+
+
+
         #add grid id : 코드 일관성 유지를 위해 자동으로 생성되는 id사용안함(사용자 후보지 고려)
         gridid = "GRID_ID"
         out_path = os.path.join(self.workpath, 'final_grid.shp')
@@ -1062,12 +1075,11 @@ class soc_locator_launcher:
         finallayer = model.make_efficiencyscore(output=out_path)
 
 
-        # todo 싱글파트 테스트 중...
-        finallayer1 = model.multiparttosingleparts(finallayer)
+
 
 
         self.setDebugProgressMsg("최종결과를 폴리곤({})으로 변환합니다...".format(self.parameters['IN_GRID_SIZE']))
-        finallayer2 = model.rectanglesovalsdiamonds(input=finallayer1, onlyselected=False,
+        finallayer2 = model.rectanglesovalsdiamonds(input=finallayer, onlyselected=False,
                                                     width=self.parameters['IN_GRID_SIZE'],
                                                     height=self.parameters['IN_GRID_SIZE'],
                                                     output=self.parameters["OUTPUT"])
@@ -1261,6 +1273,11 @@ class soc_locator_launcher:
         else:
             grid = clipedgrid
 
+        out_path = os.path.join(self.workpath, 'cliped_grid_single.shp')
+        self.setDebugProgressMsg("잠재적 후보지 데이터를 싱글파트로 변환합니다...", out_path)
+        grid = model.multiparttosingleparts(grid, output=out_path)
+
+
         # add grid id : 코드 일관성 유지를 위해 자동으로 생성되는 id사용안함(사용자 후보지 고려)
         gridid = "GRID_ID"
         out_path = os.path.join(self.workpath, 'final_grid.shp')
@@ -1316,9 +1333,14 @@ class soc_locator_launcher:
         self.setProgressMsg('[4 단계] 효율성 분석(네트워크)......')
         # 5-1 효율성 분석 : 기존 생활 SOC 시설
         if self.feedback.isCanceled(): return None
-        self.setDebugProgressMsg("개별 인구데이터의 최근린 SOC 시설을 찾습니다...")
+        out_path = os.path.join(self.workpath, 'poptable_afteranalcursoc.csv')
+
+        self.setDebugProgressMsg("개별 인구데이터의 최근린 SOC 시설을 찾습니다...", out_path)
         self.setDebugProgressMsg("anal_efficiencyCurSOC_network 실행...")
+
         dfPop = model.anal_efficiencyCurSOC_network()
+        if self.debugging: dfPop.to_csv(out_path)
+
 
         # # 5-2 효율성 분석 : 기존 생활 SOC 시설(기 서비스 지역 배제 비율 적)
         model.popcntField = self.parameters['IN_POP_CNTFID']
@@ -1656,6 +1678,11 @@ class soc_locator_launcher:
             grid = model.writeAsVectorLayer(clipedgrid)
         else:
             grid = clipedgrid
+
+        out_path = os.path.join(self.workpath, 'cliped_grid_single.shp')
+        self.setDebugProgressMsg("잠재적 후보지 데이터를 싱글파트로 변환합니다...", out_path)
+        grid = model.multiparttosingleparts(grid, output=out_path)
+
 
         # add grid id : 코드 일관성 유지를 위해 자동으로 생성되는 id사용안함(사용자 후보지 고려)
         gridid = "GRID_ID"

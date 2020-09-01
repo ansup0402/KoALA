@@ -372,7 +372,7 @@ class soc_locator_model:
 
         return completedlayer
     def multiparttosingleparts(self, input, onlyselected=False, output='TEMPORARY_OUTPUT'):
-        self.qgsutils.multiparttosingleparts(input=input, onlyselected=onlyselected, output=output)
+        return self.qgsutils.multiparttosingleparts(input=input, onlyselected=onlyselected, output=output)
 
     def createNodeEdgeInGraph(self):
 
@@ -585,14 +585,9 @@ class soc_locator_model:
                                             newfield=True)
 
         # # selbyloc : applyArea
-        # todo : 공간인덱스 오류 메세지 처리
-        poplyr = self.selectbylocation(input=poplyr, intersect=applyArea)
-
-        return self.calpopexclusratio(poplyr=poplyr, popratiofield=popratiofield, popfield=popfield, exlusrate=exlusrate, output=output)
-
-
-
-
+        self.createspatialindex(poplyr)
+        poplyr2 = self.selectbylocation(input=poplyr, intersect=applyArea)
+        return self.calpopexclusratio(poplyr=poplyr2, popratiofield=popratiofield, popfield=popfield, exlusrate=exlusrate, output=output)
 
 
     # Calculate the shortest distance and store the result in memory
@@ -657,6 +652,7 @@ class soc_locator_model:
 
         dict_distlist = self.get_allOfDistFromAlltarget(fromNodeID, svrNodeList)
 
+
         # if self.debugging:
         #     if dict_distlist is None
         #         self.setProgressSubMsg("    >> get_nearesttargetDistnace [NODE-%s] 해당 노드 %sm 이내에는 현재 생활SOC가 없습니다." % (str(fromNodeID), str(self.cutoff)))
@@ -665,16 +661,21 @@ class soc_locator_model:
             import operator
             sorteddict = sorted(dict_distlist.items(), key=operator.itemgetter(1))
 
+
+
             if len(sorteddict) > 0:
                 if fromNodeID in svrNodeList:
                     # fromNode위치와 svrNode의 위치가 동일한 경우
                     dis = sorteddict[0][1]
+
                 else:
                     if len(sorteddict) == 1:
                         # fromNode위치와 svrNode의 위치가 동일하지 않은 경우는 0번째는 자신 Node까지의 거리를 뜻함
                         dis = sorteddict[0][1]
+
                     else:
                         dis = sorteddict[1][1]
+
 
         return dis
 
@@ -1548,6 +1549,9 @@ class soc_locator_model:
         calculatedNode = {}
 
         i = 0
+
+        self.setProgressSubMsg("{} : {}  ".format("cur", cursvrlist))
+
         for feature in tmppoplayer.getFeatures():
             i += 1
             if self.feedback.isCanceled(): return None
@@ -1563,6 +1567,9 @@ class soc_locator_model:
             except:
                 dis = self.get_nearesttargetDistnace(fromNodeID=popNodeid,
                                                      svrNodeList=cursvrlist)
+
+                # self.setProgressSubMsg("{} : {}  ".format(i, dis))
+
                 if dis is None:
                     dis = self.__outofcutoff
                     if self.debugging:
@@ -1577,7 +1584,10 @@ class soc_locator_model:
             else:
                 issvr = 1
 
-            listpopID.append(popID)
+
+
+
+            listpopID.append(popID),
             listpopNode.append(popNodeid)
             listpopCnt.append(poppnt)
             listissvrSOC.append(issvr)
