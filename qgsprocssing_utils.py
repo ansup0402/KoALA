@@ -32,6 +32,7 @@ class qgsprocessUtils:
         # 2 — Diamonds
         if output is None or output == '': output = 'TEMPORARY_OUTPUT'
         algname = 'qgis:rectanglesovalsdiamonds'
+        # algname = 'qgis:rectanglesovalsdiamondsfixed'
 
         inputsource = input
         if onlyselected:
