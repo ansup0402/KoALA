@@ -110,7 +110,7 @@ class soc_locator_launcher:
         # 세생활권 레이어 생성 : 분석 영역을 기준으로 Fishnet 레이어 생성
         if self.feedback.isCanceled(): return None
         out_path = os.path.join(self.workpath, 'fishnetliving.shp')
-        self.setDebugProgressMsg("세생활권 레이어(Point)를 생성합니다.", out_path)
+        self.setDebugProgressMsg("세생활권 레이어(Polygon)를 생성합니다.", out_path)
         fishnetliving = model.createGridfromLayer(sourcelayer=model.boundary,
                                               gridsize=self.parameters['IN_LIVINGAREA'],
                                               type=2,
@@ -119,7 +119,7 @@ class soc_locator_launcher:
 
         if self.feedback.isCanceled(): return None
         out_path = os.path.join(self.workpath, 'cliped_fishnetliving.shp')
-        self.setDebugProgressMsg("분석 영역에 해당하는 세생활권 레이어(Point)를 추출합니다...", out_path)
+        self.setDebugProgressMsg("분석 영역에 해당하는 세생활권 레이어(Polygon)를 추출합니다...", out_path)
         clipedfishnetliving = model.clipwithQgis(input=fishnetliving,
                                         onlyselected=False,
                                         overlay=model.boundary,
@@ -128,17 +128,17 @@ class soc_locator_launcher:
 
         # ID 추가
         out_path = os.path.join(self.workpath, 'cliped_living.shp')
-        self.setDebugProgressMsg("세생활권 레이어(Point)에 ID필드({})를 추가합니다...".format(livingID), out_path)
+        self.setDebugProgressMsg("세생활권 레이어(Polygon)에 ID필드({})를 추가합니다...".format(livingID), out_path)
         clipedfishnetliving2 = model.addIDField(input=clipedfishnetliving, idfid=livingID, output=out_path)
 
 
-        self.setDebugProgressMsg("세생활권 레이어(Point)의 공간인덱스를 생성합니다")
+        self.setDebugProgressMsg("세생활권 레이어(Polygon)의 공간인덱스를 생성합니다")
         clipedfishnetliving2 = model.createspatialindex(clipedfishnetliving2)
 
 
         # 세생활권 레이어 정리 : 인구 레이어와의 Spatial Join을 통해 연계되지 않은 피처 제거
         out_path = os.path.join(self.workpath, 'cliped_fishnetliving_discarded.shp')
-        self.setDebugProgressMsg("세생활권 레이어(Point)와 인구레이어를 공간 조인하고, 조인되지 않는 데이터는 삭제합니다...", out_path)
+        self.setDebugProgressMsg("세생활권 레이어(Polygon)와 인구레이어를 공간 조인하고, 조인되지 않는 데이터는 삭제합니다...", out_path)
         tmpliving = model.joinattributesbylocation(input=clipedfishnetliving2,
                                                        join=clipedpop,
                                                        joinfiels=[],
@@ -148,14 +148,14 @@ class soc_locator_launcher:
 
 ######################################################################################################
         out_path = os.path.join(self.workpath, 'only_living_has_pop.shp')
-        self.setDebugProgressMsg('인구와 조인된 세생활권 레이어(Point)를 PK필드({})로 Dissolve 하여 중복데이터를 제거합니다'.format(livingID), out_path)
+        self.setDebugProgressMsg('인구와 조인된 세생활권 레이어(Polygon)를 PK필드({})로 Dissolve 하여 중복데이터를 제거합니다'.format(livingID), out_path)
         clipedliving = model.dissolvewithQgis(input=tmpliving, onlyselected=False, field=[livingID], output=out_path)
 
 
 
         # 불필요한 필드 값 제거(IN_LIVINGAREA)
         out_path = os.path.join(self.workpath, 'cliped_living2.shp')
-        self.setDebugProgressMsg("세생활권 레이어(Point)에 필수 필드({})를 제외한 데이터를 삭제합니다...".format(livingID), out_path)
+        self.setDebugProgressMsg("세생활권 레이어(Polygon)에 필수 필드({})를 제외한 데이터를 삭제합니다...".format(livingID), out_path)
         clipedliving = model.deleteFields(input=clipedliving, requredfields=[livingID], output=out_path)
 
         if isinstance(clipedliving, str):
@@ -226,7 +226,7 @@ class soc_locator_launcher:
         if self.feedback.isCanceled(): return None
         out_path = os.path.join(self.workpath, 'cliped_popaddedlivingarea.shp')
         self.setDebugProgressMsg(
-            "각 인구데이터에 교차하는 세생활권데이터를 연산하고, 필수 필드({},{},{},{})만 남겨놓습니다...".format(popID, model.popcntField, "HubDist",
+            "각 인구데이터에 교차(intersection)하는 세생활권데이터를 연산하고, 필수 필드({},{},{},{})만 남겨놓습니다...".format(popID, model.popcntField, "HubDist",
                                                                                 model.livingareaIDField), out_path)
         popWithNodeaddedliving = model.intersection(input=popwithNearSOC,
                                                     inputfields=[popID,
@@ -650,7 +650,7 @@ class soc_locator_launcher:
         # 세생활권 레이어 생성 : 분석 영역을 기준으로 Fishnet 레이어 생성
         if self.feedback.isCanceled(): return None
         out_path = os.path.join(self.workpath, 'fishnetliving.shp')
-        self.setDebugProgressMsg("세생활권 레이어(Point)를 생성합니다.", out_path)
+        self.setDebugProgressMsg("세생활권 레이어(Polygon)를 생성합니다.", out_path)
         fishnetliving = model.createGridfromLayer(sourcelayer=model.boundary,
                                                   gridsize=self.parameters['IN_LIVINGAREA'],
                                                   type=2,
@@ -658,7 +658,7 @@ class soc_locator_launcher:
 
         if self.feedback.isCanceled(): return None
         out_path = os.path.join(self.workpath, 'cliped_fishnetliving.shp')
-        self.setDebugProgressMsg("분석 영역에 해당하는 세생활권 레이어(Point)를 추출합니다...", out_path)
+        self.setDebugProgressMsg("분석 영역에 해당하는 세생활권 레이어(Polygon)를 추출합니다...", out_path)
         clipedfishnetliving = model.clipwithQgis(input=fishnetliving,
                                                  onlyselected=False,
                                                  overlay=model.boundary,
@@ -666,16 +666,16 @@ class soc_locator_launcher:
 
         # ID 추가
         out_path = os.path.join(self.workpath, 'cliped_living.shp')
-        self.setDebugProgressMsg("세생활권 레이어(Point)에 ID필드({})를 추가합니다...".format(livingID), out_path)
+        self.setDebugProgressMsg("세생활권 레이어(Polygon)에 ID필드({})를 추가합니다...".format(livingID), out_path)
         clipedfishnetliving2 = model.addIDField(input=clipedfishnetliving, idfid=livingID, output=out_path)
 
-        self.setDebugProgressMsg("세생활권 레이어(Point)의 공간인덱스를 생성합니다")
+        self.setDebugProgressMsg("세생활권 레이어(Polygon)의 공간인덱스를 생성합니다")
         clipedfishnetliving2 = model.createspatialindex(clipedfishnetliving2)
 
 
         # 세생활권 레이어 정리 : 인구 레이어와의 Spatial Join을 통해 연계되지 않은 피처 제거
         out_path = os.path.join(self.workpath, 'cliped_fishnetliving_discarded.shp')
-        self.setDebugProgressMsg("세생활권 레이어(Point)와 인구레이어를 공간 조인하고, 조인되지 않는 데이터는 삭제합니다...", out_path)
+        self.setDebugProgressMsg("세생활권 레이어(Polygon)와 인구레이어를 공간 조인하고, 조인되지 않는 데이터는 삭제합니다...", out_path)
         tmpliving = model.joinattributesbylocation(input=clipedfishnetliving2,
                                                       join=clipedpop,
                                                       joinfiels=[],
@@ -685,7 +685,7 @@ class soc_locator_launcher:
 
         ######################################################################################################
         out_path = os.path.join(self.workpath, 'only_living_has_pop.shp')
-        self.setDebugProgressMsg('인구와 조인된 세생활권 레이어(Point)를 PK필드({})로 Dissolve 하여 중복데이터를 제거합니다'.format(livingID), out_path)
+        self.setDebugProgressMsg('인구와 조인된 세생활권 레이어(Polygon)를 PK필드({})로 Dissolve 하여 중복데이터를 제거합니다'.format(livingID), out_path)
         clipedliving = model.dissolvewithQgis(input=tmpliving, onlyselected=False, field=[livingID], output=out_path)
 
 
@@ -693,7 +693,7 @@ class soc_locator_launcher:
 
         # 불필요한 필드 값 제거(IN_LIVINGAREA)
         out_path = os.path.join(self.workpath, 'cliped_living2.shp')
-        self.setDebugProgressMsg("세생활권 레이어(Point)에 필수 필드({})를 제외한 데이터를 삭제합니다...".format(livingID), out_path)
+        self.setDebugProgressMsg("세생활권 레이어(Polygon)에 필수 필드({})를 제외한 데이터를 삭제합니다...".format(livingID), out_path)
         clipedliving = model.deleteFields(input=clipedliving, requredfields=[livingID], output=out_path)
 
 
@@ -780,7 +780,7 @@ class soc_locator_launcher:
         if self.feedback.isCanceled(): return None
         out_path = os.path.join(self.workpath, 'cliped_popaddedlivingarea.shp')
         self.setDebugProgressMsg(
-            "각 인구데이터에 교차하는 세생활권데이터를 연산하고, 필수 필드({},{},{},{})만 남겨놓습니다...".format(model.popIDField, model.nodeIDfield,
+            "각 인구데이터에 교차(intersection)하는 세생활권데이터를 연산하고, 필수 필드({},{},{},{})만 남겨놓습니다...".format(model.popIDField, model.nodeIDfield,
                                                                                  model.popcntField,
                                                                                  model.livingareaIDField), out_path)
         popWithNodeaddedliving = model.intersection(input=popWithNode,
