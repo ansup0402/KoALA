@@ -5,9 +5,9 @@ name=KoALA
 qgisMinimumVersion=3.10
 qgisMaximumVersion=3.99
 description=Korean Accessibility and Optimal Location Analysis Tool for Neighborhood SOC
-version=0.5.5
-author=Ansup
-email=ansup0402@gmail.com
+version=0.5.6
+author=Hyunjoong Kim
+email=khj1122452@gmail.com
 
 about=This tool is built to support a rational decision-making process for optimal supply and management of neighborhood SOC in South Korea.
     - Equity-based potential location analysis(by euclidean Distance, by network Distance)
@@ -21,9 +21,9 @@ repository=https://github.com/ansup0402/KoALA
 # Recommended items:
 
 hasProcessingProvider=yes
-changelog=0.5.5:
+changelog=0.5.6:
     - Fixed Bug
-    - Improved live area parameters.
+
 
 tags=network, Korea, SOC, accessibility
 
