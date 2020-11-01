@@ -717,7 +717,7 @@ class soc_locator_model:
         if (self.__cutoff is not None) and (self.__cutoff > 0): matrixtype = 0
 
 
-        tmpoutput = os.path.join(self.workpath, 'popdistmatrix1_%s.shp' % targetlayer.sourceName())
+        tmpoutput = os.path.join(self.workpath, 'popdistmatrix1_%s.gpkg' % targetlayer.sourceName())
         if self.debugging:
             self.setProgressSubMsg("distancematrix(인구-SOC(기존 or 신규) : {}".format(tmpoutput))
         matrix_distance = self.qgsutils.distancematrix(input=singlepop,
@@ -748,7 +748,7 @@ class soc_locator_model:
             self.setProgressSubMsg("===기존 시설 분석 시작===")
             self.setProgressSubMsg("기존 SOC 레이어 갯수 : {}".format(str(self.__currentSOClayer.featureCount())))
 
-        tmpoutput = os.path.join(self.workpath, 'AllCurSOC1.shp')
+        tmpoutput = os.path.join(self.workpath, 'AllCurSOC1.gpkg')
         if self.debugging:
             self.setProgressSubMsg("Distancematrix(인구-기존) : {}".format(tmpoutput))
         # [향후-인구배제율] 추가1) 거리조락 밖에 있는 것도 반환하도록 수정(getPopdistmatrixDataLayer 함수 내)
@@ -780,7 +780,7 @@ class soc_locator_model:
 
 
 
-        tmpoutput = os.path.join(self.workpath, 'AllCurSOC3.shp')
+        tmpoutput = os.path.join(self.workpath, 'AllCurSOC3.gpkg')
         if (self.debugging):
             self.setProgressSubMsg("조인(인구-통계) : {}".format(tmpoutput))
         joinedpop = self.qgsutils.joinattributetable(input1=self.__popSinglepartlayer,
@@ -917,7 +917,7 @@ class soc_locator_model:
     def anal_AllPotenSOC_straight(self):
 
         # 1) 잠재적위치 레이어와 세생활권 인구레이어 distance matrix
-        tmpoutput = os.path.join(self.workpath, 'AllPotenSOC1.shp')
+        tmpoutput = os.path.join(self.workpath, 'AllPotenSOC1.gpkg')
         matrixDisLayer = self.getPopdistmatrixDataLayer(targetlayer=self.__potentiallayer,
                                                         targetlayerID=self.__potentialID,
                                                         output=tmpoutput)

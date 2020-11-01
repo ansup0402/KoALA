@@ -55,7 +55,7 @@ class LivingSOCLocatorProvider(QgsProcessingProvider):
         """
 
         self.debugging = False
-        self.debugging = True
+        #self.debugging = True
 
 
         self.tempdir = tempfile.TemporaryDirectory()
