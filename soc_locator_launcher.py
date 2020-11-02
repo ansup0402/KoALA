@@ -332,6 +332,8 @@ class soc_locator_launcher:
         if self.feedback.isCanceled(): return None
         out_path = os.path.join(self.workpath, 'boundary.gpkg')
         self.setDebugProgressMsg("대상지 레이어에서 분석 영역을 추출합니다...", out_path)
+        # Create Spatial Index
+        model.createspatialindex(self.parameters['IN_SITE'].sourceName())
         boundary = model.dissolvewithQgis(input=self.parameters['IN_SITE'].sourceName(),
                                           onlyselected=self.parameters['IN_SITE_ONLYSELECTED'],
                                           output=out_path)
@@ -349,6 +351,9 @@ class soc_locator_launcher:
         if self.feedback.isCanceled(): return None
         out_path = os.path.join(self.workpath, 'cliped_pop.gpkg')
         self.setDebugProgressMsg("분석 영역에 해당하는 인구 데이터를 추출합니다...", out_path)
+        # Create Spatial Index
+        model.createspatialindex(self.parameters['IN_POP'].sourceName())
+        model.createspatialindex(model.boundary)
         clipedpop = model.clipwithQgis(input=self.parameters['IN_POP'].sourceName(),
                                        onlyselected=self.parameters['IN_POP_ONLYSELECTED'],
                                        overlay=model.boundary,
@@ -371,6 +376,8 @@ class soc_locator_launcher:
         # 1-4 분석 지역 데이터 추출 : 기존 생활 SOC 시설
         if self.feedback.isCanceled(): return None
         self.setDebugProgressMsg("분석 영역에 해당하는 기존시설데이터를 추출합니다...", out_path)
+        # Create Spatial Index
+        model.createspatialindex(self.parameters['IN_CURSOC'].sourceName())
         clipedCurSOC = model.clipwithQgis(input=self.parameters['IN_CURSOC'].sourceName(),
                                           onlyselected=self.parameters['IN_CURSOC_ONLYSELECTED'],
                                           overlay=model.boundary)
@@ -486,6 +493,8 @@ class soc_locator_launcher:
         if self.feedback.isCanceled(): return None
         out_path = os.path.join(self.workpath, 'cliped_grid.gpkg')
         self.setDebugProgressMsg("분석 영역에 해당하는 잠재적 후보지 데이터를 추출합니다...", out_path)
+        # Create Spatial Index
+        model.createspatialindex(gridlayer)
         clipedgrid = model.clipwithQgis(input=gridlayer,
                                         onlyselected=onlyselected,
                                         overlay=model.boundary,
@@ -499,6 +508,8 @@ class soc_locator_launcher:
 
         out_path = os.path.join(self.workpath, 'cliped_grid_single.gpkg')
         self.setDebugProgressMsg("잠재적 후보지 데이터를 싱글파트로 변환합니다...", out_path)
+        # Create Spatial Index
+        model.createspatialindex(grid)
         grid = model.multiparttosingleparts(grid, output=out_path)
 
 
@@ -554,6 +565,8 @@ class soc_locator_launcher:
 
 
         self.setDebugProgressMsg("최종결과를 폴리곤({})으로 변환합니다...".format(self.parameters['IN_GRID_SIZE']))
+        # Create Spatial Index
+        model.createspatialindex(finallayer)
         finallayer2 = model.rectanglesovalsdiamonds(input=finallayer, onlyselected=False,
                                                     width=self.parameters['IN_GRID_SIZE'],
                                                     height=self.parameters['IN_GRID_SIZE'],
@@ -921,6 +934,8 @@ class soc_locator_launcher:
         if self.feedback.isCanceled(): return None
         out_path = os.path.join(self.workpath, 'boundary.gpkg')
         self.setDebugProgressMsg("대상지 레이어에서 분석 영역을 추출합니다...", out_path)
+        # Create Spatial Index
+        model.createspatialindex(self.parameters['IN_SITE'].sourceName())
         boundary = model.dissolvewithQgis(input=self.parameters['IN_SITE'].sourceName(),
                                           onlyselected=self.parameters['IN_SITE_ONLYSELECTED'],
                                           output=out_path)
@@ -933,6 +948,8 @@ class soc_locator_launcher:
         if self.feedback.isCanceled(): return None
         out_path = os.path.join(self.workpath, 'cliped_pop.gpkg')
         self.setDebugProgressMsg("분석 영역에 해당하는 인구 데이터를 추출합니다...", out_path)
+        # Create Spatial Index
+        model.createspatialindex(self.parameters['IN_POP'].sourceName())
         clipedpop = model.clipwithQgis(input=self.parameters['IN_POP'].sourceName(),
                                        onlyselected=self.parameters['IN_POP_ONLYSELECTED'],
                                        overlay=boundary,
@@ -948,6 +965,8 @@ class soc_locator_launcher:
         if self.feedback.isCanceled(): return None
         out_path = os.path.join(self.workpath, 'cliped_curSOC.gpkg')
         self.setDebugProgressMsg("분석 영역에 해당하는 기존시설데이터를 추출합니다...", out_path)
+        # Create Spatial Index
+        model.createspatialindex(self.parameters['IN_CURSOC'].sourceName())
         clipedCurSOC = model.clipwithQgis(input=self.parameters['IN_CURSOC'].sourceName(),
                                           onlyselected=self.parameters['IN_CURSOC_ONLYSELECTED'],
                                           overlay=boundary,
@@ -995,6 +1014,8 @@ class soc_locator_launcher:
         if self.feedback.isCanceled(): return None
         out_path = os.path.join(self.workpath, 'cliped_grid.gpkg')
         self.setDebugProgressMsg("분석 영역에 해당하는 잠재적 후보지 데이터를 추출합니다...", out_path)
+        # Create Spatial Index
+        model.createspatialindex(gridlayer)
         clipedgrid = model.clipwithQgis(input=gridlayer,
                                         onlyselected=onlyselected,
                                         overlay=model.boundary,
@@ -1008,6 +1029,8 @@ class soc_locator_launcher:
 
         out_path = os.path.join(self.workpath, 'cliped_grid_single.gpkg')
         self.setDebugProgressMsg("잠재적 후보지 데이터를 싱글파트로 변환합니다...", out_path)
+        # Create Spatial Index
+        model.createspatialindex(grid)
         grid = model.multiparttosingleparts(grid, output=out_path)
 
 
@@ -1041,6 +1064,8 @@ class soc_locator_launcher:
         if self.feedback.isCanceled(): return None
         out_path = os.path.join(self.workpath, 'bufferedCurSOC.gpkg')
         self.setDebugProgressMsg("기존시설 레이어에 버퍼({}m)데이터를 생성합니다...".format(model.cutoff), out_path)
+        # Create Spatial Index
+        model.createspatialindex(model.currentSOC)
         bufferedSOC = model.bufferwithQgis(input=model.currentSOC,
                                            onlyselected=False,
                                            distance=model.cutoff,
@@ -1057,6 +1082,9 @@ class soc_locator_launcher:
         if self.feedback.isCanceled(): return None
         out_path = os.path.join(self.workpath, 'selbyloc.gpkg')
         self.setDebugProgressMsg("인구 배제율({}%)이 적용된 인구데이터를 생성합니다...".format(popexlusrate), out_path)
+        # Create Spatial Index
+        model.createspatialindex(clipedpop)
+        model.createspatialindex(bufferedSOC)
         poplyr = model.applypopratioinselectedEuclidean(input=clipedpop,
                                                       popfield=self.parameters['IN_POP_CNTFID'],
                                                       exlusrate=popexlusrate,
@@ -1083,19 +1111,19 @@ class soc_locator_launcher:
         # 5-3 효율성 분석 : 잠재적 위치(서비스 영역 설정)
         out_path = os.path.join(self.workpath, 'popenSvrArea.gpkg')
         self.setDebugProgressMsg("후보지 레이어에 버퍼({}m)데이터를 생성합니다...".format(model.cutoff), out_path)
+        # Create Spatial Index
+        model.createspatialindex(model.potentiallayer)
         potenSvrArea = model.bufferwithQgis(input=model.potentiallayer,
                                             onlyselected=False,
                                             distance=model.cutoff,
                                             output=out_path)
 
-
-        self.setDebugProgressMsg("후보지 레이어의 공간인덱스를 생성합니다")
-        potenSvrArea = model.createspatialindex(potenSvrArea)
-
-
         # 5-4 효율성 분석 : 잠재적 위치(잠재적 위치 서비스 지역 분석)
         out_path = os.path.join(self.workpath, 'popaddedpotenid.gpkg')
         self.setDebugProgressMsg("후보지 레이어와 인구레이어를 공간 조인합니다...", out_path)
+        # Create Spatial Index
+        model.createspatialindex(potenSvrArea)
+        model.createspatialindex(model.populationLayer)
         popaddedpoten = model.joinattributesbylocation(input=potenSvrArea,
                                                        join=model.populationLayer,
                                                        joinfiels=[model.popcntField],
@@ -1132,6 +1160,8 @@ class soc_locator_launcher:
 
 
         self.setDebugProgressMsg("최종결과를 폴리곤({})으로 변환합니다...".format(self.parameters['IN_GRID_SIZE']))
+        # Create Spatial Index
+        model.createspatialindex(finallayer)
         finallayer2 = model.rectanglesovalsdiamonds(input=finallayer, onlyselected=False,
                                                     width=self.parameters['IN_GRID_SIZE'],
                                                     height=self.parameters['IN_GRID_SIZE'],
@@ -1540,6 +1570,8 @@ class soc_locator_launcher:
         if self.feedback.isCanceled(): return None
         out_path = os.path.join(self.workpath, 'boundary.gpkg')
         self.setDebugProgressMsg("대상지 레이어에서 분석 영역을 추출합니다...", out_path)
+        # Create Spatial Index
+        model.createspatialindex(self.parameters['IN_SITE'].sourceName())
         boundary = model.dissolvewithQgis(input=self.parameters['IN_SITE'].sourceName(),
                                           onlyselected=self.parameters['IN_SITE_ONLYSELECTED'],
                                           output=out_path)
@@ -1552,6 +1584,9 @@ class soc_locator_launcher:
         if self.feedback.isCanceled(): return None
         out_path = os.path.join(self.workpath, 'cliped_node.gpkg')
         self.setDebugProgressMsg("분석 영역에 해당하는 노드 데이터를 추출합니다...", out_path)
+        # Create Spatial Index
+        model.createspatialindex(self.parameters['IN_NODE'].sourceName())
+        model.createspatialindex(boundary)
         clipednode = model.clipwithQgis(input=self.parameters['IN_NODE'].sourceName(),
                                         onlyselected=self.parameters['IN_NODE_ONLYSELECTED'],
                                         overlay=boundary,
@@ -1567,12 +1602,17 @@ class soc_locator_launcher:
         # 1-3 분석 지역 데이터 추출 : 링크
         if self.feedback.isCanceled(): return None
         self.setDebugProgressMsg("분석 영역의 버퍼(2000m)데이터를 생성합니다...")
+        # Create Spatial Index
+        model.createspatialindex(boundary)
         boundary2000 = model.bufferwithQgis(input=boundary,
                                             onlyselected=False,
                                             distance=2000)
 
         out_path = os.path.join(self.workpath, 'cliped_link.gpkg')
         self.setDebugProgressMsg("분석 영역(2000m)에 해당하는 링크 데이터를 추출합니다...", out_path)
+        # Create Spatial Index
+        model.createspatialindex(self.parameters['IN_LINK'].sourceName())
+        model.createspatialindex(boundary2000)
         clipedlink = model.clipwithQgis(input=self.parameters['IN_LINK'].sourceName(),
                                         onlyselected=self.parameters['IN_LINK_ONLYSELECTED'],
                                         overlay=boundary2000,
@@ -1594,6 +1634,9 @@ class soc_locator_launcher:
         if self.feedback.isCanceled(): return None
         out_path = os.path.join(self.workpath, 'cliped_pop.gpkg')
         self.setDebugProgressMsg("분석 영역에 해당하는 인구 데이터를 추출합니다...")
+        # Create Spatial Index
+        model.createspatialindex(self.parameters['IN_POP'].sourceName())
+        model.createspatialindex(boundary)
         clipedpop = model.clipwithQgis(input=self.parameters['IN_POP'].sourceName(),
                                        onlyselected=self.parameters['IN_NODE_ONLYSELECTED'],
                                        overlay=boundary,
@@ -1615,6 +1658,8 @@ class soc_locator_launcher:
         if self.feedback.isCanceled(): return None
         out_path = os.path.join(self.workpath, 'cliped_curSOC.gpkg')
         self.setDebugProgressMsg("분석 영역에 해당하는 기존시설데이터를 추출합니다...", out_path)
+        # Create Spatial Index
+        model.createspatialindex(self.parameters['IN_CURSOC'].sourceName())
         clipedCurSOC = model.clipwithQgis(input=self.parameters['IN_CURSOC'].sourceName(),
                                           onlyselected=self.parameters['IN_CURSOC_ONLYSELECTED'],
                                           overlay=boundary,
@@ -1633,6 +1678,9 @@ class soc_locator_launcher:
         if self.feedback.isCanceled(): return None
         out_path = os.path.join(self.workpath, 'curSOCwithNode.gpkg')
         self.setDebugProgressMsg("기존시설데이터에 최근린 NODE를 찾습니다...", out_path)
+        # Create Spatial Index
+        model.createspatialindex(clipedCurSOC)
+        model.createspatialindex(model.nodelayer)
         curSocwithNode = model.nearesthubpoints(input=clipedCurSOC,
                                                 onlyselected=False,
                                                 sf_hub=model.nodelayer,
@@ -1707,6 +1755,8 @@ class soc_locator_launcher:
             if self.feedback.isCanceled(): return None
             out_path = os.path.join(self.workpath, 'popwithNode.gpkg')
             self.setDebugProgressMsg("인구데이터의 최근린 NODE를 찾습니다...", out_path)
+            # Create Spatial Index
+            model.createspatialindex(clipedpop)
             popWithNode = model.nearesthubpoints(input=clipedpop,
                                                  onlyselected=False,
                                                  sf_hub=model.nodelayer,
@@ -1750,6 +1800,8 @@ class soc_locator_launcher:
         if self.feedback.isCanceled(): return None
         out_path = os.path.join(self.workpath, 'cliped_grid.gpkg')
         self.setDebugProgressMsg("분석 영역에 해당하는 잠재적 후보지 데이터를 추출합니다...", out_path)
+        # Create Spatial Index
+        model.createspatialindex(gridlayer)
         clipedgrid = model.clipwithQgis(input=gridlayer,
                                         onlyselected=onlyselected,
                                         overlay=model.boundary,
@@ -1762,6 +1814,8 @@ class soc_locator_launcher:
 
         out_path = os.path.join(self.workpath, 'cliped_grid_single.gpkg')
         self.setDebugProgressMsg("잠재적 후보지 데이터를 싱글파트로 변환합니다...", out_path)
+        # Create Spatial Index
+        model.createspatialindex(grid)
         grid = model.multiparttosingleparts(grid, output=out_path)
 
 
@@ -1776,6 +1830,8 @@ class soc_locator_launcher:
         if self.feedback.isCanceled(): return None
         out_path = os.path.join(self.workpath, 'gridwithNode.gpkg')
         self.setDebugProgressMsg("후보지 데이터의 최근린 NODE를 찾습니다...", out_path)
+        # Create Spatial Index
+        model.createspatialindex(grid)
         gridwithNode = model.nearesthubpoints(input=grid,
                                               onlyselected=False,
                                               sf_hub=model.nodelayer,
@@ -1844,6 +1900,8 @@ class soc_locator_launcher:
 
 
         self.setDebugProgressMsg("최종결과를 폴리곤({})으로 변환합니다...".format(self.parameters['IN_GRID_SIZE']))
+        # Create Spatial Index
+        model.createspatialindex(finallayer)
         finallayer2 = model.rectanglesovalsdiamonds(input=finallayer, onlyselected=False,
                                                     width=self.parameters['IN_GRID_SIZE'],
                                                     height=self.parameters['IN_GRID_SIZE'],
