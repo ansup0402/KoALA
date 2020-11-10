@@ -5,7 +5,7 @@ name=KoALA
 qgisMinimumVersion=3.10
 qgisMaximumVersion=3.99
 description=Korean Accessibility and Optimal Location Analysis Tool for Neighborhood SOC
-version=0.5.6
+version=0.5.7
 author=Hyunjoong Kim
 email=khj1122452@gmail.com
 
@@ -21,7 +21,7 @@ repository=https://github.com/ansup0402/KoALA
 # Recommended items:
 
 hasProcessingProvider=yes
-changelog=0.5.6:
+changelog=0.5.7:
     - Fixed Bug
 
 
