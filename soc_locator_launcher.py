@@ -1,4 +1,6 @@
 import os
+import string
+import random
 
 class soc_locator_launcher:
 
@@ -49,12 +51,28 @@ class soc_locator_launcher:
         # self.feedback.pushConsoleInfo("\n%s %s" % (snow, msg))
         # self.feedback.pushDebugInfo("\n%s %s" % (snow, msg))
 
+    def getSubworkspace(self, basepath, lengh=10):
+        # To change the workspace for batch processing
+        string_pool = string.ascii_lowercase
+        result = ""
+        for i in range(lengh):
+            result += random.choice(string_pool)
+
+        workspace = os.path.join(basepath, result)
+
+        return workspace
+
+
     def execute_accessibility_in_straight(self):
 
         try:
             from .soc_locator_model import soc_locator_model
         except ImportError:
             from soc_locator_model import soc_locator_model
+
+        self.workpath = self.getSubworkspace(self.workpath)
+        os.mkdir(self.workpath)
+
         model = soc_locator_model(feedback=self.feedback, context=self.context, debugmode=self.debugging, workpath=self.workpath)
 
         livingID = 'LIV_ID'
@@ -314,6 +332,10 @@ class soc_locator_launcher:
             from .soc_locator_model import soc_locator_model
         except ImportError:
             from soc_locator_model import soc_locator_model
+
+        self.workpath = self.getSubworkspace(self.workpath)
+        os.mkdir(self.workpath)
+
         model = soc_locator_model(feedback=self.feedback, context=self.context, debugmode=self.debugging, workpath=self.workpath)
 
         curStep = 0
@@ -582,6 +604,10 @@ class soc_locator_launcher:
             from .soc_locator_model import soc_locator_model
         except ImportError:
             from soc_locator_model import soc_locator_model
+
+        self.workpath = self.getSubworkspace(self.workpath)
+        os.mkdir(self.workpath)
+
         model = soc_locator_model(feedback=self.feedback, context=self.context, debugmode=self.debugging, workpath=self.workpath)
 
         livingID = 'LIV_ID'
@@ -921,6 +947,10 @@ class soc_locator_launcher:
             from .soc_locator_model import soc_locator_model
         except ImportError:
             from soc_locator_model import soc_locator_model
+
+        self.workpath = self.getSubworkspace(self.workpath)
+        os.mkdir(self.workpath)
+
         model = soc_locator_model(feedback=self.feedback, context=self.context, debugmode=self.debugging, workpath=self.workpath)
 
         #
@@ -1176,6 +1206,10 @@ class soc_locator_launcher:
             from .soc_locator_model import soc_locator_model
         except ImportError:
             from soc_locator_model import soc_locator_model
+
+        self.workpath = self.getSubworkspace(self.workpath)
+        os.mkdir(self.workpath)
+
         model = soc_locator_model(feedback=self.feedback, context=self.context, debugmode=self.debugging, workpath=self.workpath)
 
         popID = 'POP_ID'
@@ -1549,6 +1583,10 @@ class soc_locator_launcher:
             from .soc_locator_model import soc_locator_model
         except ImportError:
             from soc_locator_model import soc_locator_model
+
+        self.workpath = self.getSubworkspace(self.workpath)
+        os.mkdir(self.workpath)
+
         model = soc_locator_model(feedback=self.feedback, context=self.context, debugmode=self.debugging, workpath=self.workpath)
 
         curStep = 0
