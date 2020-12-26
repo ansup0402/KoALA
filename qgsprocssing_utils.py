@@ -1,5 +1,6 @@
 import os
 from qgis.core import (
+                    QgsApplication,
                     QgsVectorLayer,
                     QgsVectorFileWriter,
                     QgsProcessingFeatureSourceDefinition
@@ -17,6 +18,18 @@ class qgsprocessUtils:
         self.feedback = feedback
         self.context = context
 
+    def checkAlgname(self, findalgid):
+        algid = ""
+        for alg in QgsApplication.processingRegistry().algorithms():
+            if alg.id() == findalgid:
+                algid = alg.id()
+                #            bchecked = True
+                break
+        return algid
+
+
+    
+    
     def run_algprocessing(self, algname, params):
         if self.feedback.isCanceled(): return None
         result = processing.run(algname,
@@ -31,8 +44,16 @@ class qgsprocessUtils:
         # 1 — Ovals
         # 2 — Diamonds
         if output is None or output == '': output = 'TEMPORARY_OUTPUT'
-        algname = 'qgis:rectanglesovalsdiamonds'
-        # algname = 'qgis:rectanglesovalsdiamondsfixed'
+
+        algname = ""
+        if algname == "": algname = self.checkAlgname("qgis:rectanglesovalsdiamondsfixed")
+        if algname == "": algname = self.checkAlgname("native:rectanglesovalsdiamondsfixed")
+        if algname == "": algname = self.checkAlgname("qgis:rectanglesovalsdiamonds")
+        if algname == "": algname = self.checkAlgname("native:rectanglesovalsdiamonds")
+
+        self.feedback.pushInfo("************ checkAlgname %s : " % algname)
+
+
 
         inputsource = input
         if onlyselected:
