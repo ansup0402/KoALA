@@ -24,6 +24,7 @@ class qgsprocessUtils:
             if alg.id() == findalgid:
                 algid = alg.id()
                 #            bchecked = True
+
                 break
         return algid
 
